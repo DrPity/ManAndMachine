@@ -7,7 +7,7 @@
 
 #define CENTER_MILLIS		1500
 
-#define MIN_MILLIS_CC_1 	700
+#define MIN_MILLIS_CC_1 	680
 #define MAX_MILLIS_CW_1		2340
 
 #define MIN_MILLIS_CC_2 	680

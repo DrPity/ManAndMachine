@@ -18,6 +18,7 @@ ChangePosition_Class::ChangePosition_Class(int minMillisCC, int maxMillisCW){
 	_maxMillisCW = maxMillisCW;
   _cubic.setDuration(EASING_RESOLUTION);
   _easingValue = 0;
+  Serial.println(_currentPosition);
 
   reachedTarget = true;
 }
@@ -35,20 +36,18 @@ void ChangePosition_Class::setPosition(int nextPosition){
     
 
   if (nextPosition < 90){
-    Serial.print("In < 90 Next Position: ");
-    Serial.print("Before convertion");
     _targetPosition = convertToMilliseconds(nextPosition, 0, 90, _minMillisCC, CENTER_MILLIS);
-    Serial.print("After convertion");
+    Serial.print("_targetPosition:");
     Serial.println(_targetPosition);
   }
   else if (nextPosition > 90){
     _targetPosition = convertToMilliseconds(nextPosition, 90, 180, CENTER_MILLIS, _maxMillisCW);
-    Serial.print("In > 90 Next Position: ");
+    Serial.print("_targetPosition:");
     Serial.println(_targetPosition);
     }
   else if ( nextPosition == 90){
-    Serial.print("In == 90 Next Position: ");
     Serial.println(_targetPosition);
+    Serial.print("_targetPosition:");
     _targetPosition = CENTER_MILLIS; //Make it a constant
   } 
 
@@ -60,9 +59,10 @@ void ChangePosition_Class::setPosition(int nextPosition){
 
   _totalChangeInPosition = (abs(_startPosition - _targetPosition));
   _cubic.setTotalChangeInPosition(_totalChangeInPosition);
+  Serial.println(_currentPosition);
 }
 
-//move for loop outside
+
 int ChangePosition_Class::nextEasedStep(){
       // this value must macht the resolution in e.g. a 'for' loop
   _easedPosition = _cubic.easeInOut(_easingValue);

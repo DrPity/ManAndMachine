@@ -33,7 +33,7 @@ Servo *servoList[] = {
 
 ChangePosition_Class *chPosition[] = {
 
-  new ChangePosition_Class(700, 2233),
+  new ChangePosition_Class(MIN_MILLIS_CC_1, MAX_MILLIS_CW_1),
   new ChangePosition_Class(MIN_MILLIS_CC_2, MAX_MILLIS_CW_2),
   new ChangePosition_Class(MIN_MILLIS_CC_3, MAX_MILLIS_CW_3),
   new ChangePosition_Class(MIN_MILLIS_CC_4, MAX_MILLIS_CW_4),
@@ -72,26 +72,57 @@ void loop()
   ///////////////Setting target
 
   if (inByte == 'a'){
-    chPosition[0]->setPosition(180);
+    chPosition[0]->setPosition(70);
+    chPosition[1]->setPosition(20);
+    chPosition[2]->setPosition(120);
+    chPosition[3]->setPosition(70);
+    chPosition[4]->setPosition(70);
+    chPosition[5]->setPosition(70);
   }
 
   if (inByte == 'b'){
-    //chPosition[0]->setPosition(100);
     chPosition[0]->setPosition(90);
+    chPosition[1]->setPosition(90);
+    chPosition[2]->setPosition(90);
+    chPosition[3]->setPosition(90);
+    chPosition[4]->setPosition(90);
+    chPosition[5]->setPosition(90);
   }
 
   if (inByte == 'c'){
-    //chPosition[0]->setPosition(100);
-    chPosition[0]->setPosition(0);
+    chPosition[0]->setPosition(100);
+    chPosition[1]->setPosition(110);
+    chPosition[2]->setPosition(110);
+    chPosition[3]->setPosition(110);
+    chPosition[4]->setPosition(110);
+    chPosition[5]->setPosition(110);
   }
 
   ///MOVE THE SERVOS
 
 
   if(!chPosition[0]->reachedTarget){
-    testServoList = chPosition[0]->nextEasedStep();
-    Serial.println(testServoList);
-    servoList[0]->writeMicroseconds(testServoList);
+    servoList[0]->writeMicroseconds(chPosition[0]->nextEasedStep());
+  }
+
+  if(!chPosition[1]->reachedTarget){
+    servoList[1]->writeMicroseconds(chPosition[1]->nextEasedStep());
+  }
+
+  if(!chPosition[2]->reachedTarget){
+    servoList[2]->writeMicroseconds(chPosition[2]->nextEasedStep());
+  }
+
+  if(!chPosition[3]->reachedTarget){
+    servoList[3]->writeMicroseconds(chPosition[3]->nextEasedStep());
+  }
+
+  if(!chPosition[4]->reachedTarget){
+    servoList[4]->writeMicroseconds(chPosition[4]->nextEasedStep());
+  }
+
+  if(!chPosition[5]->reachedTarget){
+    servoList[5]->writeMicroseconds(chPosition[5]->nextEasedStep());
   }
 
   inByte = 0;
