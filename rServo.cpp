@@ -20,7 +20,7 @@ ChangePosition_Class::ChangePosition_Class(int minMillisCC, int maxMillisCW){
   _easingValue = 0;
   Serial.println(_currentPosition);
 
-  reachedTarget = true;
+  reachedTarget = false;
 }
 
 

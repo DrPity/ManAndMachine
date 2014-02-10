@@ -19,8 +19,8 @@
 #define MIN_MILLIS_CC_4 	670
 #define MAX_MILLIS_CW_4		2270
 
-#define MIN_MILLIS_CC_5 	666
-#define MAX_MILLIS_CW_5		7677
+#define MIN_MILLIS_CC_5 	670
+#define MAX_MILLIS_CW_5		2270
 
 #define MIN_MILLIS_CC_6 	670
 #define MAX_MILLIS_CW_6		2270
