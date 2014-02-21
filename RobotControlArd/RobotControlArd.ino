@@ -28,6 +28,7 @@ bool HandIswaitingToMoveRight     = false;
 bool ClawIswaitingToMoveLeft    = false;
 bool ClawIswaitingToMoveRight   = false;
 
+bool serialReady = false;
 
 
 int bMinDegree = 0;
@@ -82,7 +83,7 @@ ChangePosition_Class *chPosition[] = {
 
 void setup() 
 { 
-  Serial.begin(9600);
+  Serial.begin(115200);
 
   for (int i = 0; i < 6; ++i)
   {
@@ -101,6 +102,14 @@ void loop()
   if(Serial.available() > 0){
     inByte = Serial.read();
     // Serial.println("Incoming Byte");
+    if(inByte == 40){
+
+    serial.write(41);
+    serialReady = true;
+
+   }
+
+
 
     if (inByte == 65) {
       BaseIswaitingToMoveLeft = true; 
@@ -279,3 +288,4 @@ void parkPosition(){
   chPosition[4]->setPosition(h);
   chPosition[5]->setPosition(c);
 }
+
