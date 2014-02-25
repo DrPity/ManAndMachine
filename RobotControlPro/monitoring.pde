@@ -1,6 +1,6 @@
 public class monitoring{
   private ArrayList strings;
-  private color[] textColor = new color [16];
+  private color[] textColor = new color [32];
   private PFont font;
   private int fontSize;
   private int offset = 0;

@@ -20,51 +20,63 @@ import com.pusher.client.connection.ConnectionState;
 import com.pusher.client.connection.ConnectionStateChange;
 import com.pusher.client.util.HttpAuthorizer;
 
-private static final String   DATA_CHANNEL = "private-data";
+
+/* Static Robot Values used for Inverse Kinematic */
+private static final String   DATA_CHANNEL        = "private-data";
 private static final String   ROBOT_CONTROL_EVENT = "client-robot-control";
-private static final String   YAW_COORD = "yaw";
-private static final String   PITCH_COORD = "pitch";
-private static final String   Z_COORD = "z_coord";
-private static final String   ID_ROBOT = "id";
-private static final Integer  DISPLAY_DURATION = 4000;
+private static final String   YAW_COORD           = "yaw";
+private static final String   PITCH_COORD         = "pitch";
+private static final String   Z_COORD             = "z_coord";
+private static final String   ID_ROBOT            = "id";
+private static final Integer  DISPLAY_DURATION    = 4000;
 
 /* Arm dimensions( mm ) */
-private static final Float BASE_HEIGHT = 101.0;   //height of robot-base"
-private static final Float SHL_ELB = 105.0;       //shoulder-to-elbow
-private static final Float ULNA = 98.0;           //elbow-to-wrist
-private static final Float GRIPLENGTH = 155.0;    //lengh-of-grip
-private static final Float WRIST_OFFSET = 28.0;   //offset wrist-gripper
+private static final Float BASE_HEIGHT  = 101.0;   //height of robot-base"
+private static final Float SHL_ELB      = 105.0;   //shoulder-to-elbow
+private static final Float ULNA         = 98.0;    //elbow-to-wrist
+private static final Float GRIPLENGTH   = 155.0;   //lengh-of-grip
+private static final Float WRIST_OFFSET = 28.0;    //offset wrist-gripper
 
-private long currentBase = 00;
-private long currentShoulder = 00;
-private long currentElbow = 00;
-private long currentWrist = 00;
+/* Dynamic Robot Values Send to Arduino */
+private int currentBase          = 00;
+private int currentShoulder      = 00;
+private int currentElbow         = 00;
+private int currentWrist         = 00;
+private int currentGripperAngle  = 00;
+private int currentGripperWidth  = 00;
+private int currentSpeed         = 00;
 
+/* Pusher */
+PusherConnection mPusherConnection;
 private Pusher          mPusher;
 private PrivateChannel  mPrivateChannel;
 private PusherOptions   mPusherOptions;
-private Integer failedConnectionAttempts = 0;
-
-
+private Integer         failedConnectionAttempts  = 0;
+private String          msg                       = "No Event";
+private String          connectionPusher          = "No Connection";
+private String          serialConnection          = "Establish serial connection...";
+private String          error;
 private double   id;
 private int      x;
 private int      y;
 private int      yaw;
 private int      pitch;
-private int      inByte = 0;
 
-private String msg = "No Event";
-private String connectionPusher = "No Connection";
-private String error;
+/* Serial Communication */
+Serial myPort;
+private long    heartbeat;
+private String  inByte;
+private char    serial1;
+private char    serial2;
+private char    serial3;
+private int     end           = 10;
+private boolean firstContact  = false;
+private boolean isHashtrue    = false;
 
-private boolean ready = false;
-
+/* Monitoring */
 monitoring mMonitoring;
 boolean gIsDebugOn = true;
 int gFontSize = 12;
-PusherConnection mPusherConnection;
-Serial myPort;
-PFont f;
 
 public class PusherConnection implements ConnectionEventListener, SubscriptionEventListener,  PrivateChannelEventListener {
   
@@ -103,9 +115,7 @@ public class PusherConnection implements ConnectionEventListener, SubscriptionEv
     }
     
     else if (change.getCurrentState() == ConnectionState.DISCONNECTED) {
-      
-      
-      
+            
       failedConnectionAttempts ++;
       connectToPusher();
       delay(2000);    
@@ -177,64 +187,47 @@ public class PusherConnection implements ConnectionEventListener, SubscriptionEv
 
 void setup() {
 	
-// mHandlePusher = new HandlePusher();	
-size(1280,720, OPENGL);
-myPort = new Serial(this, Serial.list()[0], 9600);
-myPort.clear();
-myPort.bufferUntil(255);
-mPusherConnection = new PusherConnection();
-mPusherConnection.onCreate();
-mMonitoring = new monitoring();
+ 	/* Basic setup */
+  size(1280,720, OPENGL);
+  myPort = new Serial(this, Serial.list()[6], 115200);
+  mPusherConnection = new PusherConnection();
+  mMonitoring = new monitoring();
+  mPusherConnection.onCreate();
+  myPort.bufferUntil(end);
+  inByte = null;
+  myPort.clear();
 
-for (int i = 0; i < 16; ++i) {
-  mMonitoring.setColor(color(255, 255, 255), i);
-}
-
-mMonitoring.setColor(#00D7FF, 0);
-mMonitoring.setColor(#00D7FF, 2);
-mMonitoring.setColor(#00D7FF, 4);
-mMonitoring.setColor(#00D7FF, 6);
-mMonitoring.setColor(#00D7FF, 11);
-
-delay(500);
-robotHandshake();
-
-delay(500);
+  for (int i = 0; i < 20; ++i) {
+    mMonitoring.setColor(color(255, 255, 255), i);
+  }
+  mMonitoring.setColor(#00D7FF, 0);
+  mMonitoring.setColor(#00D7FF, 2);
+  mMonitoring.setColor(#00D7FF, 4);
+  mMonitoring.setColor(#00D7FF, 6);
+  mMonitoring.setColor(#00D7FF, 11);
+  mMonitoring.setColor(#00D7FF, 15);
 }
 
 void draw() {
   background(100);
-
-
-/* Degugg output */
-  if(ready){mMonitoring.add("SERIAL READY");};
-  mMonitoring.add("FPS:"); 
-  mMonitoring.add(" | " + frameRate);
-  mMonitoring.add("X/Y:"); 
-  mMonitoring.add(" | [" + mouseX + "," + mouseY + "]");
-  mMonitoring.add("LAST KEY: ");
-  mMonitoring.add(" | " + key + "\n");
-  mMonitoring.add("SERVO ANGLES:");
-  mMonitoring.add(String.format(" | ba:\t" + "[ %s ]", currentBase));
-  mMonitoring.add(String.format(" | sh:\t" + "[ %s ]", currentShoulder));
-  mMonitoring.add(String.format(" | el:\t\t" + "[ %s ]", currentElbow));
-  mMonitoring.add(String.format(" | wr:\t" + "[ %s ]", currentWrist));
-  line(x, 100, x, 65);
- // mMonitoring.add("last serial messages: [" + serial1 + serial2 + serial3 + "]");
-  mMonitoring.add("PUSHER: ");
-  mMonitoring.add(" | " + error);
-  mMonitoring.add(" | " + msg);
-  mMonitoring.add(connectionPusher);
-  mMonitoring.draw();
+  monitoring();
   smooth(4);
+/* Check if Serial heartbeat is lost */
+  if (firstContact){
+    if (millis() - heartbeat >= 5000){
+     firstContact = false; 
+     println("Heartbeat lost");
+     serialConnection = "Heartbeat lost!";
+    }
+  }
 }
 
-
-// x can be + and -; y and z only positive. All values in mm. grip_angle_d must be according to the object in degree. gripperwidth in degree.
-void set_arm( float x, float y, float z, float grip_angle_d, int gripperWidth )
+/* Inverse Kinematic Arithmetic: X can be + and -; Y and Z only positive. All values in mm! gripperAngleD must be according to the object in degree. gripperwidth in degree. And speed from 0-255 */
+void setRobotArm( float x, float y, float z, float gripperAngleD, int gripperWidth, int speed )
 {
 
-  float gripAngle = radians( grip_angle_d );
+  /* send start byte */
+  float gripAngle = radians( gripperAngleD );
 
   float ulnaEved = ULNA + (WRIST_OFFSET*sin(gripAngle));
   float zEved = z - (WRIST_OFFSET*cos(gripAngle));
@@ -242,30 +235,30 @@ void set_arm( float x, float y, float z, float grip_angle_d, int gripperWidth )
   float baseAngle = atan2( y, x );
   float rDist = sqrt(( x * x ) + ( y * y ));
   
-  
   float rShlWri = rDist - (cos(gripAngle) * GRIPLENGTH);
   float zShlWri = zEved - BASE_HEIGHT + (sin(gripAngle) * GRIPLENGTH);
   float h = sqrt((zShlWri * zShlWri) + (rShlWri * rShlWri));
-
 
   float elbowAngle = PI - acos( ( (h*h) - (ulnaEved*ulnaEved) - (SHL_ELB*SHL_ELB) ) / (-2.0* ulnaEved * SHL_ELB) );
   float shoulderAngle = acos( ( (ulnaEved*ulnaEved) - (SHL_ELB*SHL_ELB) - (h*h) )/(-2.0*SHL_ELB*h) ) + atan2(zShlWri, rShlWri);
   float wristAngle = shoulderAngle - elbowAngle + gripAngle;
   
-
   long wristAngleD = (long) degrees(wristAngle);
   long elbowAngleD = (long) degrees(elbowAngle);
   long shoulderAngleD = (long) degrees(shoulderAngle);
   long baseAngleD = (long) degrees(baseAngle);
 
-    currentBase = baseAngleD;
-    currentShoulder = shoulderAngleD;
-    currentElbow = elbowAngleD;
-    currentWrist = wristAngleD;
+    currentBase = (int) baseAngleD;
+    currentShoulder = (int) shoulderAngleD;
+    currentElbow = (int) elbowAngleD;
+    currentWrist = (int) wristAngleD;
+    currentGripperAngle = (int) gripperAngleD;
+    currentGripperWidth = gripperWidth;
+    currentSpeed = speed;
+
+  sendRobotData( currentBase, currentShoulder, currentElbow, currentWrist,currentGripperAngle, currentGripperWidth, currentSpeed);
 
 /* send start byte */
-myPort.write(35);
-
 /* send calculated angles */
   // myPort.write(map(baseAngleD, 180, 0, 670, 2270));
   // delay(20);
@@ -275,13 +268,11 @@ myPort.write(35);
   // delay(20);
   // myPort.write(map(wristAngleD, 0, 180, 670, 2270));
   // delay(20);
-  // myPort.write(map(grip_angle_d, 0, 180, 670, 2270));
+  // myPort.write(map(gripperAngleD, 0, 180, 670, 2270));
   // delay(20);
   // myPort.write(map(gripperWidth, 0, 180, 670, 2270));
   // delay(20);
-
-/* send stop byte */
-myPort.write(4);  
+/* send stop byte */  
   
 }
 
@@ -311,63 +302,93 @@ void keyPressed(){
 
    if (key == CODED){
       if (keyCode == LEFT){
-         set_arm(100, 80, 30, 90, 120);
+        setRobotArm(100, 80, 30, 90, 120, 127);
       }
       if (keyCode == RIGHT){
-          set_arm(10, 80, 30, 90, 120);
+        setRobotArm(10, 80, 30, 90, 120, 127);
       }
       if (keyCode == UP){
-          set_arm(100, 30, 50, 90, 120);
+        setRobotArm(100, 30, 50, 90, 120, 127);
       }
       if (keyCode == DOWN){
-          set_arm(79, 80, 30, 70, 120);
+        setRobotArm(79, 80, 30, 70, 120, 127);
       }
     }
 }
 
 //Wait for serial events 
 void serialEvent(Serial myPort) {
- while (myPort.available() > 0) { 
-  inByte = myPort.read();
-  println(inByte);
-  
-    if (inByte == 41){
-    println("Serial communication Ready");
-    ready = true;
+  //println("In Serial Event");
+  while (myPort.available() > 0){
+  inByte = myPort.readStringUntil(end);
+  //println(inByte);
+  }
+  if (inByte != null) {
+
+    if (isHashtrue){
+      println("Hash received");
+      String[] s = split(inByte, ',');
+      isHashtrue = false;
+      if(s[0].trim().equals("1")){
+        println("Value of Base: " +  s[1]);
+        println("Value of Shoulder: " +  s[2]);
+        // println("Value of E: " +  s[3]);
+      }
     }
-  }  
-  //     if(inByte == 42){
-  //     println("Copying Triggered");
-  //     copyCubes(myPort.read(), myPort.read());  
-  //     }
 
-  //     //recording cube
-  //     if(inByte == 35 && !boxIsTapped){
-  //     println("Recording Triggered");
-  //     boxIsTapped = true;
-  //     sleepTime = millis();
-  //     cubeToRecord = myPort.read(); 
-  //     }
+    if (inByte.trim().equals("W")){
+      myPort.write("W");
+      myPort.write(10);
+      println("+ Heartbeat +");
+      heartbeat = millis();
+      serialConnection = "Connected";
+    }
 
-  //     //trigger cube
-  //     if(inByte == '/'){
-  //     println("IR-Sensor Triggered");
-  //     int cube = myPort.read();
-  //     int value = myPort.read();
-  //     print(cube);print('\t');println(value);
-  //     startBeat(cube, value);
-  //     }
+    if(!firstContact){
+      if (inByte.trim().equals("A")) {
+        serialConnection = "Connected";
+        println("Connected");
+        firstContact = true;
+        delay(500);                     
+        myPort.write("B");
+        myPort.write(10);        
+      }  
+    } else if(inByte.trim().equals("#")){
+        isHashtrue = true;
+      }
+  }
+}
 
-  //     //trigger cube off
-  //     if(inByte == 92){
-  //     println("IR-Sensor Off");
-  //     stopBeat(myPort.read());
-  //     }
-  //   }
+void monitoring(){
+  /* Degugg output */
+  mMonitoring.add("FPS:"); 
+  mMonitoring.add(" | " + frameRate);
+  mMonitoring.add("X/Y:"); 
+  mMonitoring.add(" | [" + mouseX + "," + mouseY + "]");
+  mMonitoring.add("LAST KEY: ");
+  mMonitoring.add(" | " + key + "\n");
+  mMonitoring.add("SERVO ANGLES:");
+  mMonitoring.add(String.format(" | ba:\t" + "[ %s ]", currentBase));
+  mMonitoring.add(String.format(" | sh:\t" + "[ %s ]", currentShoulder));
+  mMonitoring.add(String.format(" | el:\t\t" + "[ %s ]", currentElbow));
+  mMonitoring.add(String.format(" | wr:\t" + "[ %s ]", currentWrist));
+  line(x, 100, x, 65);
+ // mMonitoring.add("last serial messages: [" + serial1 + serial2 + serial3 + "]");
+  mMonitoring.add("PUSHER: ");
+  mMonitoring.add(" | " + error);
+  mMonitoring.add(" | " + msg);
+  mMonitoring.add(connectionPusher);
+  mMonitoring.add("SERIAL:");
+  mMonitoring.add(" | last serial messages: [ " + serial1 + serial2 + serial3 + " ]");
+  mMonitoring.add("" + serialConnection);
+  mMonitoring.draw();
 }
 
 
-void robotHandshake(){
-  println("Establish connection to robot");
-  myPort.write(40);
+void sendRobotData(int currentBase,int currentShoulder,int currentElbow,int currentWrist,int currentGripperWidth,int currentGripperAngle,int currentSpeed){
+
+  myPort.write(String.format("Rr%d,%d,%d,%d,%d,%d,%d\n",currentBase, currentShoulder, currentElbow, currentWrist, currentGripperWidth, currentGripperAngle, currentSpeed));
+  // myPort.write(10);
+  print(String.format("Rr%d,%d,%d,%d,%d,%d,%d",currentBase, currentShoulder, currentElbow, currentWrist, currentGripperWidth, currentGripperAngle, currentSpeed));
+
 }
