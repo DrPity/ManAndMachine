@@ -3,18 +3,18 @@
 
 //*********************************
 
-#define EASING_RESOLUTION	200
+#define EASING_RESOLUTION	250
 
 #define CENTER_MILLIS		1500
 
-#define MIN_MILLIS_CC_1 	680
-#define MAX_MILLIS_CW_1		2340
+#define MIN_MILLIS_CC_1 	2270
+#define MAX_MILLIS_CW_1		670
 
-#define MIN_MILLIS_CC_2 	680
-#define MAX_MILLIS_CW_2		2340
+#define MIN_MILLIS_CC_2 	2270
+#define MAX_MILLIS_CW_2		670
 
-#define MIN_MILLIS_CC_3 	670
-#define MAX_MILLIS_CW_3		2270
+#define MIN_MILLIS_CC_3 	2300
+#define MAX_MILLIS_CW_3		700
 
 #define MIN_MILLIS_CC_4 	670
 #define MAX_MILLIS_CW_4		2270

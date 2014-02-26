@@ -31,23 +31,23 @@ void ChangePosition_Class::setPosition(int nextPosition){
   _startPosition = _currentPosition;
   reachedTarget = false;
 
-  Serial.print("Start Position:");
-  Serial.println(_startPosition);
+  // Serial.print("Start Position:");
+  // Serial.println(_startPosition);
     
 
   if (nextPosition < 90){
     _targetPosition = convertToMilliseconds(nextPosition, 0, 90, _minMillisCC, CENTER_MILLIS);
-    Serial.print("_targetPosition:");
-    Serial.println(_targetPosition);
+    // Serial.print("_targetPosition:");
+    // Serial.println(_targetPosition);
   }
   else if (nextPosition > 90){
     _targetPosition = convertToMilliseconds(nextPosition, 90, 180, CENTER_MILLIS, _maxMillisCW);
-    Serial.print("_targetPosition:");
-    Serial.println(_targetPosition);
+    // Serial.print("_targetPosition:");
+    // Serial.println(_targetPosition);
     }
   else if ( nextPosition == 90){
-    Serial.println(_targetPosition);
-    Serial.print("_targetPosition:");
+    // Serial.println(_targetPosition);
+    // Serial.print("_targetPosition:");
     _targetPosition = CENTER_MILLIS; //Make it a constant
   } 
 
@@ -59,7 +59,7 @@ void ChangePosition_Class::setPosition(int nextPosition){
 
   _totalChangeInPosition = (abs(_startPosition - _targetPosition));
   _cubic.setTotalChangeInPosition(_totalChangeInPosition);
-  Serial.println(_currentPosition);
+  // Serial.println(_currentPosition);
 }
 
 
@@ -72,5 +72,6 @@ int ChangePosition_Class::nextEasedStep(){
     reachedTarget = true;
   }
   _currentPosition = _startPosition + _direction * _easedPosition;
+   Serial.println(_currentPosition);
   return(_currentPosition);
  }

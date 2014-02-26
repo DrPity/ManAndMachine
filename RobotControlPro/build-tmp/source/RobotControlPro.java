@@ -110,6 +110,8 @@ private int currentGripperAngle  = 00;
 private int currentGripperWidth  = 00;
 private int currentSpeed         = 00;
 
+private boolean robotIsReadyToMove = false;
+
 /* Pusher */
 PusherConnection mPusherConnection;
 private Pusher          mPusher;
@@ -290,38 +292,39 @@ public void draw() {
 public void setRobotArm( float x, float y, float z, float gripperAngleD, int gripperWidth, int speed )
 {
 
-  /* send start byte */
-  float gripAngle = radians( gripperAngleD );
+  if(robotIsReadyToMove){
+    /* send start byte */
+    float gripAngle = radians( gripperAngleD );
 
-  float ulnaEved = ULNA + (WRIST_OFFSET*sin(gripAngle));
-  float zEved = z - (WRIST_OFFSET*cos(gripAngle));
+    float ulnaEved = ULNA + (WRIST_OFFSET*sin(gripAngle));
+    float zEved = z - (WRIST_OFFSET*cos(gripAngle));
 
-  float baseAngle = atan2( y, x );
-  float rDist = sqrt(( x * x ) + ( y * y ));
-  
-  float rShlWri = rDist - (cos(gripAngle) * GRIPLENGTH);
-  float zShlWri = zEved - BASE_HEIGHT + (sin(gripAngle) * GRIPLENGTH);
-  float h = sqrt((zShlWri * zShlWri) + (rShlWri * rShlWri));
+    float baseAngle = atan2( y, x );
+    float rDist = sqrt(( x * x ) + ( y * y ));
+    
+    float rShlWri = rDist - (cos(gripAngle) * GRIPLENGTH);
+    float zShlWri = zEved - BASE_HEIGHT + (sin(gripAngle) * GRIPLENGTH);
+    float h = sqrt((zShlWri * zShlWri) + (rShlWri * rShlWri));
 
-  float elbowAngle = PI - acos( ( (h*h) - (ulnaEved*ulnaEved) - (SHL_ELB*SHL_ELB) ) / (-2.0f* ulnaEved * SHL_ELB) );
-  float shoulderAngle = acos( ( (ulnaEved*ulnaEved) - (SHL_ELB*SHL_ELB) - (h*h) )/(-2.0f*SHL_ELB*h) ) + atan2(zShlWri, rShlWri);
-  float wristAngle = shoulderAngle - elbowAngle + gripAngle;
-  
-  long wristAngleD = (long) degrees(wristAngle);
-  long elbowAngleD = (long) degrees(elbowAngle);
-  long shoulderAngleD = (long) degrees(shoulderAngle);
-  long baseAngleD = (long) degrees(baseAngle);
+    float elbowAngle = PI - acos( ( (h*h) - (ulnaEved*ulnaEved) - (SHL_ELB*SHL_ELB) ) / (-2.0f* ulnaEved * SHL_ELB) );
+    float shoulderAngle = acos( ( (ulnaEved*ulnaEved) - (SHL_ELB*SHL_ELB) - (h*h) )/(-2.0f*SHL_ELB*h) ) + atan2(zShlWri, rShlWri);
+    float wristAngle = shoulderAngle - elbowAngle + gripAngle;
+    
+    long wristAngleD = (long) degrees(wristAngle);
+    long elbowAngleD = (long) degrees(elbowAngle);
+    long shoulderAngleD = (long) degrees(shoulderAngle);
+    long baseAngleD = (long) degrees(baseAngle);
 
-    currentBase = (int) baseAngleD;
-    currentShoulder = (int) shoulderAngleD;
-    currentElbow = (int) elbowAngleD;
-    currentWrist = (int) wristAngleD;
-    currentGripperAngle = (int) gripperAngleD;
-    currentGripperWidth = gripperWidth;
-    currentSpeed = speed;
+      currentBase = (int) baseAngleD;
+      currentShoulder = (int) shoulderAngleD;
+      currentElbow = (int) elbowAngleD;
+      currentWrist = (int) wristAngleD;
+      currentGripperAngle = (int) gripperAngleD;
+      currentGripperWidth = gripperWidth;
+      currentSpeed = speed;
 
-  sendRobotData( currentBase, currentShoulder, currentElbow, currentWrist,currentGripperAngle, currentGripperWidth, currentSpeed);
-
+    sendRobotData( currentBase, currentShoulder, currentElbow, currentWrist, currentGripperAngle, currentGripperWidth, currentSpeed);
+  }else{println("Robot not ready yet!");}
 /* send start byte */
 /* send calculated angles */
   // myPort.write(map(baseAngleD, 180, 0, 670, 2270));
@@ -366,23 +369,23 @@ public void keyPressed(){
 
    if (key == CODED){
       if (keyCode == LEFT){
-        setRobotArm(100, 80, 30, 90, 120, 127);
+        setRobotArm(-100, 80, 50, 90, 180, 127);
       }
       if (keyCode == RIGHT){
-        setRobotArm(10, 80, 30, 90, 120, 127);
+        setRobotArm(100, 80, 10, 90, 180, 127);
       }
       if (keyCode == UP){
-        setRobotArm(100, 30, 50, 90, 120, 127);
+        setRobotArm(100, 80, 0, 90, 90, 127);
       }
       if (keyCode == DOWN){
-        setRobotArm(79, 80, 30, 70, 120, 127);
+        setRobotArm(0, 100, 50, 90, 90, 127);
       }
     }
 }
 
 //Wait for serial events 
 public void serialEvent(Serial myPort) {
-  //println("In Serial Event");
+  // println("In Serial Event");
   while (myPort.available() > 0){
   inByte = myPort.readStringUntil(end);
   //println(inByte);
@@ -408,18 +411,25 @@ public void serialEvent(Serial myPort) {
       serialConnection = "Connected";
     }
 
+    if(inByte.trim().equals("N")){
+      robotIsReadyToMove = true;
+      println("Robot Ready for Next Position");
+    }
+
     if(!firstContact){
       if (inByte.trim().equals("A")) {
         serialConnection = "Connected";
         println("Connected");
         firstContact = true;
+        robotIsReadyToMove = true;
         delay(500);                     
         myPort.write("B");
         myPort.write(10);        
       }  
-    } else if(inByte.trim().equals("#")){
+    } 
+    else if(inByte.trim().equals("#")){
         isHashtrue = true;
-      }
+    }
   }
 }
 
@@ -454,6 +464,7 @@ public void sendRobotData(int currentBase,int currentShoulder,int currentElbow,i
   myPort.write(String.format("Rr%d,%d,%d,%d,%d,%d,%d\n",currentBase, currentShoulder, currentElbow, currentWrist, currentGripperWidth, currentGripperAngle, currentSpeed));
   // myPort.write(10);
   print(String.format("Rr%d,%d,%d,%d,%d,%d,%d",currentBase, currentShoulder, currentElbow, currentWrist, currentGripperWidth, currentGripperAngle, currentSpeed));
+  robotIsReadyToMove = false;
 
 }
 public class monitoring{
