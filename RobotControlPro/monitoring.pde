@@ -1,4 +1,4 @@
-public class monitoring{
+public class Monitoring{
   private ArrayList strings;
   private color[] textColor = new color [32];
   private PFont font;
@@ -6,7 +6,7 @@ public class monitoring{
   private int offset = 0;
   private boolean isOn;
  
-  public monitoring(){
+  public Monitoring(){
     strings = new ArrayList();
     setFont("helvetica", 12);
     isOn = true;
