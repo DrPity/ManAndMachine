@@ -1,7 +1,8 @@
 class Plotter {
 	int x, y, w, h, currentValue, targetValue, backgroundColor;
 	Channel sourceChannel;
-	Textlabel label;	
+	Textlable describtion;
+	
 	
 	Plotter(Channel _sourceChannel, int _x, int _y, int _w, int _h) {
 		sourceChannel = _sourceChannel;
@@ -11,9 +12,7 @@ class Plotter {
 		h = _h;
 		currentValue = 0;
 		backgroundColor = color(255);
-		
- 		label = new Textlabel(controlP5,sourceChannel.name, x + 16, y + 16);
-		label.setColorValue(0);
+
 
 	}
 	
@@ -25,14 +24,14 @@ class Plotter {
 		pushMatrix();
 		translate(x, y);		
 		// Background
-		noStroke();
-		fill(backgroundColor);
-		rect(0, 0, w, h);
+		// noStroke();
+		// fill(backgroundColor);
+		// rect(0, 0, w, h);
 
-		// border line
-		strokeWeight(1);
-		stroke(220);
-		line(w - 1, 0, w - 1, h);
+		// // border line
+		// strokeWeight(1);
+		// stroke(220);
+		// line(w - 1, 0, w - 1, h);
 
 		
 		if(sourceChannel.points.size() > 0) {
@@ -50,19 +49,22 @@ class Plotter {
 			// Bar
 			noStroke();
 			fill(sourceChannel.drawColor);
-			rect(0, h - currentValue, w, h);
+			rect(0, h, w, -currentValue);
+
+			describtion = new Textlabel("label")
+                    	.setText(sourceChannel.describtion)
+                    	.setPosition(10,h)
+                    	.setColorValue(0xffffff00)
+                    	.setFont(createFont("Georgia",20));
+
 		}
 
 		// Draw the checkbox matte
 		
 		noStroke();
-		fill(255, 150);		
-		rect(10, 10, w - 20, 40);
-
-			popMatrix();
-
-
- 		label.draw();		
+		fill(255, 127);		
+		rect(10, 50, w - 20, 10);
+		popMatrix();	
 	}
 	
 	

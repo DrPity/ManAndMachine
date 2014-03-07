@@ -18,7 +18,15 @@ private int currentWrist         = 00;
 private int currentGripperAngle  = 00;
 private int currentGripperWidth  = 00;
 private int currentSpeed         = 00;
+private int blinkStrength        = 0;
+private int k                    = 0;
+private int xOffset              = 0;
+private int bWristAngle          = 90;
+private int barIteration         = 0;
+private float attentionValue     = 90.0;
+private float meditationValue    = 120.0;
 private boolean robotIsReadyToMove = false;
+private boolean barReadyToDraw  = true;
 
 Client myClient;
 
@@ -43,8 +51,9 @@ int gFontSize = 12;
 /*Control 5 GUI*/
 ControlP5 controlP5;
 ControlFont cfont;
-Plotter[] plotter = new Plotter[10];
-Channel[] channels = new Channel[11];
+Plotter[] plotter = new Plotter[200];
+int[] barTracer = new int[10];
+Channel[] channels = new Channel[201];
 int packetCount = 0;
 int globalMax;
 String scaleMode;
@@ -112,28 +121,28 @@ void setup() {
         myClient.write(command);
 
 
-
   // Creat the channel objects
   // yellow to purple and then the space in between, grays for the alphas
+
   channels[0] = new Channel("Signal Quality", color(0), "");
-  channels[1] = new Channel("Attention", color(100), "");
-  channels[2] = new Channel("Meditation", color(50), "");
-  channels[3] = new Channel("Delta", color(219, 211, 42), "Dreamless Sleep");
-  channels[4] = new Channel("Theta", color(245, 80, 71), "Drowsy");
-  channels[5] = new Channel("Low Alpha", color(237, 0, 119), "Relaxed");
-  channels[6] = new Channel("High Alpha", color(212, 0, 149), "Relaxed");
-  channels[7] = new Channel("Low Beta", color(158, 18, 188), "Alert");
-  channels[8] = new Channel("High Beta", color(116, 23, 190), "Alert");
-  channels[9] = new Channel("Low Gamma", color(39, 25, 159), "???");
-  channels[10] = new Channel("High Gamma", color(23, 26, 153), "???");
-  
   // Manual override for a couple of limits.
+
+  for (int i = 1; i < plotter.length + 1; ++i) {  
+    if(i <= 20){channels[i] = new Channel("Attention", color(10), "");  channels[i].minValue = 0; channels[i].maxValue = 100; channels[i].addDataPoint(0);}
+    if(i > 20 && i <= 40){channels[i] = new Channel("Meditation", color(50), ""); channels[i].minValue = 0; channels[i].maxValue = 100; channels[i].addDataPoint(0);}
+    if(i > 40 && i <= 60){channels[i] = new Channel("Delta", color(219, 211, 42), "Dreamless Sleep"); channels[i].addDataPoint(0);}
+    if(i > 60 && i <= 80){channels[i] = new Channel("Theta", color(245, 80, 71), "Drowsy"); channels[i].addDataPoint(0);}
+    if(i > 80 && i <= 100){channels[i] = new Channel("Low Alpha", color(237, 0, 119), "Relaxed"); channels[i].addDataPoint(0);}
+    if(i > 100 && i <= 120){channels[i] = new Channel("High Alpha", color(212, 0, 149), "Relaxed"); channels[i].addDataPoint(0);}
+    if(i > 120 && i <= 140){channels[i] = new Channel("Low Beta", color(158, 18, 188), "Alert"); channels[i].addDataPoint(0);}
+    if(i > 140 && i <= 160){channels[i] = new Channel("High Beta", color(116, 23, 190), "Alert"); channels[i].addDataPoint(0);}
+    if(i > 160 && i <= 180){channels[i] = new Channel("Low Gamma", color(39, 25, 159), "???"); channels[i].addDataPoint(0);}
+    if(i > 180 && i <= 200){channels[i] = new Channel("High Gamma", color(23, 26, 153), "???"); channels[i].addDataPoint(0);}
+  }
+  
   channels[0].minValue = 0;
   channels[0].maxValue = 200;
-  channels[1].minValue = 0;
-  channels[1].maxValue = 100;
-  channels[2].minValue = 0;
-  channels[2].maxValue = 100;
+  
   // channels[0].allowGlobal = false;
   // channels[1].allowGlobal = false;
   // channels[2].allowGlobal = false;
@@ -141,10 +150,14 @@ void setup() {
   // Set up the plotter, skip the signal quality
   
   for (int i = 0; i < plotter.length; i++) {
-    plotter[i] = new Plotter(channels[i + 1], i * (width / 10), height / 2, width / 10, height / 2);
+    if (i%20 == 0){
+      k++;
+      xOffset = xOffset + 20;
+    }
+    plotter[i] = new Plotter(channels[i+1], 1200 + ((8*i) - (8*xOffset)), 40 + (60 * k), 4, 30);
   }
   
-  plotter[plotter.length - 1].w += width % plotter.length;
+  //plotter[plotter.length - 1].w += width % plotter.length;
 
     for (int i = 0; i < 20; ++i) {
       monitoring.setColor(color(255, 255, 255), i);
@@ -155,7 +168,7 @@ void setup() {
     monitoring.setColor(#00D7FF, 6);
     monitoring.setColor(#00D7FF, 11);
     monitoring.setColor(#00D7FF, 15);
-    }
+}
 
 void draw() {
   background(100);
@@ -163,29 +176,28 @@ void draw() {
   connectionStatus.draw(); 
   monitoring();
 
-    // find the global max
-  if(scaleMode == "Global") {
-    if(channels.length > 3) {
-      for(int i = 3; i < channels.length; i++) {
-        if (channels[i].maxValue > globalMax) globalMax = channels[i].maxValue;
-      }
-    }
-  } 
-
- for (int i = 0; i < plotter.length; i++) {
-    plotter[i].update();
-    plotter[i].draw();
-  }
-  
-  
-  
+  //   // find the global max
+  // if(scaleMode == "Global") {
+  //   if(channels.length > 3) {
+  //     for(int i = 3; i < channels.length; i++) {
+  //       if (channels[i].maxValue > globalMax) globalMax = channels[i].maxValue;
+  //     }
+  //   }
+  // } 
 
 /* Check if Serial heartbeat is lost */
   if (firstContact){
     if (millis() - heartbeat >= 5000){
-     firstContact = false; 
-     println("Heartbeat lost");
-     serialConnection = "Heartbeat lost!";
+       firstContact = false; 
+       println("Heartbeat lost");
+       serialConnection = "Heartbeat lost!";
+    }
+  }
+  if(barReadyToDraw){
+    for (int i = 0; i < plotter.length; ++i) {
+      // println("I: " + i);
+      plotter[i].update();
+      plotter[i].draw(); 
     }
   }
 }
@@ -283,62 +295,114 @@ void serialEvent(Serial myPort) {
 
 
 void clientEvent(Client  myClient) {
-  
   // Sample JSON data:
   // {"eSense":{"attention":67,"meditation":43},"eegPower":{"delta":657208,"theta":69277,"lowAlpha":15004,"highAlpha":7692,"lowBeta":10326,"highBeta":8686,"lowGamma":4384,"highGamma":1974},"poorSignalLevel":0}
   // {"eSense":{"attention":91,"meditation":41},"eegPower":{"delta":1105014,"theta":211310,"lowAlpha":7730,"highAlpha":68568,"lowBeta":12949,"highBeta":47455,"lowGamma":55770,"highGamma":28247},"poorSignalLevel":0}
   
   if (myClient.available() > 0) {
+      
+    byte[] inBuffer = myClient.readBytesUntil(breakLine);
     
-  byte[] inBuffer = myClient.readBytesUntil(breakLine);
+    if (inBuffer != null){
+    String myString = new String(inBuffer);
+    print(myString);
+      try {
+        org.json.JSONObject json = new org.json.JSONObject(myString);
+        channels[0].addDataPoint(Integer.parseInt(json.getString("poorSignalLevel")));
+      }
+      catch (JSONException e) {
+       println (e);
+       // e.printStackTrace();
+       // print(myString);
+      };
+    
+      try{
+
+        org.json.JSONObject json = new org.json.JSONObject(myString);
+        org.json.JSONObject esense = json.getJSONObject("eSense");
+        if (esense != null) {
+          while (barIteration < (plotter.length - 20)){
+            for (int i = 0; i < 10; ++i) {
+              if(i != 0){
+              barTracer[i] = barIteration;
+              barIteration += 20;
+              println("for loop: " + barIteration);
+              }
+              println("I in while: " + barIteration);
+            }
+          }
+          println("After While: " + barIteration);
+          barIteration = (200%barIteration);
+          println("After Modulo: " + barIteration);
+          if(barIteration > 0){barIteration = 20 - barIteration;}
+          barIteration++;
+          println("Ready for next loop: " + barIteration);
+
+          channels[barTracer[0]].addDataPoint(Integer.parseInt(esense.getString("attention")));
+          channels[barTracer[1]].addDataPoint(Integer.parseInt(esense.getString("meditation")));
+        }
+        
+        org.json.JSONObject eegPower = json.getJSONObject("eegPower");
+        if (eegPower != null) {
+          channels[barTracer[2]].addDataPoint(Integer.parseInt(eegPower.getString("delta")));
+          channels[barTracer[3]].addDataPoint(Integer.parseInt(eegPower.getString("theta"))); 
+          channels[barTracer[4]].addDataPoint(Integer.parseInt(eegPower.getString("lowAlpha")));
+          channels[barTracer[5]].addDataPoint(Integer.parseInt(eegPower.getString("highAlpha")));  
+          channels[barTracer[6]].addDataPoint(Integer.parseInt(eegPower.getString("lowBeta")));
+          channels[barTracer[7]].addDataPoint(Integer.parseInt(eegPower.getString("highBeta")));
+          channels[barTracer[8]].addDataPoint(Integer.parseInt(eegPower.getString("lowGamma")));
+          channels[barTracer[9]].addDataPoint(Integer.parseInt(eegPower.getString("highGamma")));
+          }
+
+      }
+      catch (JSONException e) {
+      println (e);
+      // e.printStackTrace();
+      // print(myString);
+      };
+
+
+      try{
+      org.json.JSONObject json = new org.json.JSONObject(myString);  
+      blinkStrength = json.getInt("blinkStrength");
+      println(blinkStrength);
+
+      }
+
+      catch (JSONException e) {
+       println (e);
+       // e.printStackTrace();
+       // print(myString);
+      };
   
-  if (inBuffer != null){
-  String myString = new String(inBuffer);
-  // print(myString);
-
-    try {
-      org.json.JSONObject json = new org.json.JSONObject(myString);
-      
-      channels[0].addDataPoint(Integer.parseInt(json.getString("poorSignalLevel")));
-
-    
-      org.json.JSONObject esense = json.getJSONObject("eSense");
-      println(esense);
-      if (esense != null) {
-        channels[1].addDataPoint(Integer.parseInt(esense.getString("attention")));
-        println("Channel one: " + channels[1].getLatestPoint().value);
-        channels[2].addDataPoint(Integer.parseInt(esense.getString("meditation")));
-        println("Channel two: " + channels[2].getLatestPoint().value);
-        // print(esense);
-      }
-      
-      org.json.JSONObject eegPower = json.getJSONObject("eegPower");
-      if (eegPower != null) {
-        channels[3].addDataPoint(Integer.parseInt(eegPower.getString("delta")));
-        channels[4].addDataPoint(Integer.parseInt(eegPower.getString("theta"))); 
-        channels[5].addDataPoint(Integer.parseInt(eegPower.getString("lowAlpha")));
-        channels[6].addDataPoint(Integer.parseInt(eegPower.getString("highAlpha")));  
-        channels[7].addDataPoint(Integer.parseInt(eegPower.getString("lowBeta")));
-        channels[8].addDataPoint(Integer.parseInt(eegPower.getString("highBeta")));
-        channels[9].addDataPoint(Integer.parseInt(eegPower.getString("lowGamma")));
-        channels[10].addDataPoint(Integer.parseInt(eegPower.getString("highGamma")));
-
-      }
-
       packetCount++;
-  
-      
-    }
-    catch (JSONException e) {
-     // println (e);
-     // e.printStackTrace();
-     print(myString);
-    };
-  }  
-  
-  }
 
-}
+      if(barIteration == 0){
+        barReadyToDraw = true;
+      }
+      // println("BarIteration after Modulo: " + barIteration);
+    }
+        
+  }
+ 
+    if (channels[0].getLatestPoint().value == 00){  
+      if(channels[2].getLatestPoint().value >= 55){
+        attentionValue = map(channels[2].getLatestPoint().value, 55, 100, 50, 140);
+      }
+
+      if(channels[1].getLatestPoint().value >= 55){
+        meditationValue = map(channels[1].getLatestPoint().value, 55, 100, 100, 130);
+      }
+    }
+
+    if (blinkStrength >= 50){
+      bWristAngle = 180;
+    }else if (blinkStrength < 50 ){
+      bWristAngle = 90;
+    }
+
+    setRobotArm(0, meditationValue, attentionValue, 90,bWristAngle,127);
+}  
 
 void monitoring(){
   /* Degugg output */
@@ -412,7 +476,9 @@ void setRobotArm( float x, float y, float z, float gripperAngleD, int gripperWid
       currentSpeed = speed;
 
     sendRobotData( currentBase, currentShoulder, currentElbow, currentWrist, currentGripperAngle, currentGripperWidth, currentSpeed);
-  }else{println("Robot not ready yet!");}
+  }else{
+    // println("Robot not ready yet!");
+  }
   
 }
 
