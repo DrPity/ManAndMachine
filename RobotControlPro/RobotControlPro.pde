@@ -1,498 +1,408 @@
-import processing.serial.*;
 import controlP5.*;
+import org.json.*; 
 import processing.net.*;
-import org.json.*;
+import processing.serial.*;
+import java.awt.Frame;
+import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
+import javax.media.opengl.GLAutoDrawable;
+import javax.media.opengl.GLCapabilities;
+import javax.media.opengl.GLContext;
+import javax.media.opengl.GLEventListener;
+import javax.media.opengl.GLProfile;
+import javax.media.opengl.awt.GLCanvas;
+import processing.core.PGraphics;
+import processing.opengl.PGL;
+import processing.opengl.PGraphicsOpenGL;
+import processing.opengl.Texture;
+
+private int[]   bitArray            = new int[8];
+private int     lastPulseBit        = 0;
+private int     counter             = 0;
+private int     heartRate           = 0;
+private int     end                 = 10;
+private int     pulsMeterConValue   = 200;
+private int     robotConValue       = 200;
+private int     pose                = 1;
+private int     gAngle              = 90;
+private int     debugVariable       = 0;
+private int     z                   = 120;
+private int     gGripperWidth       = 0;
+private int     bioValue            = 0;
+private int     speed               = 0;
+private int     recordColor         = color(127, 127, 127);
+private int     id                  = 0;
+private int     packetCount         = 0;
+private int     globalMax;
+private int     tableIndex          = 0;
+private byte    caReturn            = 13;
+private long    heartbeat;
+private String  pulseString        = "";
+private String  heartRateString    = "NA";
+private String  inChar;
+private String  scaleMode;
+private String  pulseMeterPort      = "/dev/tty.BerryMed-SerialPort";
+private String  arduinoPort         = "/dev/tty.usbmodem1421";
+private float   angle               = 0;
+private float   aVelocity           = 0.05;
+private boolean isRobotReadyToMove  = false;
+private boolean isFirstContact      = false;
+private boolean isHashtrue          = false;
+private boolean isRobotStarted      = false;
+private boolean isDataVerified      = false;
+private boolean isRecording         = false;
+private boolean isEsenseEvent       = false;
+private boolean isReadyToRecord     = false;
+private boolean gridYisDrawn        = false;
+private boolean gridXisDrawn        = false;
+private boolean isArduinoPort       = false;
+private boolean isPulseMeterPort    = false;
+private boolean isDataToGraph       = false;
+private boolean isTimerStarted      = false;
+
+
 /* Static Robot Values used for Inverse Kinematic */
 /* Arm dimensions( mm ) */
-private static final Float BASE_HEIGHT  = 101.0;   //height of robot-base"
-private static final Float SHL_ELB      = 105.0;   //shoulder-to-elbow
-private static final Float ULNA         = 98.0;    //elbow-to-wrist
-private static final Float GRIPLENGTH   = 155.0;   //lengh-of-grip
-private static final Float WRIST_OFFSET = 28.0;    //offset wrist-gripper
 
-/* Dynamic Robot Values Send to Arduino */
-private int currentBase          = 00;
-private int currentShoulder      = 00;
-private int currentElbow         = 00;
-private int currentWrist         = 00;
-private int currentGripperAngle  = 00;
-private int currentGripperWidth  = 00;
-private int currentSpeed         = 00;
-private int blinkStrength        = 0;
-private int k                    = 0;
-private int xOffset              = 0;
-private int bWristAngle          = 90;
-private int barIteration         = 0;
-private float attentionValue     = 90.0;
-private float meditationValue    = 120.0;
-private boolean robotIsReadyToMove = false;
-private boolean barReadyToDraw  = true;
+private static final Float  BASE_HEIGHT  = 101.0;   //height of robot-base"
+private static final Float  SHL_ELB      = 105.0;   //shoulder-to-elbow
+private static final Float  ULNA         = 98.0;    //elbow-to-wrist
+private static final Float  GRIPLENGTH   = 155.0;   //lengh-of-grip
+private static final Float  WRIST_OFFSET = 28.0;    //offset wrist-gripper
 
+/* Constrains of servo motors in milliseconds */
+private static final Integer  BASE_MAX            = 2300;
+private static final Integer  BASE_MIN            = 720;
+private static final Integer  SHOULDER_MAX        = 2350; 
+private static final Integer  SHOULDER_MIN        = 720; 
+private static final Integer  ELBOW_MAX           = 2370; 
+private static final Integer  ELBOW_MIN           = 720;
+private static final Integer  WRIST_MAX           = 2370; 
+private static final Integer  WRIST_MIN           = 720;
+private static final Integer  GRIPPER_ANGLE_MAX   = 2400;
+private static final Integer  GRIPPER_ANGLE_MIN   = 700;
+private static final Integer  GRIPPER_MAX         = 2100;
+private static final Integer  GRIPPER_MIN         = 1450;  
+
+/* Dynamic values of the robot arm */
+private int     currentBase             = 00;
+private int     currentShoulder         = 00;
+private int     currentElbow            = 00;
+private int     currentWrist            = 00;
+private int     currentGripperAngle     = 00;
+private int     currentGripperWidth     = 00;
+private int     currentLight            = 00;
+private int     currentEasing           = 00;
+
+PImage bg;
+Table table;
+ControlFont font;
 Client myClient;
-
-/* Serial Communication */
-Serial myPort;
-private long    heartbeat;
-private String  inByte;
-private char    serial1;
-private char    serial2;
-private char    serial3;
-private int     end           = 10;
-private byte    breakLine     = 13;
-// private byte[] byteBuffer = new byte[24];
-private boolean firstContact  = false;
-private boolean isHashtrue    = false;
-
-/* Monitoring */
-Monitoring monitoring;
-boolean gIsDebugOn = true;
-int gFontSize = 12;
-
-/*Control 5 GUI*/
+Drawings drawings;
 ControlP5 controlP5;
-ControlFont cfont;
-Plotter[] plotter = new Plotter[200];
-int[] barTracer = new int[10];
-Channel[] channels = new Channel[201];
-int packetCount = 0;
-int globalMax;
-String scaleMode;
+Serial pulseMeter, myPort;
+Kinect kinect;
+HelperClass helpers;
+ManageCLE mindWaveCLE;
+ManageSE manageSE;
+Robot robot;
 
+Channel[] channels = new Channel[11];
+Graph mindWave, emg, ecg, eda;
+Textlabel lableHeartRate, textHeartRate, timerLable, lableID, textID, fRate;
+ConnectionLight connectionLight, bluetoothConnection, robotConnection;
 
-
-/*Connection Status */
-ConnectionStatus connectionStatus;
 
 void setup() {
-	
- 	/* Basic setup */
-  size(1280,720);
+
+  frameRate(60);
+	size(displayWidth, displayHeight, P2D);
+  noSmooth();
+  // bg = loadImage("brain.png");
+  // bg.resize(width, height);
   smooth(4);
-  
-  frame.setTitle("Robot Control");  
-  
-    for (int i = 0; i < Serial.list().length; i++) {
-      println("[" + i + "] " + Serial.list()[i]);
+
+  manageSE  = new ManageSE();
+  robot = new Robot();
+	
+	// Set up the knobs and dials
+	controlP5 = new ControlP5(this);
+	controlP5.setColorLabel(color(0));
+	controlP5.setColorBackground(color(127));
+
+	for (int i = 0; i < Serial.list().length; i++) {
+    println("[" + i + "] " + Serial.list()[i]);
+
+    // Flag serial ports as true
+    if(Serial.list()[i].equals(pulseMeterPort)){
+      isPulseMeterPort = true;
+    }else if (Serial.list()[i].equals(arduinoPort)){
+      isArduinoPort = true;
     }
- 
-  myPort = new Serial(this, Serial.list()[0], 115200);
-  myPort.bufferUntil(end);
-  myPort.clear();
-  inByte = null;
+  }
+
+  if(isPulseMeterPort){
+    // if(Serial.list()[i].available() > 0){
+    try {
+      pulseMeter = new Serial(this, pulseMeterPort, 115200);
+      pulseMeter.clear();
+      
+    } catch (Exception e) {
+      isPulseMeterPort = false;
+      println("PulseMeter port received an exepction: " + e);
+    }
+   
+  }else println("PulseMeter not available");
   
-  mPusherConnection = new PusherConnection();
-  // mPusherConnection.onCreate();
+  if(isArduinoPort){
+    myPort = new Serial(this, arduinoPort, 115200);
+    myPort.bufferUntil(end);
+    myPort.clear();
+  }else println("Arduino not available");
 
-  monitoring = new Monitoring();
+  helpers = new HelperClass();
+  drawings = new Drawings();
+  mindWaveCLE = new ManageCLE();
+  drawings.CP5Init();
+  // mindWaveCLE.thingearInit();
 
-  controlP5 = new ControlP5(this);
-  controlP5.setColorLabel(color(0));    
-  controlP5.setColorBackground(color(0));
-  controlP5.disableShortcuts(); 
-  controlP5.disableMouseWheel();
-  controlP5.setMoveable(false);
-  
-  /* Must be declared after ControlP5! */
-  connectionStatus = new ConnectionStatus(width - 140, 10, 20);
-  cfont = new ControlFont(createFont("DIN-MediumAlternate", 12), 12);
-
-        // Connect to ThinkGear socket (default = 127.0.0.1:13854)
-        // By default, Thinkgear only binds to localhost:
-        // To allow other hosts to connect and run Processing from another machine, run ReplayTCP (http://www.dlcsistemas.com/html/relay_tcp.html)
-        // OR, use netcat (windows or mac) to port forard (clients can now connect to port 13855).  Ex:  nc -l -p 13855 -c ' nc localhost 13854'
-        
-        String thinkgearHost = "127.0.0.1";
-        int thinkgearPort = 13854;
-        
-        String envHost = System.getenv("THINKGEAR_HOST");
-        if (envHost != null) {
-          thinkgearHost = envHost;
-        }
-        String envPort = System.getenv("THINKGEAR_PORT");
-        if (envPort != null) {
-           thinkgearPort = Integer.parseInt(envPort);
-        }
+	font = new ControlFont(createFont("DIN-MediumAlternate", 12), 12);
+  mindWaveCLE.connectToMindWave(this);
        
-        println("Connecting to host = " + thinkgearHost + ", port = " + thinkgearPort);
-        myClient = new Client(this, thinkgearHost, thinkgearPort);
-        String command = "{\"enableRawOutput\": false, \"format\": \"Json\"}\n";
-        print("Sending command");
-        println (command);
-        myClient.write(command);
-
-
-  // Creat the channel objects
-  // yellow to purple and then the space in between, grays for the alphas
-
-  channels[0] = new Channel("Signal Quality", color(0), "");
-  // Manual override for a couple of limits.
-
-  for (int i = 1; i < plotter.length + 1; ++i) {  
-    if(i <= 20){channels[i] = new Channel("Attention", color(10), "");  channels[i].minValue = 0; channels[i].maxValue = 100; channels[i].addDataPoint(0);}
-    if(i > 20 && i <= 40){channels[i] = new Channel("Meditation", color(50), ""); channels[i].minValue = 0; channels[i].maxValue = 100; channels[i].addDataPoint(0);}
-    if(i > 40 && i <= 60){channels[i] = new Channel("Delta", color(219, 211, 42), "Dreamless Sleep"); channels[i].addDataPoint(0);}
-    if(i > 60 && i <= 80){channels[i] = new Channel("Theta", color(245, 80, 71), "Drowsy"); channels[i].addDataPoint(0);}
-    if(i > 80 && i <= 100){channels[i] = new Channel("Low Alpha", color(237, 0, 119), "Relaxed"); channels[i].addDataPoint(0);}
-    if(i > 100 && i <= 120){channels[i] = new Channel("High Alpha", color(212, 0, 149), "Relaxed"); channels[i].addDataPoint(0);}
-    if(i > 120 && i <= 140){channels[i] = new Channel("Low Beta", color(158, 18, 188), "Alert"); channels[i].addDataPoint(0);}
-    if(i > 140 && i <= 160){channels[i] = new Channel("High Beta", color(116, 23, 190), "Alert"); channels[i].addDataPoint(0);}
-    if(i > 160 && i <= 180){channels[i] = new Channel("Low Gamma", color(39, 25, 159), "???"); channels[i].addDataPoint(0);}
-    if(i > 180 && i <= 200){channels[i] = new Channel("High Gamma", color(23, 26, 153), "???"); channels[i].addDataPoint(0);}
-  }
+	// Creat the channel objects
+	// yellow to purple and then the space in between, grays for the alphas
+	channels[0]  = new Channel("Signal Quality", color(0), "");
+	channels[1]  = new Channel("Attention", color(100), "");
+	channels[2]  = new Channel("Meditation", color(50), "");
+	channels[3]  = new Channel("Delta", color(219, 211, 42), "Dreamless Sleep");
+	channels[4]  = new Channel("Theta", color(245, 80, 71), "Drowsy");
+	channels[5]  = new Channel("Low Alpha", color(237, 0, 119), "Relaxed");
+	channels[6]  = new Channel("High Alpha", color(212, 0, 149), "Relaxed");
+	channels[7]  = new Channel("Low Beta", color(158, 18, 188), "Alert");
+	channels[8]  = new Channel("High Beta", color(116, 23, 190), "Alert");
+	channels[9]  = new Channel("Low Gamma", color(39, 25, 159), "???");
+	channels[10] = new Channel("High Gamma", color(23, 26, 153), "???");
+	
+	// Manual override for a couple of limits.
+	channels[0].minValue = 0;
+	channels[0].maxValue = 200;
+	channels[1].minValue = 0;
+	channels[1].maxValue = 100;
+	channels[2].minValue = 0;
+	channels[2].maxValue = 100;
+	channels[0].allowGlobal = false;
+	channels[1].allowGlobal = false;
+	channels[2].allowGlobal = false;
+	
+	// Set up the graph
+	mindWave = new Graph(0, 0, width, round(height * 0.10));
+  emg = new Graph(0, round(height * 0.10), width, round(height * 0.10));
+  eda = new Graph(0, round(height * 0.20), width, round(height * 0.10));
+  ecg = new Graph(0, round(height * 0.30), width, round(height * 0.10));
+	
+	connectionLight     = new ConnectionLight(width - 98, 10, 10);
+  bluetoothConnection = new ConnectionLight(width - 98, 30, 10);
+  robotConnection     = new ConnectionLight(width - 98, 50, 10);
   
-  channels[0].minValue = 0;
-  channels[0].maxValue = 200;
-  
-  // channels[0].allowGlobal = false;
-  // channels[1].allowGlobal = false;
-  // channels[2].allowGlobal = false;
 
-  // Set up the plotter, skip the signal quality
-  
-  for (int i = 0; i < plotter.length; i++) {
-    if (i%20 == 0){
-      k++;
-      xOffset = xOffset + 20;
-    }
-    plotter[i] = new Plotter(channels[i+1], 1200 + ((8*i) - (8*xOffset)), 40 + (60 * k), 4, 30);
-  }
-  
-  //plotter[plotter.length - 1].w += width % plotter.length;
-
-    for (int i = 0; i < 20; ++i) {
-      monitoring.setColor(color(255, 255, 255), i);
-    }
-    monitoring.setColor(#00D7FF, 0);
-    monitoring.setColor(#00D7FF, 2);
-    monitoring.setColor(#00D7FF, 4);
-    monitoring.setColor(#00D7FF, 6);
-    monitoring.setColor(#00D7FF, 11);
-    monitoring.setColor(#00D7FF, 15);
+	globalMax = 0;
+  isReadyToRecord = true;
+  inChar = null;
+  // kinect = addControlFrame("extra", 320,240);
+    
 }
 
 void draw() {
-  background(100);
-  connectionStatus.update();
-  connectionStatus.draw(); 
-  monitoring();
+  
+  background(200);
+  drawings.drawRectangle(0,0,width,round(height * 0.40),0,0,255,150); 
+  lableHeartRate.setValue(heartRateString);
+  fRate.setValue(Float.toString(frameRate));
+  // lableID.setValue(String.valueOf(id));
 
-  //   // find the global max
-  // if(scaleMode == "Global") {
-  //   if(channels.length > 3) {
-  //     for(int i = 3; i < channels.length; i++) {
-  //       if (channels[i].maxValue > globalMax) globalMax = channels[i].maxValue;
-  //     }
-  //   }
-  // } 
+	// mindWave.update();
+	mindWave.draw();
+  mindWave.drawGrid();
+  // emg.update();
+  emg.draw();
+  // // ecg.update();
+  ecg.draw();
+  // // eda.update();
+  eda.draw();
+  drawings.drawLine(0,round(mindWave.y + (height * 0.10)), width, round(mindWave.y + (height * 0.10)));
+  drawings.drawLine(0,round(emg.y + (height * 0.10)), width, round(emg.y + (height * 0.10)));
+  drawings.drawLine(0,round(ecg.y + (height * 0.10)), width, round(ecg.y + (height * 0.10)));
+  drawings.drawLine(0,round(eda.y + (height * 0.10)), width, round(eda.y + (height * 0.10)));
+  noStroke();
+  drawings.drawRectangle(10,10,195,300,0,0,255,150);  
+  drawings.drawRectangle(0, 0, 88, 58, width - 98, 10, 255, 150);
+	connectionLight.update(channels[0].getLatestPoint().value);
+	connectionLight.draw();
+  connectionLight.mindWave.draw();
+  bluetoothConnection.update(pulsMeterConValue);
+  bluetoothConnection.draw();
+  bluetoothConnection.pulseMeter.draw();
+  robotConnection.update(robotConValue);
+  robotConnection.draw();
+  robotConnection.robot.draw();
 
-/* Check if Serial heartbeat is lost */
-  if (firstContact){
+
+  if (isFirstContact){
     if (millis() - heartbeat >= 5000){
-       firstContact = false; 
+       isFirstContact = false; 
        println("Heartbeat lost");
-       serialConnection = "Heartbeat lost!";
+       robotConValue = 100;
     }
   }
-  if(barReadyToDraw){
-    for (int i = 0; i < plotter.length; ++i) {
-      // println("I: " + i);
-      plotter[i].update();
-      plotter[i].draw(); 
+  
+
+  if (!isRobotStarted){
+
+    if(true){
+
+      float amplitude = 100;
+      float x = amplitude * cos(angle);
+      angle += aVelocity;
+      calculateBioInput();
+
+      if (debugVariable > 0 && debugVariable <= 100){
+        gAngle = (int) map(debugVariable, 0, 100, 90, 00);
+        z = (int) map (debugVariable,0, 100, 120, 250);
+        gGripperWidth = (int) map(debugVariable, 0, 100, 0, 180);
+        speed = (int) map(debugVariable, 0, 100, 0, 255);
+      }
+    
+      robot.setRobotArm(x, 130, z, gAngle, gGripperWidth, speed, 5);
+      // println("Robot Movement");
     }
   }
+
+  if(isTimerStarted)
+    timerLable.setValue(String.valueOf(second()));
+
+  gridYisDrawn = false;
+  gridXisDrawn = false;
+
+}
+
+void clientEvent(Client  myClient) {
+
+  
+	if (myClient.available() > 0) {
+  
+    byte[] inBuffer = myClient.readBytesUntil(caReturn);
+    
+    if (inBuffer != null){
+    	String data = new String(inBuffer);
+    	// print(data);
+      mindWaveCLE.mindWave(data);
+
+	  }
+	}
+
+}
+
+
+void serialEvent(Serial thisPort){
+
+
+  if (thisPort == pulseMeter && isPulseMeterPort){
+    
+    counter++;
+
+     while (pulseMeter.available() > 0) {
+      // Expand array size to the number of bytes you expect:
+      int inByte = pulseMeter.read();
+      for (int i = 7; i >= 0; i--){ 
+        bitArray[i] = manageSE.bitRead(inByte, i);
+      }
+    }
+    manageSE.newPulse();
+  }
+
+  if (thisPort == myPort && isArduinoPort){
+    
+    while (myPort.available() > 0){
+      inChar = myPort.readStringUntil(end);
+    }
+    if (inChar != null) {
+
+      manageSE.arduino(inChar);
+
+    }
+  }
+}
+
+
+public void Start_Recording() {
+  if(isReadyToRecord){
+    helpers.BeginRecording();
+  }
+}
+
+public void Stop_Recording() {
+  if(isReadyToRecord){
+    helpers.EndRecording();
+  }
+}
+
+public void Start_Robot() {
+  isRobotStarted = !isRobotStarted;
+  println("robot started");
+  //isTimerStarted = !isTimerStarted;
 }
 
 
 
 void keyPressed(){
- 
-  // We should be able to toggle the debugger so
-  // it doesn't consume resources.»
-  if(key == 'd'){
-    gIsDebugOn = !gIsDebugOn;
-    monitoring.setOn(gIsDebugOn);
-  }
- 
-  if(key == '+'){
-    gFontSize++;
-  }
- 
-  if(key == '-'){
-    gFontSize--;
-    if(gFontSize == 0){
-      gFontSize = 1;
-    }
-  }
- 
-  monitoring.setFont("verdana", gFontSize);
 
    if (key == CODED){
       if (keyCode == LEFT){
-        setRobotArm(-100, 80, 50, 90, 180, 127);
+        // setRobotArm(-100, 80, 50, 90, 180, 127);
       }
       if (keyCode == RIGHT){
-        setRobotArm(100, 80, 10, 90, 180, 127);
+        // setRobotArm(100, 80, 10, 90, 180, 127);
       }
       if (keyCode == UP){
-        setRobotArm(100, 80, 0, 90, 90, 127);
+        debugVariable += 2;
+
       }
       if (keyCode == DOWN){
-        setRobotArm(0, 100, 50, 90, 90, 127);
-      }
-    }
-}
-
-//Wait for serial events 
-void serialEvent(Serial myPort) {
-  // println("In Serial Event");
-  while (myPort.available() > 0){
-  inByte = myPort.readStringUntil(end);
-  //println(inByte);
-  }
-  if (inByte != null) {
-
-    if (isHashtrue){
-      println("Hash received");
-      String[] s = split(inByte, ',');
-      isHashtrue = false;
-      if(s[0].trim().equals("1")){
-        println("Value of Base: " +  s[1]);
-        println("Value of Shoulder: " +  s[2]);
-        // println("Value of E: " +  s[3]);
+        debugVariable -= 2;
       }
     }
 
-    if (inByte.trim().equals("W")){
-      myPort.write("W");
-      myPort.write(10);
-      println("+ Heartbeat +");
-      heartbeat = millis();
-      serialConnection = "Connected";
-    }
-
-    if(inByte.trim().equals("N")){
-      robotIsReadyToMove = true;
-      println("Robot Ready for Next Position");
-    }
-
-    if(!firstContact){
-      if (inByte.trim().equals("A")) {
-        serialConnection = "Connected";
-        println("Connected");
-        firstContact = true;
-        robotIsReadyToMove = true;
-        delay(500);                     
-        myPort.write("B");
-        myPort.write(10);        
-      }  
-    } 
-    else if(inByte.trim().equals("#")){
-        isHashtrue = true;
-    }
-  }
+    println("Debug Variable : " + debugVariable);
 }
 
 
-
-void clientEvent(Client  myClient) {
-  // Sample JSON data:
-  // {"eSense":{"attention":67,"meditation":43},"eegPower":{"delta":657208,"theta":69277,"lowAlpha":15004,"highAlpha":7692,"lowBeta":10326,"highBeta":8686,"lowGamma":4384,"highGamma":1974},"poorSignalLevel":0}
-  // {"eSense":{"attention":91,"meditation":41},"eegPower":{"delta":1105014,"theta":211310,"lowAlpha":7730,"highAlpha":68568,"lowBeta":12949,"highBeta":47455,"lowGamma":55770,"highGamma":28247},"poorSignalLevel":0}
-  
-  if (myClient.available() > 0) {
-      
-    byte[] inBuffer = myClient.readBytesUntil(breakLine);
-    
-    if (inBuffer != null){
-    String myString = new String(inBuffer);
-    print(myString);
-      try {
-        org.json.JSONObject json = new org.json.JSONObject(myString);
-        channels[0].addDataPoint(Integer.parseInt(json.getString("poorSignalLevel")));
-      }
-      catch (JSONException e) {
-       println (e);
-       // e.printStackTrace();
-       // print(myString);
-      };
-    
-      try{
-
-        org.json.JSONObject json = new org.json.JSONObject(myString);
-        org.json.JSONObject esense = json.getJSONObject("eSense");
-        if (esense != null) {
-          while (barIteration < (plotter.length - 20)){
-            for (int i = 0; i < 10; ++i) {
-              if(i != 0){
-              barTracer[i] = barIteration;
-              barIteration += 20;
-              println("for loop: " + barIteration);
-              }
-              println("I in while: " + barIteration);
-            }
-          }
-          println("After While: " + barIteration);
-          barIteration = (200%barIteration);
-          println("After Modulo: " + barIteration);
-          if(barIteration > 0){barIteration = 20 - barIteration;}
-          barIteration++;
-          println("Ready for next loop: " + barIteration);
-
-          channels[barTracer[0]].addDataPoint(Integer.parseInt(esense.getString("attention")));
-          channels[barTracer[1]].addDataPoint(Integer.parseInt(esense.getString("meditation")));
-        }
-        
-        org.json.JSONObject eegPower = json.getJSONObject("eegPower");
-        if (eegPower != null) {
-          channels[barTracer[2]].addDataPoint(Integer.parseInt(eegPower.getString("delta")));
-          channels[barTracer[3]].addDataPoint(Integer.parseInt(eegPower.getString("theta"))); 
-          channels[barTracer[4]].addDataPoint(Integer.parseInt(eegPower.getString("lowAlpha")));
-          channels[barTracer[5]].addDataPoint(Integer.parseInt(eegPower.getString("highAlpha")));  
-          channels[barTracer[6]].addDataPoint(Integer.parseInt(eegPower.getString("lowBeta")));
-          channels[barTracer[7]].addDataPoint(Integer.parseInt(eegPower.getString("highBeta")));
-          channels[barTracer[8]].addDataPoint(Integer.parseInt(eegPower.getString("lowGamma")));
-          channels[barTracer[9]].addDataPoint(Integer.parseInt(eegPower.getString("highGamma")));
-          }
-
-      }
-      catch (JSONException e) {
-      println (e);
-      // e.printStackTrace();
-      // print(myString);
-      };
-
-
-      try{
-      org.json.JSONObject json = new org.json.JSONObject(myString);  
-      blinkStrength = json.getInt("blinkStrength");
-      println(blinkStrength);
-
-      }
-
-      catch (JSONException e) {
-       println (e);
-       // e.printStackTrace();
-       // print(myString);
-      };
-  
-      packetCount++;
-
-      if(barIteration == 0){
-        barReadyToDraw = true;
-      }
-      // println("BarIteration after Modulo: " + barIteration);
-    }
-        
-  }
- 
-    if (channels[0].getLatestPoint().value == 00){  
-      if(channels[2].getLatestPoint().value >= 55){
-        attentionValue = map(channels[2].getLatestPoint().value, 55, 100, 50, 140);
-      }
-
-      if(channels[1].getLatestPoint().value >= 55){
-        meditationValue = map(channels[1].getLatestPoint().value, 55, 100, 100, 130);
-      }
-    }
-
-    if (blinkStrength >= 50){
-      bWristAngle = 180;
-    }else if (blinkStrength < 50 ){
-      bWristAngle = 90;
-    }
-
-    setRobotArm(0, meditationValue, attentionValue, 90,bWristAngle,127);
-}  
-
-void monitoring(){
-  /* Degugg output */
-  monitoring.add("FPS:"); 
-  monitoring.add(" | " + frameRate);
-  monitoring.add("X/Y:"); 
-  monitoring.add(" | [" + mouseX + "," + mouseY + "]");
-  monitoring.add("LAST KEY: ");
-  monitoring.add(" | " + key + "\n");
-  monitoring.add("SERVO ANGLES:");
-  monitoring.add(String.format(" | ba:\t" + "[ %s ]", currentBase));
-  monitoring.add(String.format(" | sh:\t" + "[ %s ]", currentShoulder));
-  monitoring.add(String.format(" | el:\t\t" + "[ %s ]", currentElbow));
-  monitoring.add(String.format(" | wr:\t" + "[ %s ]", currentWrist));
-  line(x, 100, x, 65);
- // monitoring.add("last serial messages: [" + serial1 + serial2 + serial3 + "]");
-  monitoring.add("PUSHER: ");
-  monitoring.add(" | " + error);
-  monitoring.add(" | " + msg);
-  monitoring.add(connectionPusher);
-  monitoring.add("SERIAL:");
-  monitoring.add(" | last serial messages: [ " + serial1 + serial2 + serial3 + " ]");
-  monitoring.add("" + serialConnection);
-  monitoring.draw();
-}
-
-
-void sendRobotData(int currentBase,int currentShoulder,int currentElbow,int currentWrist,int currentGripperWidth,int currentGripperAngle,int currentSpeed){
-
-  myPort.write(String.format("Rr%d,%d,%d,%d,%d,%d,%d\n",currentBase, currentShoulder, currentElbow, currentWrist, currentGripperWidth, currentGripperAngle, currentSpeed));
-  // myPort.write(10);
-  print(String.format("Rr%d,%d,%d,%d,%d,%d,%d",currentBase, currentShoulder, currentElbow, currentWrist, currentGripperWidth, currentGripperAngle, currentSpeed));
-  robotIsReadyToMove = false;
-
-}
-
-
-/* Inverse Kinematic Arithmetic: X can be + and -; Y and Z only positive. All values in mm! gripperAngleD must be according to the object in degree. gripperwidth in degree. And speed from 0-255 */
-void setRobotArm( float x, float y, float z, float gripperAngleD, int gripperWidth, int speed )
+  int bitRead(int b, int bitPos)
 {
+  int x = b & (1 << bitPos);
+  return x == 0 ? 0 : 1;
+}
 
-  if(robotIsReadyToMove){
-    /* send start byte */
-    float gripAngle = radians( gripperAngleD );
-
-    float ulnaEved = ULNA + (WRIST_OFFSET*sin(gripAngle));
-    float zEved = z - (WRIST_OFFSET*cos(gripAngle));
-
-    float baseAngle = atan2( y, x );
-    float rDist = sqrt(( x * x ) + ( y * y ));
-    
-    float rShlWri = rDist - (cos(gripAngle) * GRIPLENGTH);
-    float zShlWri = zEved - BASE_HEIGHT + (sin(gripAngle) * GRIPLENGTH);
-    float h = sqrt((zShlWri * zShlWri) + (rShlWri * rShlWri));
-
-    float elbowAngle = PI - acos( ( (h*h) - (ulnaEved*ulnaEved) - (SHL_ELB*SHL_ELB) ) / (-2.0* ulnaEved * SHL_ELB) );
-    float shoulderAngle = acos( ( (ulnaEved*ulnaEved) - (SHL_ELB*SHL_ELB) - (h*h) )/(-2.0*SHL_ELB*h) ) + atan2(zShlWri, rShlWri);
-    float wristAngle = shoulderAngle - elbowAngle + gripAngle;
-    
-    long wristAngleD = (long) degrees(wristAngle);
-    long elbowAngleD = (long) degrees(elbowAngle);
-    long shoulderAngleD = (long) degrees(shoulderAngle);
-    long baseAngleD = (long) degrees(baseAngle);
-
-      currentBase = (int) baseAngleD;
-      currentShoulder = (int) shoulderAngleD;
-      currentElbow = (int) elbowAngleD;
-      currentWrist = (int) wristAngleD;
-      currentGripperAngle = (int) gripperAngleD;
-      currentGripperWidth = gripperWidth;
-      currentSpeed = speed;
-
-    sendRobotData( currentBase, currentShoulder, currentElbow, currentWrist, currentGripperAngle, currentGripperWidth, currentSpeed);
-  }else{
-    // println("Robot not ready yet!");
-  }
-  
+Kinect addControlFrame(String theName, int theWidth, int theHeight) {
+  Frame f = new Frame(theName);
+  Kinect p = new Kinect(this, theWidth, theHeight);
+  f.add(p);
+  p.init();
+  f.setTitle(theName);
+  f.setSize(320, 240);
+  f.setLocation(10, 240);
+  f.setResizable(false);
+  f.setVisible(true);
+  return p;
 }
 
 
-// // Utilities
 
-// // Extend Processing's built-in map() function to support the Long datatype
-// long mapLong(long x, long in_min, long in_max, long out_min, long out_max) { 
-//   return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
-// }
 
-// // Extend Processing's built-in constrain() function to support the Long datatype
-// long constrainLong(long value, long min_value, long max_value) {
-//   if (value > max_value) return max_value;
-//   if (value < min_value) return min_value;
-//   return value;
-// }
+void calculateBioInput(){
+
+
+  bioValue = ((100 - channels[2].getLatestPoint().value) + (heartRate - 60))/2;
+  // println("Bio Value:" + bioValue + " " + channels[2].getLatestPoint().value + " " + heartRate );
+
+
+}

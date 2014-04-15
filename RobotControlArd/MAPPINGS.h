@@ -3,7 +3,8 @@
 
 //*********************************
 
-#define EASING_RESOLUTION	250
+
+#define PIN 14
 
 #define CENTER_MILLIS		1500
 

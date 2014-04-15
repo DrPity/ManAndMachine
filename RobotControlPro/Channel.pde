@@ -8,7 +8,7 @@ class Channel {
 	int maxValue;
 	int minValue;
 	ArrayList points;
-	// boolean allowGlobal;
+	boolean allowGlobal;
 		
 
 
@@ -16,7 +16,7 @@ class Channel {
 		name = _name;
 		drawColor = _drawColor;
 		description = _description;
-		// allowGlobal = true;
+		allowGlobal = true;
 		points = new ArrayList();
 	}
 	

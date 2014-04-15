@@ -12,6 +12,7 @@ class ChangePosition_Class {
 		ChangePosition_Class(int minMillisCC, int maxMillisCW);
 		void setPosition(int nextPosition);
 		int nextEasedStep();
+		int easing_resolution;
 
 		bool reachedTarget;
 

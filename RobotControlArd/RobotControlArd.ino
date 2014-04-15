@@ -4,7 +4,7 @@
 #include <Arduino.h>
 #include "rServo.h"
 #include "Servo.h"
-
+#include <Adafruit_NeoPixel.h>
 //******* For Debugging *******\\
 #define DEBUG
 #include "debug.h"
@@ -17,9 +17,12 @@ const int ledPin = 13;
 
 int parameterArray[6];
 int splitArray[6]; 
+int light = 0;
+int easingRes = 0;
+int counter = 1;
+
 
 bool robotIsReadyToMove   = true;
-bool requestNextPos = false;
 bool jointReachedTarget []   = {false,false,false,false,false,false};
 
 
@@ -45,20 +48,24 @@ int hMaxDegree = 180;
 int cMaxDegree = 180;
 
 int connectionTimeOut = 10;
-int base              = 90;
-int shoulder          = 90;
-int elbow             = 90;
-int wrist             = 90;
-int gripper           = 90;
-int gripperAngle      = 90;
-int speed             = 90;
+int base              = 1500;
+int shoulder          = 1500;
+int elbow             = 1500;
+int wrist             = 1500;
+int gripper           = 1500;
+int gripperAngle      = 1500;
 char end              = '\n';
 
-String inByte;
+float angle = 0;
+float aVelocity = 0.02;
 
+Adafruit_NeoPixel strip = Adafruit_NeoPixel(2, PIN, NEO_GRB + NEO_KHZ800);
+
+String inByte;
 //******* Declaration of Instances ******* \\ 
 
-CubicEase cubic;
+
+
 
 Servo *servoList[] = {
   new Servo(), 
@@ -68,6 +75,7 @@ Servo *servoList[] = {
   new Servo(),
   new Servo(),
 };  
+
 
 ChangePosition_Class *chPosition[] = {
 
@@ -88,12 +96,15 @@ void setup()
 { 
   Serial.begin(115200);
 
-  for (int i = 0; i < 6; ++i)
+  strip.begin();
+  strip.show(); // Initialize all pixels to 'off'
+
+   for (int i = 0; i < 6; ++i)
   {
     servoList[i]->attach(servoPins[i]);
     //Serial.println(testAttach);
   }
-  pinMode(ledPin, OUTPUT);
+
   establishContact();
   parkPosition();
 } 
@@ -107,14 +118,14 @@ void loop(){
     
     if(inByte.equals("B") == true){
     serialReady = true;
-    Serial.print("#");
-    Serial.println();
-    Serial.print(1,DEC);
-    Serial.print(",");
-    Serial.print(base, DEC);
-    Serial.print(",");
-    Serial.print(shoulder, DEC);
-    Serial.println();
+    // Serial.print("#");
+    // Serial.println();
+    // Serial.print(1,DEC);
+    // Serial.print(",");
+    // Serial.print(base, DEC);
+    // Serial.print(",");
+    // Serial.print(shoulder, DEC);
+    // Serial.println();
     }
 
     if(inByte.equals("W") == true){
@@ -126,9 +137,8 @@ void loop(){
     if(inByte.indexOf('R') == 0 && inByte.indexOf('r') == 1){
 
     splitString(inByte);
-    sendConfirmationData(1, base, shoulder, elbow, wrist, gripperAngle, gripper, speed);
-    requestNextPos = true;
-    Serial.println("New Position");
+    // sendConfirmationData(1, base, shoulder, elbow, wrist, gripperAngle, gripper, light);
+    // Serial.println("New Position");
        
     }
 
@@ -145,23 +155,14 @@ void loop(){
 
   if (connectionTimeOut <= 0){
 
-    Serial.println("TimeOut");
+    // Serial.println("TimeOut");
   }
 
 
-   //******* Setting Target Position *******
- if (robotIsReadyToMove){
-  chPosition[0]->setPosition(base);
-  chPosition[1]->setPosition(shoulder);
-  chPosition[2]->setPosition(elbow);
-  chPosition[3]->setPosition(wrist);
-  chPosition[4]->setPosition(gripperAngle);
-  chPosition[5]->setPosition(gripper);
-  }
+ //  ******* Setting Target Position *******
 
- //******* MOVE THE SERVOS *******
 
-  if(!chPosition[0]->reachedTarget){
+   if(!chPosition[0]->reachedTarget){
     servoList[0]->writeMicroseconds(chPosition[0]->nextEasedStep());
   }else{jointReachedTarget[0] = true;}
 
@@ -184,32 +185,26 @@ void loop(){
   if(!chPosition[5]->reachedTarget){
     servoList[5]->writeMicroseconds(chPosition[5]->nextEasedStep());
   }else{jointReachedTarget[5] = true;} 
+
   // delay(1);
 
 
   for (int i = 0; i < 6; ++i){
-    if(jointReachedTarget[i] == true){
-      booleanCount++;
+    if(chPosition[i]->reachedTarget == false){
+      robotIsReadyToMove = false;
+      break;
+    }
+    else if(i==5 && counter == 1){
+      robotIsReadyToMove = true;
+      requestNextPosition();
+      counter = 0;
     }
   }
 
-  if (booleanCount == 6 ){
-    robotIsReadyToMove = true;
-    booleanCount = 0;
-    for (int i = 0; i < 6; ++i)
-    {
-      jointReachedTarget[i] = false;
-    }
-  }else{
-    robotIsReadyToMove = false;
-    booleanCount = 0;
-  }
-  
-  if(requestNextPos){
-  requestNextPosition();
-  }
 
 }
+//END OF MAIN LOOP
+
 void blink(){
   digitalWrite(ledPin, HIGH);   // set the LED on
   delay(50);                  // wait for a second
@@ -219,17 +214,30 @@ void blink(){
 
 void parkPosition(){
 
-  chPosition[0]->setPosition(90);
-  chPosition[1]->setPosition(90);
-  chPosition[2]->setPosition(90);
-  chPosition[3]->setPosition(90);
-  chPosition[4]->setPosition(90);
-  chPosition[5]->setPosition(90);
+
+  // send_serial_command(1500, 1500, 1500, 1500, 1500, 1500, 300);
+
+  // // chPosition[0]->setPosition(1500);
+  // // chPosition[1]->setPosition(1500);
+  // // chPosition[2]->setPosition(1500);
+  // // chPosition[3]->setPosition(1500);
+  // // chPosition[4]->setPosition(1500);
+  // // chPosition[5]->setPosition(1500);
+
+  chPosition[0]->setPosition(1500);
+  chPosition[1]->setPosition(1500);
+  chPosition[2]->setPosition(1500);
+  chPosition[3]->setPosition(1500);
+  chPosition[4]->setPosition(1500);
+  chPosition[5]->setPosition(1500);
+
+
+
 }
 
 int splitString(String inByte){
 
-for (int i = 0; i <= 6; i++){
+for (int i = 0; i <= 7; i++){
   if(i == 0){
     splitArray[i] = inByte.indexOf(',');
     parameterArray[i] = inByte.substring(2,splitArray[i]).toInt();
@@ -245,7 +253,62 @@ for (int i = 0; i <= 6; i++){
   wrist         = parameterArray[3];
   gripperAngle  = parameterArray[4];
   gripper       = parameterArray[5];
-  speed         = parameterArray[6];
+  light         = parameterArray[6];
+  easingRes     = parameterArray[7];
+
+
+  //   for (int i = 0; i < 6; ++i)
+  // {
+  //   chPosition[i]->easing_resolution = easingRes;
+  //   Serial.println("EasingRes: ");
+  //   Serial.println(easingRes);
+  //   Serial.println("Easing Value: ");
+  //   Serial.println(chPosition[i]->easing_resolution);
+  // }
+
+  // servoList[0]->writeMicroseconds(base);
+  // servoList[1]->writeMicroseconds(shoulder);
+  // servoList[2]->writeMicroseconds(elbow);
+  // servoList[3]->writeMicroseconds(wrist);
+  // servoList[4]->writeMicroseconds(gripperAngle);
+  // servoList[5]->writeMicroseconds(gripper);
+
+  Serial.print("base: ");
+  Serial.println(base);
+  Serial.print("shoulder: ");
+  Serial.println(shoulder);
+  Serial.print("elbow: ");
+  Serial.println(elbow);
+  Serial.print("wrist: ");
+  Serial.println(wrist);
+  Serial.print("gripperAngle: ");
+  Serial.println(gripperAngle);
+  Serial.print("gripper: ");
+  Serial.println(gripper);
+  Serial.print("light: ");
+  Serial.println(light);
+  Serial.print("easingRes: ");
+  Serial.println(easingRes);
+  
+
+
+
+  strip.setPixelColor(0, strip.Color(light, 255-light, 0));
+  strip.setPixelColor(1, strip.Color(light, 255-light, 0));
+  
+
+  strip.show();
+
+  chPosition[0]->setPosition(base);
+  chPosition[1]->setPosition(shoulder);
+  chPosition[2]->setPosition(elbow);
+  chPosition[3]->setPosition(wrist);
+  chPosition[4]->setPosition(gripperAngle);
+  chPosition[5]->setPosition(gripper);
+
+  counter = 1;
+
+
 
 }
 
@@ -277,7 +340,6 @@ void requestNextPosition(){
 
   Serial.print("N");
   Serial.println();
-  requestNextPos = false;
 }
 
 
@@ -291,10 +353,64 @@ void watchdogCall() {
 
 
 void establishContact() {
+  strip.setPixelColor(0, strip.Color(0, 255, 0));
+  strip.setPixelColor(1, strip.Color(0, 255, 0));
+  strip.show();
+   // Serial.println("Hello World...");
+  delay(1000);  // do not print too fast!
   while (Serial.available() <= 0 && !serialReady) {
     Serial.print("A");   // send a capital A
     Serial.println();
     robotIsReadyToMove = true;
     delay(300);
   }
-}  
+}
+
+// void send_serial_command(int servoNr, int servoPosition, int light){
+
+//   Serial1.print("#");
+//   Serial1.print(servoNr,DEC);
+//   Serial1.print("P");
+//   Serial1.print(servoPosition,DEC);
+//   Serial1.print("T");
+//   Serial1.print(light,DEC);
+//   Serial1.print('\r');
+//   Serial1.print('\n');
+
+// } 
+
+
+// void send_serial_command(int baseAngleInt,int shoulderAngleInt,int elbowAngleInt,int wristAngleInt,int gripAngleInt,int gripperWidthInt,int light){
+
+//  Serial1.print("#");
+//   Serial1.print(1,DEC);
+//   Serial1.print("P");
+//   Serial1.print(baseAngleInt,DEC);
+//  Serial1.print("#");
+//   Serial1.print(2,DEC);
+//   Serial1.print("P");
+//   Serial1.print(shoulderAngleInt,DEC);
+//  Serial1.print("#");
+//   Serial1.print(3,DEC);
+//   Serial1.print("P");
+//   Serial1.print(elbowAngleInt,DEC);
+//  Serial1.print("#");
+//   Serial1.print(4,DEC);
+//   Serial1.print("P");
+//   Serial1.print(wristAngleInt,DEC);
+//  Serial1.print("#");
+//   Serial1.print(5,DEC);
+//   Serial1.print("P");
+//   Serial1.print(gripAngleInt,DEC);
+//  Serial1.print("#");
+//   Serial1.print(6,DEC);
+//   Serial1.print("P");
+//   Serial1.print(gripperWidthInt,DEC);
+//   Serial1.print("T");
+//   Serial1.print(light,DEC);
+//   Serial1.print('\r');
+//   Serial1.print('\n');
+
+//   // requestNextPosition();
+
+// }
