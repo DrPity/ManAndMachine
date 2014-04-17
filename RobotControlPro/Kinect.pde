@@ -1,14 +1,15 @@
 import processing.core.PApplet.*;
 import SimpleOpenNI.*;
 
+// ------------------------------------------------------------------------------------
 
 public class Kinect extends PApplet{
 
 SimpleOpenNI  context;
-
 int w, h;
-
 int abc = 100;
+
+// ------------------------------------------------------------------------------------
 
   void setup()
   {
@@ -44,7 +45,7 @@ int abc = 100;
   
   }
 
-
+// ------------------------------------------------------------------------------------
    
   void draw()
   {
@@ -70,8 +71,9 @@ int abc = 100;
     }
 
   }
-   
-  // draws a circle at the position of the head
+// ------------------------------------------------------------------------------------ 
+// draws a circle at the position of the head
+
   void circleForAHead(int userId)
   {
     // get 3D position of a joint
@@ -101,23 +103,26 @@ int abc = 100;
     //println("X: " + jointPos_Proj.x + " Y: " + jointPos_Proj.y + " Z: " + jointPos_Proj.z);
   }
 
+// ------------------------------------------------------------------------------------
+// when a person ('user') enters the field of view
 
-   
-  // when a person ('user') enters the field of view
   void onNewUser(SimpleOpenNI curContext,int userId)
   {
     println("New User Detected - userId: " + userId);
    
    // start pose detection
     curContext.startTrackingSkeleton(userId);
-  }  
-   
-  // when a person ('user') leaves the field of view 
+  }
+
+// ------------------------------------------------------------------------------------    
+// when a person ('user') leaves the field of view 
+
   void onLostUser(int userId)
   {
     println("User Lost - userId: " + userId);
   }
 
+// ------------------------------------------------------------------------------------
 
   public Kinect(Object theParent, int theWidth, int theHeight) {
     parent = theParent;
@@ -125,6 +130,7 @@ int abc = 100;
     h = theHeight;
   }
 
+// ------------------------------------------------------------------------------------
 
   public ControlP5 control() {
     return controlP5;

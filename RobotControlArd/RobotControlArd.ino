@@ -9,8 +9,8 @@
 #define DEBUG
 #include "debug.h"
 
-
 //******* Declaration of Variables *******\\
+// ------------------------------------------------------------------------------------
 
 const int servoPins[] = {2, 3, 4, 5, 6, 7};
 const int ledPin = 13;
@@ -62,10 +62,9 @@ float aVelocity = 0.02;
 Adafruit_NeoPixel strip = Adafruit_NeoPixel(2, PIN, NEO_GRB + NEO_KHZ800);
 
 String inByte;
+
 //******* Declaration of Instances ******* \\ 
-
-
-
+// ------------------------------------------------------------------------------------
 
 Servo *servoList[] = {
   new Servo(), 
@@ -91,6 +90,7 @@ ChangePosition_Class *chPosition[] = {
 
 
 //******* Programm Start ******* \\
+// ------------------------------------------------------------------------------------
 
 void setup() 
 { 
@@ -108,6 +108,9 @@ void setup()
   establishContact();
   parkPosition();
 } 
+
+
+// ------------------------------------------------------------------------------------
  
  
 void loop(){ 
@@ -203,7 +206,9 @@ void loop(){
 
 
 }
+
 //END OF MAIN LOOP
+// ------------------------------------------------------------------------------------
 
 void blink(){
   digitalWrite(ledPin, HIGH);   // set the LED on
@@ -211,6 +216,8 @@ void blink(){
   digitalWrite(ledPin, LOW);    // set the LED off
   delay(50); 
 }
+
+// ------------------------------------------------------------------------------------
 
 void parkPosition(){
 
@@ -235,6 +242,8 @@ void parkPosition(){
 
 }
 
+// ------------------------------------------------------------------------------------
+
 int splitString(String inByte){
 
 for (int i = 0; i <= 7; i++){
@@ -257,14 +266,10 @@ for (int i = 0; i <= 7; i++){
   easingRes     = parameterArray[7];
 
 
-  //   for (int i = 0; i < 6; ++i)
-  // {
-  //   chPosition[i]->easing_resolution = easingRes;
-  //   Serial.println("EasingRes: ");
-  //   Serial.println(easingRes);
-  //   Serial.println("Easing Value: ");
-  //   Serial.println(chPosition[i]->easing_resolution);
-  // }
+    for (int i = 0; i < 6; ++i)
+  {
+    chPosition[i]->easing_resolution = easingRes;
+  }
 
   // servoList[0]->writeMicroseconds(base);
   // servoList[1]->writeMicroseconds(shoulder);
@@ -273,22 +278,22 @@ for (int i = 0; i <= 7; i++){
   // servoList[4]->writeMicroseconds(gripperAngle);
   // servoList[5]->writeMicroseconds(gripper);
 
-  Serial.print("base: ");
-  Serial.println(base);
-  Serial.print("shoulder: ");
-  Serial.println(shoulder);
-  Serial.print("elbow: ");
-  Serial.println(elbow);
-  Serial.print("wrist: ");
-  Serial.println(wrist);
-  Serial.print("gripperAngle: ");
-  Serial.println(gripperAngle);
-  Serial.print("gripper: ");
-  Serial.println(gripper);
-  Serial.print("light: ");
-  Serial.println(light);
-  Serial.print("easingRes: ");
-  Serial.println(easingRes);
+  // Serial.print("base: ");
+  // Serial.println(base);
+  // Serial.print("shoulder: ");
+  // Serial.println(shoulder);
+  // Serial.print("elbow: ");
+  // Serial.println(elbow);
+  // Serial.print("wrist: ");
+  // Serial.println(wrist);
+  // Serial.print("gripperAngle: ");
+  // Serial.println(gripperAngle);
+  // Serial.print("gripper: ");
+  // Serial.println(gripper);
+  // Serial.print("light: ");
+  // Serial.println(light);
+  // Serial.print("easingRes: ");
+  // Serial.println(easingRes);
   
 
 
@@ -311,6 +316,8 @@ for (int i = 0; i <= 7; i++){
 
 
 }
+
+// ------------------------------------------------------------------------------------
 
 
 void sendConfirmationData(int ID, int value1, int value2, int value3, int value4, int value5, int value6, int value7){
@@ -336,12 +343,15 @@ void sendConfirmationData(int ID, int value1, int value2, int value3, int value4
 
 }
 
+// ------------------------------------------------------------------------------------
+
 void requestNextPosition(){
 
   Serial.print("N");
   Serial.println();
 }
 
+// ------------------------------------------------------------------------------------
 
 void watchdogCall() {
     Serial.print("W");   // send a capital A
@@ -351,6 +361,7 @@ void watchdogCall() {
     watchdogActive = false;
 }  
 
+// ------------------------------------------------------------------------------------
 
 void establishContact() {
   strip.setPixelColor(0, strip.Color(0, 255, 0));

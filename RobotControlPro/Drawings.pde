@@ -10,6 +10,8 @@ class Drawings  {
     popMatrix();
   }
 
+  // ------------------------------------------------------------------------------------
+
   void drawRectangle(int x1, int y1, int x2, int y2, int tx, int ty, int f, int fa){
     pushMatrix();
     translate(tx,ty);
@@ -18,12 +20,16 @@ class Drawings  {
     popMatrix();
   }
 
+  // ------------------------------------------------------------------------------------
+
   void Draw_Elipse(int x, int y, int dx, int dy){
     fill(recordColor);
     ellipseMode(CORNER);
     ellipse(x, y, dx, dy);
 
   }
+
+  // ------------------------------------------------------------------------------------
 
   void CP5Init(){
 
@@ -41,9 +47,21 @@ class Drawings  {
   
   controlP5.addButton("Start_Robot")
      .setValue(0)
-     .setPosition(30,500)
+     .setPosition(20,round(height * 0.42))
      .setSize(100,20)
      ;
+  
+  controlP5.addButton("Reset_Robot")
+   .setValue(0)
+   .setPosition(20,round(height * 0.44))
+   .setSize(100,20)
+   ;
+     
+  controlP5.addButton("Test_Movement")
+   .setValue(0)
+   .setPosition(20,round(height * 0.46))
+   .setSize(100,20)
+   ;     
 
   lableHeartRate = controlP5.addTextlabel("lable")
                     .setText(heartRateString)
@@ -67,7 +85,7 @@ class Drawings  {
 
   fRate = controlP5.addTextlabel("lable3")
                   .setText("00")
-                  .setPosition(10,height - 70)
+                  .setPosition(10,round(height * 0.93))
                   .setColorValue(255)
                   .setFont(createFont("Helvetica",12))
                   ;

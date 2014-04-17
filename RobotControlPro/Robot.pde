@@ -1,3 +1,39 @@
+/* Static Robot Values used for Inverse Kinematic */
+/* Arm dimensions( mm ) */
+
+private static final Float  BASE_HEIGHT  = 101.0;   //height of robot-base"
+private static final Float  SHL_ELB      = 105.0;   //shoulder-to-elbow
+private static final Float  ULNA         = 98.0;    //elbow-to-wrist
+private static final Float  GRIPLENGTH   = 155.0;   //lengh-of-grip
+private static final Float  WRIST_OFFSET = 28.0;    //offset wrist-gripper
+
+
+/* Constrains of servo motors in milliseconds */
+private static final Integer  BASE_MAX            = 2300;
+private static final Integer  BASE_MIN            = 720;
+private static final Integer  SHOULDER_MAX        = 2350; 
+private static final Integer  SHOULDER_MIN        = 720; 
+private static final Integer  ELBOW_MAX           = 2370; 
+private static final Integer  ELBOW_MIN           = 720;
+private static final Integer  WRIST_MAX           = 2370; 
+private static final Integer  WRIST_MIN           = 720;
+private static final Integer  GRIPPER_ANGLE_MAX   = 2400;
+private static final Integer  GRIPPER_ANGLE_MIN   = 700;
+private static final Integer  GRIPPER_MAX         = 2100;
+private static final Integer  GRIPPER_MIN         = 1450;  
+
+/* Dynamic values of the robot arm */
+private int     currentBase             = 00;
+private int     currentShoulder         = 00;
+private int     currentElbow            = 00;
+private int     currentWrist            = 00;
+private int     currentGripperAngle     = 00;
+private int     currentGripperWidth     = 00;
+private int     currentLight            = 00;
+private int     currentEasing           = 00;
+
+// ------------------------------------------------------------------------------------
+
 class Robot {
 
   //List of robot data: x1-10,y1-10,  xx,yy to xx2,yy2, Turn towards or away TT or TA, Open or Close claw OC or CC, Stretch or Contract S or C, Arousal in %, Classification of move <A>, Other: emotions etc
@@ -12,6 +48,8 @@ class Robot {
 
 
   }
+
+// ------------------------------------------------------------------------------------
 
   /* Inverse Kinematic Arithmetic: X can be + and -; Y and Z only positive. All values in mm! gripperAngleD must be according to the object in degree. gripperwidth in degree. And speed from 0-255 */
   void setRobotArm( float x, float y, float z, float gripperAngleD, int gripperWidth, int light, int easingResolution )
@@ -79,6 +117,8 @@ class Robot {
 
   }
 
+// ------------------------------------------------------------------------------------
+
   boolean isInRange(float value, float minimum, float maximum)
   {
     if(value >= minimum && value <= maximum)
@@ -86,15 +126,12 @@ class Robot {
     return false;
   }
 
-  void sendRobotData(int currentBase,int currentShoulder,int currentElbow,int currentWrist,int currentGripperWidth,int currentGripperAngle, int currentLight, int currentEasing){
+  void sendRobotData(int currentBase, int currentShoulder, int currentElbow, int currentWrist, int currentGripperAngle, int currentGripperWidth, int currentLight, int currentEasing){
 
-    myPort.write(String.format("Rr%d,%d,%d,%d,%d,%d,%d,%d\n",currentBase, currentShoulder, currentElbow, currentWrist, currentGripperWidth, currentGripperAngle, currentLight, currentEasing));
-    // myPort.write(10);
-    println(String.format("Rr%d,%d,%d,%d,%d,%d,%d,%d",currentBase, currentShoulder, currentElbow, currentWrist, currentGripperWidth, currentGripperAngle, currentLight, currentEasing));
+    wA.port.write(String.format("Rr%d,%d,%d,%d,%d,%d,%d,%d\n",currentBase, currentShoulder, currentElbow, currentWrist, currentGripperAngle, currentGripperWidth, currentLight, currentEasing));
+    // wA.port.write(10);
+    println(String.format("Rr%d,%d,%d,%d,%d,%d,%d,%d",currentBase, currentShoulder, currentElbow, currentWrist, currentGripperAngle, currentGripperWidth, currentLight, currentEasing));
     isRobotReadyToMove = false;
 
   }
-
-
-	
-}
+}  

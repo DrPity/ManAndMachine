@@ -3,7 +3,8 @@ class Monitor {
 	Channel sourceChannel;
 	CheckBox showGraph;	
 	Textlabel label;
-	
+
+// ------------------------------------------------------------------------------------	
 	
 	Monitor(Channel _sourceChannel, int _x, int _y, int _w, int _h) {
 		sourceChannel = _sourceChannel;
@@ -24,10 +25,14 @@ class Monitor {
 		label.setColorValue(0);
 
 	}
+
+// ------------------------------------------------------------------------------------
 	
 	void update() {
 
 	}
+
+// ------------------------------------------------------------------------------------
 	
 	void draw() {
 		// this technically only neds to happen on the packet, not every frame

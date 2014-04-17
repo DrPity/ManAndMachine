@@ -11,8 +11,8 @@ class ConnectionLight {
 	Textlabel robot;
 	PShape circle;
 	
+// ------------------------------------------------------------------------------------
 	
-
 	ConnectionLight(int _x, int _y, int _diameter) {
 		x = _x;
 		y = _y;
@@ -30,12 +30,15 @@ class ConnectionLight {
 		robot.setColorValue(255);
 	}
 	
+// ------------------------------------------------------------------------------------	
 	void update( int value) {
 		latestConnectionValue = value;
 		if(latestConnectionValue == 200) currentColor = noColor;
 		if(latestConnectionValue < 200) currentColor = badColor;
 		if(latestConnectionValue == 00) currentColor = goodColor;
 	}
+
+// ------------------------------------------------------------------------------------	
 	
 	void draw() {
 		
@@ -55,7 +58,6 @@ class ConnectionLight {
 				
 		popMatrix();
 
-	
 	}
 
 }

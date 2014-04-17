@@ -10,7 +10,7 @@ class Channel {
 	ArrayList points;
 	boolean allowGlobal;
 		
-
+// ------------------------------------------------------------------------------------
 
 	Channel(String _name, int _drawColor, String _description) {
 		name = _name;
@@ -19,7 +19,7 @@ class Channel {
 		allowGlobal = true;
 		points = new ArrayList();
 	}
-	
+// ------------------------------------------------------------------------------------	
 	
 	void addDataPoint(int value) {
 		
@@ -32,6 +32,8 @@ class Channel {
 		
 		// tk max length handling
 	}
+
+// ------------------------------------------------------------------------------------
 	
 	Point getLatestPoint() {
 		if(points.size() > 0) {

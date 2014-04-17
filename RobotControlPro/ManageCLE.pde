@@ -1,6 +1,8 @@
 
 class ManageCLE {
 
+  // ------------------------------------------------------------------------------------
+
   void connectToMindWave(PApplet p){
       // Connect to ThinkGear socket (default = 127.0.0.1:13854)
       // By default, Thinkgear only binds to localhost:
@@ -28,6 +30,8 @@ class ManageCLE {
 
 
   }
+
+  // ------------------------------------------------------------------------------------
 	
 	void mindWave(String data) {
 		
@@ -69,7 +73,7 @@ class ManageCLE {
          	if (isRecording){
   			TableRow newRow = table.addRow();
   			newRow.setInt("ID", table.getRowCount() -1);
-         	newRow.setInt("Heart_Rate", heartRate);
+         	newRow.setInt("Heart_Rate", receivedHeartRate);
   			newRow.setInt("attention", channels[1].getLatestPoint().value);
   			newRow.setInt("meditation", channels[2].getLatestPoint().value);
   			newRow.setInt("delta", channels[3].getLatestPoint().value);
