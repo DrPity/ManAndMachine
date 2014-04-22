@@ -31,7 +31,6 @@ private float   aVelocity           = 0.05;
 private boolean isRobotReadyToMove  = false;
 private boolean isFirstContact      = false;
 private boolean isRobotStarted      = false;
-private boolean isDataVerified      = false;
 private boolean isRecording         = false;
 private boolean isEsenseEvent       = false;
 private boolean isReadyToRecord     = false;
@@ -66,11 +65,13 @@ ConnectionLight connectionLight, bluetoothConnection, robotConnection;
 // ------------------------------------------------------------------------------------
 
 void setup() {
-  frameRate(60);
-	size(displayWidth, displayHeight, P2D);
+  frameRate(120);
+	size(displayWidth, displayHeight,P2D);
   noSmooth();
+  hint(ENABLE_RETINA_PIXELS);
   // bg = loadImage("brain.png");
   // bg.resize(width, height);
+  // background(bg);
   smooth(4);
   helpers = new HelperClass();
   manageSE  = new ManageSE();
@@ -83,7 +84,7 @@ void setup() {
 
   wPm = new WatchDog(1,"PulseMeter", pulseMeterPort, false, isPulseMeterPort, 115200, this);
   wPm.start();
-  wA = new WatchDog(1,"Arduino", arduinoPort, true, isPulseMeterPort, 115200, this);
+  wA = new WatchDog(1,"Arduino", arduinoPort, true, isArduinoPort, 115200, this);
   wA.start();
  
 
@@ -147,13 +148,15 @@ void setup() {
 void draw() {
 
 
-  background(200);
-  drawings.drawRectangle(0,0,width,round(height * 0.40),0,0,255,150); 
+  background(180);
   lableHeartRate.setValue(heartRateString);
-
+  drawings.drawRectangle(0,0,width,round(height*0.40),0,0,255,150);
+   
   fRate.setValue(Float.toString(frameRate));
   // lableID.setValue(String.valueOf(id));
-	mindWave.draw();
+	
+
+  mindWave.draw();
   mindWave.drawGrid();
   emg.draw();
   ecg.draw();
@@ -193,8 +196,8 @@ void draw() {
         speed = (int) map(debugVariable, 0, 100, 0, 255);
       }
     
-      robot.setRobotArm(x, 130, z, gAngle, gGripperWidth, speed, 1);
-      // println("Robot Movement");
+      robot.setRobotArm(x, 130, z, gAngle, gGripperWidth, speed, 1, true);
+      println("Robot Movement");
     }
   }
 
@@ -214,10 +217,9 @@ void clientEvent(Client  myClient) {
 	if (myClient.available() > 0) {
   
     byte[] inBuffer = myClient.readBytesUntil(caReturn);
-    
+  
     if (inBuffer != null){
     	String data = new String(inBuffer);
-    	// print(data);
       mindWaveCLE.mindWave(data);
 
 	  }
@@ -225,27 +227,23 @@ void clientEvent(Client  myClient) {
 
 }
 
+// ------------------------------------------------------------------------------------
 
 void serialEvent(Serial thisPort){
 
 
-  if (thisPort == wPm.port && isPulseMeterPort){
-    // println("In serial pulse");
+  if (thisPort == wPm.port && wPm.deviceInstanciated){
      manageSE.newPulse();
 
   }
 
-  if (thisPort == wA.port && isArduinoPort){
-    // println("In serial arduino");
+  if (thisPort == wA.port && wA.deviceInstanciated){
     
     while (wA.port.available() > 0){
       inChar = wA.port.readStringUntil(end);
-      // println("inchar : "+inChar );
     }
     if (inChar != null) {
-
       manageSE.arduino(inChar);
-
     }
   }
 }
@@ -275,7 +273,7 @@ public void Start_Robot() {
 
 public void Reset_Robot() {
    println("reset robot");
-   //robot.sendRobotData( 1500, 1500, 1500, 1500, 1500, 1700, 0, 200);
+   robot.setRobotArm( 0, 150, 80, 90, 90, 254, 200, true); 
   //isTimerStarted = !isTimerStarted;
 }
 
@@ -290,21 +288,29 @@ void keyPressed(){
 
    if (key == CODED){
       if (keyCode == LEFT){
-        // setRobotArm(-100, 80, 50, 90, 180, 127);
+        int yy = robot.stretching(20);
+        println("#streched Position in keyPressed Left: "  + yy);
+        robot.setRobotArm(0, yy, 80, 45, 90, 255, 200, true);
+        println("+ IsStRun: +" + isStrRun); 
       }
       if (keyCode == RIGHT){
-        // setRobotArm(100, 80, 10, 90, 180, 127);
+        int yy = robot.stretching(50);
+        println("( streched Position in keyPressed Right: )"  + yy);
+        robot.setRobotArm(0, yy , 80, 45, 90, 255, 200, true);
+        println("+ IsStRun: +" + isStrRun); 
       }
       if (keyCode == UP){
+        robot.setRobotArm(0, debugVariable, 80, 45, 90, 255, 200, true);
         debugVariable += 2;
 
       }
       if (keyCode == DOWN){
+        robot.setRobotArm(0, debugVariable, 80, 45, 90, 255, 200, true);
         debugVariable -= 2;
       }
     }
 
-    println("Debug Variable : " + debugVariable);
+    // println("Debug Variable : " + debugVariable);
 }
 
 // ------------------------------------------------------------------------------------

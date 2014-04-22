@@ -51,7 +51,7 @@ class ConnectionLight {
 		
 		
 		// fill(currentColor);
-		// ellipseMode(CORNER);
+		ellipseMode(CORNER);
 		circle.setFill(currentColor);
 		shape(circle);
 		//ellipse(5, 4, diameter, diameter);

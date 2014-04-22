@@ -17,7 +17,7 @@ String 	id;                 // Thread name
 
   // Constructor, create the thread
   // It is not running by default
-  WatchDog (int _w, String _s, String _devicePort, boolean _buffer, boolean _isPort, int _bautRate, PApplet _p) {
+  WatchDog (int _w, String _id, String _devicePort, boolean _buffer, boolean _isPort, int _bautRate, PApplet _p) {
     wait = _w;
     p = _p;
     running = false;
@@ -27,7 +27,7 @@ String 	id;                 // Thread name
     buffer = _buffer;
     isPort = _isPort;
     bautRate = _bautRate;
-    id = _s;
+    id = _id;
   }
 
 // ------------------------------------------------------------------------------------
@@ -36,7 +36,6 @@ String 	id;                 // Thread name
   void start () {
     running = true;
     println("Starting thread (will execute every " + wait + " milliseconds.)");
-    deviceInit();
     super.start();
   }
  
@@ -44,7 +43,9 @@ String 	id;                 // Thread name
  
   // We must implement run, this gets triggered by start()
   void run () {
-    sleep(3000);
+    // sleep(2000);
+    deviceInit();
+    sleep(300);
     while (running) {
       check();
       checkHeartBeat();
@@ -59,12 +60,14 @@ String 	id;                 // Thread name
   void check(){
 
   	if (!deviceInstanciated){
-  		sleep(2000);
+  		sleep(3000);
   		deviceInit();
+      println("deviceInstanciated not true: " + id);
   	}else if(deviceInstanciated && deviceLost){
-  		sleep(2000);
+  		sleep(3000);
   		port.stop();
   		deviceInit();
+      println("deviceLost and new Init: " + id);
   	}
 
   }
@@ -122,12 +125,13 @@ String 	id;                 // Thread name
 	      }
 	      deviceInstanciated = true;
 	      deviceLost = false;
+        isFirstContact = false;
 	    } 
 	    catch (Exception e) {
-	      println(e);
+	      // println(e);
 	      deviceInstanciated = false;
 	      deviceLost = true;
-	      println(id + " port received an exepction: " + e);
+	      // println(id + " port received an exepction: " + e);
 	    }
 	  } 
 	}

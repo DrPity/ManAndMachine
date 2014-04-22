@@ -55,7 +55,6 @@ private float   aVelocity           = 0.05f;
 private boolean isRobotReadyToMove  = false;
 private boolean isFirstContact      = false;
 private boolean isRobotStarted      = false;
-private boolean isDataVerified      = false;
 private boolean isRecording         = false;
 private boolean isEsenseEvent       = false;
 private boolean isReadyToRecord     = false;
@@ -90,11 +89,13 @@ ConnectionLight connectionLight, bluetoothConnection, robotConnection;
 // ------------------------------------------------------------------------------------
 
 public void setup() {
-  frameRate(60);
-	size(displayWidth, displayHeight, P2D);
+  frameRate(120);
+	size(displayWidth, displayHeight,P2D);
   noSmooth();
+  hint(ENABLE_RETINA_PIXELS);
   // bg = loadImage("brain.png");
   // bg.resize(width, height);
+  // background(bg);
   smooth(4);
   helpers = new HelperClass();
   manageSE  = new ManageSE();
@@ -107,7 +108,7 @@ public void setup() {
 
   wPm = new WatchDog(1,"PulseMeter", pulseMeterPort, false, isPulseMeterPort, 115200, this);
   wPm.start();
-  wA = new WatchDog(1,"Arduino", arduinoPort, true, isPulseMeterPort, 115200, this);
+  wA = new WatchDog(1,"Arduino", arduinoPort, true, isArduinoPort, 115200, this);
   wA.start();
  
 
@@ -162,37 +163,27 @@ public void setup() {
 	globalMax = 0;
   isReadyToRecord = true;
   inChar = null;
-  kinect = addControlFrame("extra", 320,240);
+  // kinect = addControlFrame("extra", 320,240);
     
 }
 
 // ------------------------------------------------------------------------------------
 
 public void draw() {
-  
-
-  // int a = watchDog1.getCount();
-  // text(a,10,50);
- 
-  // int b = watchDog2.getCount();
-  // text(b,10,150);
 
 
-  background(200);
-  drawings.drawRectangle(0,0,width,round(height * 0.40f),0,0,255,150); 
+  background(180);
   lableHeartRate.setValue(heartRateString);
-
+  drawings.drawRectangle(0,0,width,round(height*0.40f),0,0,255,150);
+   
   fRate.setValue(Float.toString(frameRate));
   // lableID.setValue(String.valueOf(id));
+	
 
-	// mindWave.update();
-	mindWave.draw();
+  mindWave.draw();
   mindWave.drawGrid();
-  // emg.update();
   emg.draw();
-  // // ecg.update();
   ecg.draw();
-  // // eda.update();
   eda.draw();
   drawings.drawLine(0,round(mindWave.y + (height * 0.10f)), width, round(mindWave.y + (height * 0.10f)));
   drawings.drawLine(0,round(emg.y + (height * 0.10f)), width, round(emg.y + (height * 0.10f)));
@@ -229,8 +220,8 @@ public void draw() {
         speed = (int) map(debugVariable, 0, 100, 0, 255);
       }
     
-      robot.setRobotArm(x, 130, z, gAngle, gGripperWidth, speed, 1);
-      // println("Robot Movement");
+      robot.setRobotArm(x, 130, z, gAngle, gGripperWidth, speed, 1, true);
+      println("Robot Movement");
     }
   }
 
@@ -250,10 +241,9 @@ public void clientEvent(Client  myClient) {
 	if (myClient.available() > 0) {
   
     byte[] inBuffer = myClient.readBytesUntil(caReturn);
-    
+  
     if (inBuffer != null){
     	String data = new String(inBuffer);
-    	// print(data);
       mindWaveCLE.mindWave(data);
 
 	  }
@@ -261,27 +251,23 @@ public void clientEvent(Client  myClient) {
 
 }
 
+// ------------------------------------------------------------------------------------
 
 public void serialEvent(Serial thisPort){
 
 
-  if (thisPort == wPm.port && isPulseMeterPort){
-    // println("In serial pulse");
+  if (thisPort == wPm.port && wPm.deviceInstanciated){
      manageSE.newPulse();
 
   }
 
-  if (thisPort == wA.port && isArduinoPort){
-    // println("In serial arduino");
+  if (thisPort == wA.port && wA.deviceInstanciated){
     
     while (wA.port.available() > 0){
       inChar = wA.port.readStringUntil(end);
-      // println("inchar : "+inChar );
     }
     if (inChar != null) {
-
       manageSE.arduino(inChar);
-
     }
   }
 }
@@ -311,7 +297,7 @@ public void Start_Robot() {
 
 public void Reset_Robot() {
    println("reset robot");
-   //robot.sendRobotData( 1500, 1500, 1500, 1500, 1500, 1700, 0, 200);
+   robot.setRobotArm( 0, 150, 80, 90, 90, 254, 200, true); 
   //isTimerStarted = !isTimerStarted;
 }
 
@@ -326,21 +312,29 @@ public void keyPressed(){
 
    if (key == CODED){
       if (keyCode == LEFT){
-        // setRobotArm(-100, 80, 50, 90, 180, 127);
+        int yy = robot.stretching(20);
+        println("#streched Position in keyPressed Left: "  + yy);
+        robot.setRobotArm(0, yy, 80, 45, 90, 255, 200, true);
+        println("+ IsStRun: +" + isStrRun); 
       }
       if (keyCode == RIGHT){
-        // setRobotArm(100, 80, 10, 90, 180, 127);
+        int yy = robot.stretching(50);
+        println("( streched Position in keyPressed Right: )"  + yy);
+        robot.setRobotArm(0, yy , 80, 45, 90, 255, 200, true);
+        println("+ IsStRun: +" + isStrRun); 
       }
       if (keyCode == UP){
+        robot.setRobotArm(0, debugVariable, 80, 45, 90, 255, 200, true);
         debugVariable += 2;
 
       }
       if (keyCode == DOWN){
+        robot.setRobotArm(0, debugVariable, 80, 45, 90, 255, 200, true);
         debugVariable -= 2;
       }
     }
 
-    println("Debug Variable : " + debugVariable);
+    // println("Debug Variable : " + debugVariable);
 }
 
 // ------------------------------------------------------------------------------------
@@ -469,7 +463,7 @@ class ConnectionLight {
 		
 		
 		// fill(currentColor);
-		// ellipseMode(CORNER);
+		ellipseMode(CORNER);
 		circle.setFill(currentColor);
 		shape(circle);
 		//ellipse(5, 4, diameter, diameter);
@@ -1136,10 +1130,10 @@ class ManageSE {
 
 private boolean isHashtrue = false;
 private int heartRate = 0;
-private int[] bitArray  = new int[8];
 private String  pulseString  = "";
 private int lastPulseBit  = 0;
 private int counter = 0;
+private int[] bitArray = new int[8];
 
   public void arduino(String inChar) {
 
@@ -1158,13 +1152,13 @@ private int counter = 0;
     }
 
     if (inChar.trim().equals("W")){
+      wA.heartBeat = millis();
       wA.port.write("W");
       wA.port.write(10);
       println("+ Heartbeat +");
       if(robotConValue != 00){
         robotConValue = 00;
       }
-      wA.heartBeat = millis();
       // serialConnection = "Connected";
     }
 
@@ -1174,16 +1168,14 @@ private int counter = 0;
     }
 
     if(!isFirstContact){
-      // println("In first contact");
+      println("In first contact");
       if (inChar.trim().equals("A")) {
-        // serialConnection = "Connected";
         println("Connected");
-        isFirstContact = true;
-        isRobotReadyToMove = true;
-        // delay(200);
         wA.heartBeat = millis();                   
         wA.port.write("B");
-        wA.port.write(10);        
+        wA.port.write(10);
+        isFirstContact = true;
+        isRobotReadyToMove = true;       
       }  
     } 
     else if(inChar.trim().equals("#")){
@@ -1369,7 +1361,6 @@ private static final Float  ULNA         = 98.0f;    //elbow-to-wrist
 private static final Float  GRIPLENGTH   = 155.0f;   //lengh-of-grip
 private static final Float  WRIST_OFFSET = 28.0f;    //offset wrist-gripper
 
-
 /* Constrains of servo motors in milliseconds */
 private static final Integer  BASE_MAX            = 2300;
 private static final Integer  BASE_MIN            = 720;
@@ -1385,6 +1376,7 @@ private static final Integer  GRIPPER_MAX         = 2100;
 private static final Integer  GRIPPER_MIN         = 1450;  
 
 /* Dynamic values of the robot arm */
+
 private int     currentBase             = 00;
 private int     currentShoulder         = 00;
 private int     currentElbow            = 00;
@@ -1394,39 +1386,77 @@ private int     currentGripperWidth     = 00;
 private int     currentLight            = 00;
 private int     currentEasing           = 00;
 
+private int       verifCounter          = 0;
+
+private float     lastX             = 0;
+private float     lastY             = 0;
+private float     lastZ             = 0;
+private float     lastGripperAngle  = 0;
+private float     lastGripperWidth  = 0;
+
+private boolean     sendData        = false;
+private boolean     isDataVerified  = false;
+private boolean     isStrRun        = false;
+private boolean     validStrPos     = false;
+
+// private boolean[]   strArray        = new boolean[350];
+
+
 // ------------------------------------------------------------------------------------
 
-class Robot {
+class Robot{
 
   //List of robot data: x1-10,y1-10,  xx,yy to xx2,yy2, Turn towards or away TT or TA, Open or Close claw OC or CC, Stretch or Contract S or C, Arousal in %, Classification of move <A>, Other: emotions etc
-  public void moveRobot(int x, int y, boolean turning, boolean claw, boolean stretchOrContract, int arousal){
+  public void moveRobot(int x, int y, boolean turning, boolean claw, int stretch, int arousal){
 
     // setTraversPosition(x, y);
     // setTurning();
     // setClaw();
     // setStretchOrContract();
     // setArousal();
-
-
-
   }
 
 // ------------------------------------------------------------------------------------
 
-  /* Inverse Kinematic Arithmetic: X can be + and -; Y and Z only positive. All values in mm! gripperAngleD must be according to the object in degree. gripperwidth in degree. And speed from 0-255 */
-  public void setRobotArm( float x, float y, float z, float gripperAngleD, int gripperWidth, int light, int easingResolution )
-  {
 
-    if(isRobotReadyToMove){
+  public int stretching(int percentage){
+    
+    println("Percentage: " + percentage);
+    int strechedPosition = (int) map(percentage, 0, 100, 0, 349);
+    // println("( Streched position in strechedPosition: )" + strechedPosition);
+    // println("( Streched position in strechedPosition: )" + strechedPosition + " " + lastX + " " + lastY + " " + lastZ + " " + lastGripperAngle);
+
+    if(!isStrRun){
+      isStrRun = true;
+      // printArray(strArray);
+      if(strechedPosition > lastY){
+        int k = findUpperBound(strechedPosition);
+        isStrRun = false;
+        return k;
+      }else if(strechedPosition < lastY){
+        int k = findLowerBound(strechedPosition);
+        isStrRun = false;
+        return k;
+      }
+    }
+  isStrRun = false;  
+  return (int) lastY; 
+  }
+
+
+
+// // ------------------------------------------------------------------------------------
+
+  /* Inverse Kinematic Arithmetic: X can be + and -; Y and Z only positive. All values in mm! gripperAngleD must be according to the object in degree. gripperwidth in degree. And speed from 0-255 */
+  public void setRobotArm( float x, float y, float z, float gripperAngleD, int gripperWidth, int light, int easingResolution, boolean sendData ){
+
+    if(true || isRobotReadyToMove){
       /* send start byte */
       float gripAngle = radians( gripperAngleD );
 
       float ulnaEved = ULNA + (WRIST_OFFSET*sin(gripAngle));
       float zEved = z - (WRIST_OFFSET*cos(gripAngle));
-
-      // float ulnaEved = ULNA + (sin(gripAngle));
-      // float zEved = z - (cos(gripAngle));
-
+      
       float baseAngle = atan2( y, x );
       float rDist = sqrt(( x * x ) + ( y * y ));
       
@@ -1453,9 +1483,17 @@ class Robot {
         && isInRange(baseAngleD, 0, 180) && isInRange(shoulderAngleD, 0, 180)
         && isInRange(elbowAngleD, 0, 180) && isInRange(wristAngleD, 0, 180) && isInRange(gripperAngleD, 0, 180) && isInRange(gripperWidth, 0, 180)){
         isDataVerified = true;
+        println("( Data verfied )");
+        if (!sendData){
+          validStrPos = true;
+        }
+
       }else{
         isDataVerified = false;
+        println("[ Data not verified ]");
       }
+
+      println("x,y,z: " +  x + " " +  y + " " + z);
 
       currentBase = (int) map(baseAngleD, 180, 0, BASE_MIN, BASE_MAX);
       currentShoulder = (int) map(shoulderAngleD, 0, 180, SHOULDER_MIN, SHOULDER_MAX);
@@ -1470,16 +1508,21 @@ class Robot {
         currentEasing = easingResolution;
      
 
-      if(isDataVerified){
+      if(isDataVerified && sendData){
         sendRobotData( currentBase, currentShoulder, currentElbow, currentWrist, currentGripperAngle, currentGripperWidth, currentLight, currentEasing);
-        // println("Data Send");
+        lastX = x;
+        lastY = y;
+        lastZ = z;
+        lastGripperAngle = gripperAngleD;
+        lastGripperWidth = gripperWidth;
+        println("Data verified and send");
+        isDataVerified = false;
       }
-    
     }
 
   }
 
-// ------------------------------------------------------------------------------------
+// // ------------------------------------------------------------------------------------
 
   public boolean isInRange(float value, float minimum, float maximum)
   {
@@ -1488,14 +1531,45 @@ class Robot {
     return false;
   }
 
+// // ------------------------------------------------------------------------------------
+
   public void sendRobotData(int currentBase, int currentShoulder, int currentElbow, int currentWrist, int currentGripperAngle, int currentGripperWidth, int currentLight, int currentEasing){
 
+    if(isArduinoPort)
     wA.port.write(String.format("Rr%d,%d,%d,%d,%d,%d,%d,%d\n",currentBase, currentShoulder, currentElbow, currentWrist, currentGripperAngle, currentGripperWidth, currentLight, currentEasing));
     // wA.port.write(10);
-    println(String.format("Rr%d,%d,%d,%d,%d,%d,%d,%d",currentBase, currentShoulder, currentElbow, currentWrist, currentGripperAngle, currentGripperWidth, currentLight, currentEasing));
+    println(String.format("(Rr%d,%d,%d,%d,%d,%d,%d,%d)",currentBase, currentShoulder, currentElbow, currentWrist, currentGripperAngle, currentGripperWidth, currentLight, currentEasing));
     isRobotReadyToMove = false;
 
   }
+
+
+  public int findLowerBound(int strechedPosition){
+    for(int i = strechedPosition; i <= 349; i++){
+    setRobotArm(lastX, i, lastZ, lastGripperAngle, (int) lastGripperWidth, speed, 1, false);
+      if(validStrPos){
+        validStrPos = false;
+        return i;
+      }
+    }
+  validStrPos = false;
+  return (int) lastY;
+  }
+
+
+  public int findUpperBound(int strechedPosition){
+    for(int i = strechedPosition; i >= 0; i--){
+    setRobotArm(lastX, i, lastZ, lastGripperAngle, (int) lastGripperWidth, speed, 1, false); 
+      if(validStrPos){
+        validStrPos = false;
+        return i;
+      }
+
+    }
+  validStrPos = false;
+  return (int) lastY;
+  }
+
 }  
 class WatchDog extends Thread{
 
@@ -1516,7 +1590,7 @@ String 	id;                 // Thread name
 
   // Constructor, create the thread
   // It is not running by default
-  WatchDog (int _w, String _s, String _devicePort, boolean _buffer, boolean _isPort, int _bautRate, PApplet _p) {
+  WatchDog (int _w, String _id, String _devicePort, boolean _buffer, boolean _isPort, int _bautRate, PApplet _p) {
     wait = _w;
     p = _p;
     running = false;
@@ -1526,7 +1600,7 @@ String 	id;                 // Thread name
     buffer = _buffer;
     isPort = _isPort;
     bautRate = _bautRate;
-    id = _s;
+    id = _id;
   }
 
 // ------------------------------------------------------------------------------------
@@ -1535,7 +1609,6 @@ String 	id;                 // Thread name
   public void start () {
     running = true;
     println("Starting thread (will execute every " + wait + " milliseconds.)");
-    deviceInit();
     super.start();
   }
  
@@ -1543,7 +1616,9 @@ String 	id;                 // Thread name
  
   // We must implement run, this gets triggered by start()
   public void run () {
-    sleep(3000);
+    // sleep(2000);
+    deviceInit();
+    sleep(300);
     while (running) {
       check();
       checkHeartBeat();
@@ -1558,12 +1633,14 @@ String 	id;                 // Thread name
   public void check(){
 
   	if (!deviceInstanciated){
-  		sleep(2000);
+  		sleep(3000);
   		deviceInit();
+      println("deviceInstanciated not true: " + id);
   	}else if(deviceInstanciated && deviceLost){
-  		sleep(2000);
+  		sleep(3000);
   		port.stop();
   		deviceInit();
+      println("deviceLost and new Init: " + id);
   	}
 
   }
@@ -1621,12 +1698,13 @@ String 	id;                 // Thread name
 	      }
 	      deviceInstanciated = true;
 	      deviceLost = false;
+        isFirstContact = false;
 	    } 
 	    catch (Exception e) {
-	      println(e);
+	      // println(e);
 	      deviceInstanciated = false;
 	      deviceLost = true;
-	      println(id + " port received an exepction: " + e);
+	      // println(id + " port received an exepction: " + e);
 	    }
 	  } 
 	}

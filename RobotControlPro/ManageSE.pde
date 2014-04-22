@@ -2,10 +2,10 @@ class ManageSE {
 
 private boolean isHashtrue = false;
 private int heartRate = 0;
-private int[] bitArray  = new int[8];
 private String  pulseString  = "";
 private int lastPulseBit  = 0;
 private int counter = 0;
+private int[] bitArray = new int[8];
 
   void arduino(String inChar) {
 
@@ -24,13 +24,13 @@ private int counter = 0;
     }
 
     if (inChar.trim().equals("W")){
+      wA.heartBeat = millis();
       wA.port.write("W");
       wA.port.write(10);
       println("+ Heartbeat +");
       if(robotConValue != 00){
         robotConValue = 00;
       }
-      wA.heartBeat = millis();
       // serialConnection = "Connected";
     }
 
@@ -40,16 +40,14 @@ private int counter = 0;
     }
 
     if(!isFirstContact){
-      // println("In first contact");
+      println("In first contact");
       if (inChar.trim().equals("A")) {
-        // serialConnection = "Connected";
         println("Connected");
-        isFirstContact = true;
-        isRobotReadyToMove = true;
-        // delay(200);
         wA.heartBeat = millis();                   
         wA.port.write("B");
-        wA.port.write(10);        
+        wA.port.write(10);
+        isFirstContact = true;
+        isRobotReadyToMove = true;       
       }  
     } 
     else if(inChar.trim().equals("#")){
