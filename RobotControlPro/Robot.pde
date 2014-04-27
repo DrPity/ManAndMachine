@@ -96,7 +96,7 @@ class Robot{
   /* Inverse Kinematic Arithmetic: X can be + and -; Y and Z only positive. All values in mm! gripperAngleD must be according to the object in degree. gripperwidth in degree. And speed from 0-255 */
   void setRobotArm( float x, float y, float z, float gripperAngleD, int gripperWidth, int light, int easingResolution, boolean sendData ){
 
-    if(true || isRobotReadyToMove){
+    if(isRobotReadyToMove){
       /* send start byte */
       float gripAngle = radians( gripperAngleD );
 
@@ -139,7 +139,7 @@ class Robot{
         println("[ Data not verified ]");
       }
 
-      println("x,y,z: " +  x + " " +  y + " " + z);
+      // println("x,y,z: " +  x + " " +  y + " " + z);
 
       currentBase = (int) map(baseAngleD, 180, 0, BASE_MIN, BASE_MAX);
       currentShoulder = (int) map(shoulderAngleD, 0, 180, SHOULDER_MIN, SHOULDER_MAX);

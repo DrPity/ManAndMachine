@@ -125,10 +125,12 @@ String 	id;                 // Thread name
 	      }
 	      deviceInstanciated = true;
 	      deviceLost = false;
+        if(id.equals("Arduino")){
         isFirstContact = false;
+        }
 	    } 
 	    catch (Exception e) {
-	      // println(e);
+	      println(e);
 	      deviceInstanciated = false;
 	      deviceLost = true;
 	      // println(id + " port received an exepction: " + e);
