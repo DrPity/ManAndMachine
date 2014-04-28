@@ -29,32 +29,35 @@ public class RobotControlPro extends PApplet {
 
 
 private int     end                 = 10;
-private int     pulsMeterConValue   = 200;
-private int     robotConValue       = 200;
 private int     pose                = 1;
 private int     gAngle              = 90;
 private int     debugVariable       = 0;
 private int     z                   = 120;
 private int     gGripperWidth       = 0;
 private int     bioValue            = 0;
+private int     globalID            = 0;
 private int     speed               = 0;
 private int     recordColor         = color(127, 127, 127);
 private int     id                  = 0;
-private int     storingID                  = 0;
+private int     storingID           = 0;
 private int     packetCount         = 0;
 private int     globalMax;
 private int     tableIndex          = 0;
 private int     tableIndexStoring   = 0;
 private int     receivedHeartRate   = 0;
+private int     voice               = 0;
 private byte    caReturn            = 13;
 private String  heartRateString    = "NA";
-private String  inChar;
+private String  inCharA;
+private String  inCharM;
 private String  scaleMode;
 private String  arduinoPort         = "/dev/tty.usbmodem1421";
+private String  melziPort           = "/dev/tty.usbserial-AH01SIVE";
 private String  pulseMeterPort      = "/dev/tty.BerryMed-SerialPort";
 private float   angle               = 0;
 private float   aVelocity           = 0.05f;
 private boolean isRobotReadyToMove  = false;
+private boolean isTraversReadyToMove  = false;
 private boolean isFirstContact      = false;
 private boolean isRobotStarted      = false;
 private boolean isRecording         = false;
@@ -65,16 +68,23 @@ private boolean isReadyToStore      = true;
 private boolean gridYisDrawn        = false;
 private boolean gridXisDrawn        = false;
 private boolean isArduinoPort       = false;
+private boolean isMelziPort         = false;
 private boolean isPulseMeterPort    = false;
 private boolean isDataToGraph       = false;
 private boolean isTimerStarted      = false;
-
+private boolean isTableSpeechLoaded = false;
+private boolean isReadyForButtonCommands = false;
+private boolean newSay              = false;
+private boolean newPosition         = false;
+private boolean stepForward         = false;
+private boolean stepBack            = false;
+private boolean nextStep            = false;
 
 // ------------------------------------------------------------------------------------
 // Println console;
 PImage bg;
-Table table, tableRm;
-WatchDog wPm, wA;
+Table table, tableRm, tablePositions;
+WatchDog wPm, wA, wM;
 ControlFont font;
 Client myClient;
 Drawings drawings;
@@ -83,18 +93,20 @@ Kinect kinect;
 HelperClass helpers;
 ManageCLE mindWaveCLE;
 ManageSE manageSE;
+TextToSpeech textToSpeech;
 Robot robot;
 
 Channel[] channels = new Channel[11];
 Graph mindWave, emg, ecg, eda;
 Textlabel lableHeartRate, textHeartRate, timerLable, lableID, textID, fRate, headlineText_1, headlineText_2;
-ConnectionLight connectionLight, bluetoothConnection, robotConnection;
+ConnectionLight connectionLight, bluetoothConnection, robotConnection, traversConnection;
 
 // ------------------------------------------------------------------------------------
 
 public void setup() {
   frameRate(120);
 	size(displayWidth, displayHeight,P2D);
+  // size(1280,720,P2D);
   noSmooth();
   hint(ENABLE_RETINA_PIXELS);
   // bg = loadImage("brain.png");
@@ -104,16 +116,21 @@ public void setup() {
   helpers = new HelperClass();
   manageSE  = new ManageSE();
   robot = new Robot();
+  robot.loadRobotData();
   helpers.checkSerialPorts();
-  // Starting WatchDog and establish Serial connection
 
-  // watchDog = new WatchDog("WatchDog", this); 
-  // watchDog.start();
-
-  wPm = new WatchDog(1,"PulseMeter", pulseMeterPort, false, isPulseMeterPort, 115200, this);
+  // WachtDog: SleepTime Thread, NameDevice, Port, Buffering, initOK?, BautRate, isTypArduino, PApplet 
+  wPm = new WatchDog(1,"PulseMeter", pulseMeterPort, false, isPulseMeterPort, 115200, false, this);
   wPm.start();
-  wA = new WatchDog(1,"Arduino", arduinoPort, true, isArduinoPort, 115200, this);
+  wA = new WatchDog(1,"Arduino", arduinoPort, true, isArduinoPort, 115200, true, this);
   wA.start();
+  wM = new WatchDog(1,"Melzi", melziPort, true, isMelziPort, 115200, true, this);
+  wM.start();
+
+  //active textToSpeech Thread
+  textToSpeech = new TextToSpeech(1);
+  textToSpeech.start();
+
  
 
 	// Set up the knobs and dials
@@ -162,12 +179,14 @@ public void setup() {
 	connectionLight     = new ConnectionLight(width - 98, 10, 10);
   bluetoothConnection = new ConnectionLight(width - 98, 30, 10);
   robotConnection     = new ConnectionLight(width - 98, 50, 10);
+  traversConnection   = new ConnectionLight(width - 98, 70, 10);
   
 
 	globalMax = 0;
   isReadyToRecord = true;
-  inChar = null;
-  
+  inCharA = null;
+  inCharM = null;
+  isReadyForButtonCommands = true;
   // kinect = addControlFrame("extra", 320,240);
     
 }
@@ -181,7 +200,7 @@ public void draw() {
   lableHeartRate.setValue(heartRateString);
   drawings.drawRectangle(0,0,width,round(height*0.40f),0,0,255,150);
   
-  // lableID.setValue(String.valueOf(id));
+  lableID.setValue(String.valueOf(globalID));
 	
 
   mindWave.draw();
@@ -201,15 +220,18 @@ public void draw() {
 	connectionLight.update(channels[0].getLatestPoint().value);
 	connectionLight.draw();
   connectionLight.mindWave.draw();
-  bluetoothConnection.update(pulsMeterConValue);
+  bluetoothConnection.update(wPm.conValue);
   bluetoothConnection.draw();
   bluetoothConnection.pulseMeter.draw();
-  robotConnection.update(robotConValue);
+  robotConnection.update(wA.conValue);
   robotConnection.draw();
   robotConnection.robot.draw();
+  traversConnection.update(wM.conValue);
+  traversConnection.draw();
+  traversConnection.travers.draw();
 
 
-  if (!isRobotStarted){
+  if (isRobotStarted){
 
     if((frameCount%10)==0){
 
@@ -269,10 +291,23 @@ public void serialEvent(Serial thisPort){
   if (thisPort == wA.port && wA.deviceInstanciated){
     
     while (wA.port.available() > 0){
-      inChar = wA.port.readStringUntil(end);
+      inCharA = wA.port.readStringUntil(end);
     }
-    if (inChar != null) {
-      manageSE.arduino(inChar);
+    if (inCharA != null) {
+      manageSE.arduino(inCharA);
+    }
+  }
+
+  if (thisPort == wM.port && wM.deviceInstanciated && isMelziPort){
+    println("In melzi event");
+    
+    while (wM.port.available() > 0){
+      println("In melzi event > 0");
+      inCharM = wM.port.readStringUntil(end);
+    }
+    if (inCharM != null) {
+      println("In melzi event start manageSE");
+      manageSE.melzi(inCharM);
     }
   }
 }
@@ -281,71 +316,82 @@ public void serialEvent(Serial thisPort){
 
 
 public void controlEvent(ControlEvent theEvent) {
-  if(theEvent.isAssignableFrom(Textfield.class)) {
-    println("controlEvent: accessing a string from controller '"
-            +theEvent.getName()+"': "
-            +theEvent.getStringValue()
-            );
-    if(isStoring){
+  if(isReadyForButtonCommands){  
+    if(theEvent.isAssignableFrom(Textfield.class)) {
+      println("controlEvent: accessing a string from controller '"
+              +theEvent.getName()+"': "
+              +theEvent.getStringValue()
+              );
+      
+      voice = Integer.parseInt(theEvent.getStringValue());
 
-      String[] s = split(theEvent.getStringValue(), ',');
-      helpers.storePositionToTable(Integer.parseInt(s[1]),
-                                  Integer.parseInt(s[2]), 
-                                  Integer.parseInt(s[3]), 
-                                  Integer.parseInt(s[4]), 
-                                  Integer.parseInt(s[5]), 
-                                  Integer.parseInt(s[6]), 
-                                  Integer.parseInt(s[7]), 
-                                  Integer.parseInt(s[8]), 
-                                  Integer.parseInt(s[9]), 
-                                  Integer.parseInt(s[10]), 
-                                  Integer.parseInt(s[11]), 
-                                  Integer.parseInt(s[12]), 
-                                  Integer.parseInt(s[13]));
+      // if(isStoring){
 
+      //   String[] s = split(theEvent.getStringValue(), ',');
+      //   helpers.storePositionToTable(Integer.parseInt(s[1]),
+      //                               Integer.parseInt(s[2]), 
+      //                               Integer.parseInt(s[3]), 
+      //                               Integer.parseInt(s[4]), 
+      //                               Integer.parseInt(s[5]), 
+      //                               Integer.parseInt(s[6]), 
+      //                               Integer.parseInt(s[7]), 
+      //                               Integer.parseInt(s[8]), 
+      //                               Integer.parseInt(s[9]), 
+      //                               Integer.parseInt(s[10]), 
+      //                               Integer.parseInt(s[11]), 
+      //                               Integer.parseInt(s[12]), 
+      //                               Integer.parseInt(s[13]));
+
+      // }
+
+      if(theEvent.getStringValue().equals("NewTable") && isReadyToStore){
+         println("New Table Created");
+         // helpers.newStorePositionTable();
+      }
     }
 
-
-    if(theEvent.getStringValue().equals("NewTable") && isReadyToStore){
-       println("New Table Created");
-       helpers.newStorePositionTable();
+    if(theEvent.getName().equals("Reset_Robot")){
+      println("reset robot event ");
+      robot.setRobotArm( 0, 150, 80, 90, 90, 254, 200, true); 
     }
 
-  }
+    if(theEvent.getName().equals("saveBtn")){
+      println("save button event");
+    }
 
-  if(theEvent.getName().equals("Reset_Robot")){
-    println("reset robot event ");
-    robot.setRobotArm( 0, 150, 80, 90, 90, 254, 200, true); 
-  }
+    if(theEvent.getName().equals("loadBtnDefault")){
+      println("load default button");
+      globalID = 0;
+    }
 
-  if(theEvent.getName().equals("saveBtn")){
-    println("save button event");
-  }
+    if(theEvent.getName().equals("loadBtnLastPosition")){
+      println("load last Position");
+    }
 
-  if(theEvent.getName().equals("loadBtnDefault")){
-    println("load default button");
-    // tableRm = loadTable("data/RobotMovements.csv");
-  }
+    if(theEvent.getName().equals("Start_Robot")){
+    isRobotStarted = !isRobotStarted;
+      if(isRobotStarted)
+        println("robot started");
+      else
+        println("robot stoped");
+      //isTimerStarted = !isTimerStarted;
+    }
 
-  if(theEvent.getName().equals("loadBtnLastPosition")){
-    println("load last Position");
-  }
+    if(theEvent.getName().equals("Back")){
+      if(!nextStep && !stepBack){
+        stepBack = true;
+        nextStep = true;
+      }
+    }
 
-  if(theEvent.getName().equals("Start_Robot")){
-  isRobotStarted = !isRobotStarted;
-    if(isRobotStarted)
-      println("robot started");
-    else
-      println("robot stoped");
-    //isTimerStarted = !isTimerStarted;
-  }
-
-  if(theEvent.getName().equals("Test_Movement")){
-  println("load last Position");
-  }
-
-
-}
+    if(theEvent.getName().equals("Forward")){
+      if(!nextStep && !stepForward){
+        stepForward = true;
+        nextStep = true;
+      } 
+    }
+ }
+} 
 
 
 // public void Start_Recording() {
@@ -479,6 +525,7 @@ class ConnectionLight {
 	Textlabel mindWave;
 	Textlabel pulseMeter;
 	Textlabel robot;
+	Textlabel travers;
 	PShape circle;
 	
 // ------------------------------------------------------------------------------------
@@ -498,6 +545,9 @@ class ConnectionLight {
 		robot = new Textlabel(controlP5,"Robot", x + 16, y + 4);
 		robot.setFont(createFont("Helvetica", 10));
 		robot.setColorValue(255);
+		travers = new Textlabel(controlP5,"Travers", x + 16, y + 4);
+		travers.setFont(createFont("Helvetica", 10));
+		travers.setColorValue(255);
 	}
 	
 // ------------------------------------------------------------------------------------	
@@ -532,8 +582,9 @@ class ConnectionLight {
 
 }
 class Drawings  {
-Textarea consolTextArea;
-RadioButton toggleTestMode;
+  Textarea consolTextArea;
+  RadioButton toggleTestMode;
+  float sV = 1;
 
   public void drawLine(int x1, int y1, int x2, int y2, int th){
     
@@ -566,11 +617,11 @@ RadioButton toggleTestMode;
   // ------------------------------------------------------------------------------------
 
   public void CP5Init(){
-  PFont fontSmallBold = createFont("ProximaNova-Bold",15);
-  PFont fontSmallLight = createFont("ProximaNova-Light",15);
-  PFont fontHeadline = createFont("ProximaNova-Thin",20);
-  PFont fontHeadline_2 = createFont("ProximaNova-Bold",20);
-  PFont fontHeadLableBig = createFont("ProximaNova-Thin",100);
+    PFont fontSmallBold = createFont("ProximaNova-Bold",15);
+    PFont fontSmallLight = createFont("ProximaNova-Light",15);
+    PFont fontHeadline = createFont("ProximaNova-Thin",20);
+    PFont fontHeadline_2 = createFont("ProximaNova-Bold",20);
+    PFont fontHeadLableBig = createFont("ProximaNova-Thin",100);
 
   // fontHeadline
 
@@ -589,8 +640,8 @@ RadioButton toggleTestMode;
   controlP5.addButton("saveBtn")
     .setValue(0)
     .setCaptionLabel("save Values")
-    .setSize(100,20)
-    .setPosition(260,round(height * 0.47f))
+    .setSize(round(100*sV),round(20*sV))
+    .setPosition(round(260*sV),round(height * 0.47f))
     .setColorBackground(color(0, 200, 0))
     ;
 
@@ -598,8 +649,8 @@ RadioButton toggleTestMode;
   controlP5.addButton("loadBtnDefault")
     .setValue(0)
     .setCaptionLabel("load Default")
-    .setSize(100,20)
-    .setPosition(20,round(height * 0.51f))
+    .setSize(round(100*sV),round(20*sV))
+    .setPosition(round(20*sV),round(height * 0.51f))
     .setColorActive(127)
     .setColorBackground(color(200, 130, 0))
     ;
@@ -607,37 +658,44 @@ RadioButton toggleTestMode;
   controlP5.addButton("loadBtnLastPosition")
     .setValue(0)
     .setCaptionLabel("load last Position")
-    .setSize(100,20)
-    .setPosition(140,round(height * 0.51f))
+    .setSize(round(100*sV),round(20*sV))
+    .setPosition(round(140*sV),round(height * 0.51f))
     .setColorCaptionLabel(0) 
     .setColorValueLabel(127)
     .setColorBackground(color(200, 130, 0))
     ;
   
-  controlP5.addButton("Start_Robot")
-   .setValue(0)
-   .setCaptionLabel("START ROBOT")
-   .setPosition(500,round(height * 0.42f))
-   .setSize(100,20)
-   ;
+  // controlP5.addButton("Start_Robot")
+  //  .setValue(0)
+  //  .setCaptionLabel("START ROBOT")
+  //  .setPosition(round(500*sV),round(height * 0.42))
+  //  .setSize(round(100*sV),round(20*sV))
+  //  ;
   
-  controlP5.addButton("Reset_Robot")
-   .setValue(0)
-   .setCaptionLabel("RESET ROBOT")
-   .setPosition(500,round(height * 0.44f))
-   .setSize(100,20)
-   ;
+  // controlP5.addButton("Reset_Robot")
+  //  .setValue(0)
+  //  .setCaptionLabel("RESET ROBOT")
+  //  .setPosition(round(500*sV),round(height * 0.44))
+  //  .setSize(round(100*sV),round(20*sV))
+  //  ;
      
-  controlP5.addButton("Test_Movement")
+  controlP5.addButton("Back")
    .setValue(0)
-   .setCaptionLabel("TEST MOVEMENT")
-   .setPosition(500,round(height * 0.46f))
-   .setSize(100,20)
+   .setCaptionLabel("Back")
+   .setPosition(round(500*sV),round(height * 0.46f))
+   .setSize(round(100*sV),round(20*sV))
+   ;
+
+   controlP5.addButton("Forward")
+   .setValue(0)
+   .setCaptionLabel("Forward")
+   .setPosition(round(800*sV),round(height * 0.46f))
+   .setSize(round(100*sV),round(20*sV))
    ;
 
   toggleTestMode = controlP5.addRadioButton("testMode")
-         .setPosition(20,round(height * 0.458f))
-         .setSize(20,10)
+         .setPosition(round(20*sV),round(height * 0.458f))
+         .setSize(round(20*sV),round(10*sV))
          .setColorForeground(color(120))
          .setColorActive(color(0,190,0))
          .setColorLabel(color(255,0,0))
@@ -648,47 +706,49 @@ RadioButton toggleTestMode;
 
   lableHeartRate = controlP5.addTextlabel("lable")
                   .setText(heartRateString)
-                  .setPosition(10,160)
+                  .setPosition(round(10*sV),round(160*sV))
                   .setColorValue(255)
                   .setFont(fontHeadLableBig)
                   ;
 
   textHeartRate = controlP5.addTextlabel("label2")
                   .setText("Heart Rate")
-                  .setPosition(15,260)
+                  .setPosition(round(15*sV),round(260*sV))
                   .setColorValue(255)
                   .setFont(createFont("Helvetica",16))
                   ;
 
   timerLable = controlP5.addTextlabel("lable3")
                   .setText("00.00")
-                  .setPosition(10,20)
+                  .setPosition(round(10*sV),round(20*sV))
                   .setColorValue(255)
                   .setFont(createFont("Helvetica",50))
                   ;
   headlineText_1 = controlP5.addTextlabel("label4")
                   .setText("ROBOT CONTROLS: ")
-                  .setPosition(15,round(height * 0.42f))
+                  .setPosition(round(15*sV),round(height * 0.42f))
                   .setColorValue(255)
-                .setFont(fontHeadline);
+                  .setFont(fontHeadline)
+                  ;
  
-  headlineText_2 = controlP5.addTextlabel("label5")
-                .setText("ROBOT CONTROLS: ")
-                .setPosition(490,round(height * 0.42f))
-                .setColorValue(255)
-                .setFont(fontHeadline_2);
+  // headlineText_2 = controlP5.addTextlabel("label5")
+  //               .setText("ROBOT CONTROLS: ")
+  //               .setPosition(round(490*sV),round(height * 0.42))
+  //               .setColorValue(255)
+  //               .setFont(fontHeadline_2)
+  //               ;
 
 
 
   controlP5.addTextfield("Enter Robot Position - Press [ ENTER ] to test")
-                .setPosition(20,round(height * 0.47f))
-                .setSize(220,20)
+                .setPosition(round(20*sV),round(height * 0.47f))
+                .setSize(round(220*sV),round(20*sV))
                 .setFont(fontSmallBold)
                 .setFocus(true)
                 .setColorActive(0)
                 .setColorValue(255)
                 .setColorBackground(color(255, 255))
-                 ;
+                ;
 
   // consolTextArea = controlP5.addTextarea("txt")
   //                 .setPosition(10, round(height * 0.80))
@@ -699,22 +759,22 @@ RadioButton toggleTestMode;
   //                 .setColorBackground(color(0, 100))
   //                 .setColorForeground(color(255, 100))
 
-  controlP5.addFrameRate().setInterval(10).setColor(0).setPosition(10,height - 30).setFont(fontSmallLight);
+  controlP5.addFrameRate().setInterval(10).setColor(0).setPosition(round(10*sV),height - round(30*sV)).setFont(fontSmallLight);
   // console = controlP5.addConsole(consolTextArea);              
 
 
-     // lableID = controlP5.addTextlabel("lable3")
-   //                .setText("id")
-   //                .setPosition(250,100)
-   //                .setColorValue(255)
-   //                .setFont(createFont("Helvetica",100))
-   //                ;
-   // textID = controlP5.addTextlabel("label4")
-   //                .setText("ID")
-   //                .setPosition(270,200)
-   //                .setColorValue(255)
-   //                .setFont(createFont("Helvetica",16))
-   //                ;                     
+   lableID = controlP5.addTextlabel("lable6")
+                .setText("id")
+                .setPosition(250,100)
+                .setColorValue(255)
+                .setFont(fontHeadline)
+                ;
+    textID = controlP5.addTextlabel("label7")
+                .setText("ID")
+                .setPosition(270,200)
+                .setColorValue(255)
+                .setFont(fontSmallBold)
+                ;                     
 
 
   }
@@ -1022,7 +1082,7 @@ public void storePositionToTable(int x, int y, int z, int gripperAngle, int grip
 
 
 
-public void EndStoring() {
+public void endStoring() {
     if(isReadyToStore){
       saveTable(table, String.format("data/RobotMovements.csv"), "csv");
       println("Storing finished");
@@ -1030,7 +1090,6 @@ public void EndStoring() {
       isStoring = false;
     }
   }
-
 
 
 
@@ -1056,9 +1115,11 @@ public void EndStoring() {
        println("[" + i + "] " + Serial.list()[i]);
        // Flag serial ports as true
        if(Serial.list()[i].equals(pulseMeterPort)){
-         isPulseMeterPort = true;
+        isPulseMeterPort = true;
        }else if (Serial.list()[i].equals(arduinoPort)){
-         isArduinoPort = true;
+        isArduinoPort = true;
+       }else if (Serial.list()[i].equals(melziPort)){
+        isMelziPort = true;
        }
     }
   }  
@@ -1348,8 +1409,8 @@ private int[] bitArray = new int[8];
       wA.port.write("W");
       wA.port.write(10);
       println("+ Heartbeat +");
-      if(robotConValue != 00){
-        robotConValue = 00;
+      if(wA.conValue != 00){
+        wA.conValue = 00;
       }
       // serialConnection = "Connected";
     }
@@ -1359,14 +1420,14 @@ private int[] bitArray = new int[8];
      // println("Robot Ready for Next Position");
     }
 
-    if(!isFirstContact){
+    if(!wA.isFirstContact){
       println("In first contact");
       if (inChar.trim().equals("A")) {
         println("Connected");
         wA.heartBeat = millis();                   
         wA.port.write("B");
         wA.port.write(10);
-        isFirstContact = true;
+        wA.isFirstContact = true;
         isRobotReadyToMove = true;       
       }  
     } 
@@ -1414,11 +1475,11 @@ private int[] bitArray = new int[8];
         heartRateString = String.valueOf(heartRate);
         pulseString = "";
         bitArray[7] = 0;
-        if (pulsMeterConValue <= 200){
-          pulsMeterConValue = 00;
+        if (wPm.conValue <= 200){
+          wPm.conValue = 00;
         }
         if(PApplet.parseInt(heartRateString) == 255){
-          pulsMeterConValue = 100;
+          wPm.conValue = 100;
         }
       }
 
@@ -1429,6 +1490,42 @@ private int[] bitArray = new int[8];
 
       wPm.heartBeat = millis();
 
+  }
+
+
+   public void melzi(String inChar) {
+
+   // println("In after Null");
+    // println(inChar);
+
+    if (inChar.trim().equals("W")){
+      wM.heartBeat = millis();
+      wM.port.write("W");
+      wM.port.write(10);
+      println("+ Heartbeat +");
+      if(wM.conValue != 00){
+        wM.conValue = 00;
+      }
+      // serialConnection = "Connected";
+    }
+
+    if(inChar.trim().equals("N")){
+      isTraversReadyToMove = true;
+     // println("Robot Ready for Next Position");
+    }
+
+    if(!wM.isFirstContact){
+      println("In first contact");
+      if (inChar.trim().equals("A")) {
+        println("Connected");
+        wM.heartBeat = millis();                   
+        wM.port.write("B");
+        wM.port.write(10);
+        wM.isFirstContact = true;
+        isTraversReadyToMove = true;       
+      }  
+    }
+  
   }
 
   // ------------------------------------------------------------------------------------
@@ -1762,7 +1859,184 @@ class Robot{
   return (int) lastY;
   }
 
+
+
+  public void loadRobotData(){
+
+    tablePositions = loadTable("data/Positions.csv", "header");
+  }
+
+  public void readNextRobotPosition(){
+  if(newPosition && globalID <= (tablePositions.getRowCount() -1) && globalID >= 0){
+
+        int x = tablePositions.getInt(globalID, "X");
+        int y = tablePositions.getInt(globalID, "Y");
+        int z = tablePositions.getInt(globalID, "Z");
+        int gripperAngle = tablePositions.getInt(globalID, "GripperAngle");
+        int gripperWidth = tablePositions.getInt(globalID, "GripperWidth");
+        int x1 = tablePositions.getInt(globalID, "X1");
+        int y1 = tablePositions.getInt(globalID, "Y1");
+        int turning = tablePositions.getInt(globalID, "Turning");
+        int claw = tablePositions.getInt(globalID, "Claw");
+        int stretching = tablePositions.getInt(globalID, "Streching");
+        int arousal = tablePositions.getInt(globalID, "Arousal");
+        println("[ x: " + x + " y: " + y + " z: " + z + " gripperAngle: " + gripperAngle + " gripperWidth: " + gripperWidth + " x1: " + x1 + " y1: " + y1 + " turning: " + turning + " claw: " + claw + " stretching: " + stretching + " araousal: " + arousal + " ]");
+        newPosition = false;
+      }
+  }
 }  
+class TextToSpeech extends Thread{
+
+int AGNES = 0;
+int KATHY = 1;
+int PRINCESS = 2;
+int VICKI = 3;
+int VICTORIA = 4;
+int BRUCE = 5;
+int FRED = 6;
+int JUNIOR = 7;
+int RALPH = 8;
+int ALBERT = 9;
+int BAD_NEWS = 10;
+int BAHH = 11;
+int BELLS = 12;
+int BOING = 13;
+int BUBBLES = 14;
+int CELLOS = 15;
+int DERANGED = 16;
+int GOOD_NEWS = 17;
+int HYSTERICAL = 18;
+int PIPE_ORGAN = 19;
+int TRINOIDS = 20;
+int WHISPER = 21;
+int ZARVOX = 22;
+ 
+String[] voices = { 
+  // female
+  "Agnes","Kathy", "Princess", "Vicki", "Victoria",
+  // male
+  "Bruce", "Fred", "Junior", "Ralph",
+  // novelty
+  "Albert", "Bad News", "Bahh", "Bells", "Boing", "Bubbles", "Cellos", "Deranged", "Good News", "Hysterical", "Pipe Organ", "Trinoids", "Whisper", "Zarvox" 
+};
+
+Table tableSpeech;
+boolean running;           // Is the thread running?  Yes or no?
+int wait;
+public int waitForSpeechReturn;
+
+// ------------------------------------------------------------------------------------
+
+
+
+	TextToSpeech(int _wait){
+
+		wait = _wait;
+	}
+
+// ------------------------------------------------------------------------------------	
+	
+	public void start () {
+    running = true;
+    waitForSpeechReturn = 0;
+    println("Starting thread TextToSpeech (will execute every " + wait + " milliseconds.)");
+    tableSpeech = loadTable("data/Strings.csv", "header");
+    super.start();
+  }
+ 
+// ------------------------------------------------------------------------------------
+ 
+  // We must implement run, this gets triggered by start()
+  public void run () {
+    // sleep(2000);
+    sleep(300);
+    while (running) {
+      if(nextStep){
+        nextStepInTables();
+      }
+    	if(newSay && globalID <= (tableSpeech.getRowCount() -1) && globalID >= 0){
+    		String textString = tableSpeech.getString(globalID, "STRING");
+    		say(textString,voice);
+    		newSay = false;
+    	}
+    	sleep(wait);   
+    }
+    System.out.println(id + " thread is done!");  // The thread is done when we get to the end of run()
+    quit();
+  }
+
+// ------------------------------------------------------------------------------------
+
+	public void say(String s, int voice) {
+	  try {
+	    Runtime rtime = Runtime.getRuntime();
+	    Process child = rtime.exec("/usr/bin/say -v " + (voices[voice]) + " " + s);
+	    waitForSpeechReturn = child.waitFor();
+	  }
+	  catch (Exception e) {
+	    e.printStackTrace();
+	  }
+		
+	}
+
+// ------------------------------------------------------------------------------------
+
+	 public void sleep(int sleepTime){
+	  try {
+	      sleep((long)(sleepTime));
+	  } catch (Exception e) {
+	    }
+
+  }
+
+// ------------------------------------------------------------------------------------
+ 
+  // Our method that quits the thread
+  public void quit() {
+    System.out.println("Quitting."); 
+    running = false;  // Setting running to false ends the loop in run()
+    // IUn case the thread is waiting. . .
+    interrupt();
+  }
+
+
+  public void checkTableConstrains(){
+
+  if((textToSpeech.tableSpeech.getRowCount() -1) <= (tablePositions.getRowCount() -1)){
+    if (globalID >= (tablePositions.getRowCount() -1))
+      globalID = tablePositions.getRowCount() -1;
+  }else if((textToSpeech.tableSpeech.getRowCount() -1) > (tablePositions.getRowCount() -1)){
+    if (globalID >= (textToSpeech.tableSpeech.getRowCount() -1))
+      globalID = textToSpeech.tableSpeech.getRowCount() -1;
+  }
+  if(globalID < 1){
+        globalID = 0;
+  }
+
+}
+
+public void nextStepInTables(){
+  while(nextStep){
+    if(waitForSpeechReturn == 0){
+      newSay = true;
+      newPosition = true;
+      robot.readNextRobotPosition();
+      if(stepForward){
+        globalID ++;
+        stepForward = false;
+      }else if (stepBack){
+        globalID--;
+        stepBack = false;
+      }  
+      nextStep = false;
+      checkTableConstrains();
+    }
+  }
+}
+
+
+
+}
 class WatchDog extends Thread{
 
 boolean running;           // Is the thread running?  Yes or no?
@@ -1771,19 +2045,22 @@ boolean deviceLost;
 String devicePort;
 boolean buffer;
 boolean isPort;
+boolean isFirstContact;
+boolean isArduino;
 long    heartBeat;
-int 	bautRate;
-Serial 	port;
+int     bautRate;
+int     conValue;
+Serial  port;
 PApplet p;
-int 	wait;                  // How many milliseconds should we wait in between executions?
-String 	id;                 // Thread name
+int   wait;                  // How many milliseconds should we wait in between executions?
+String  id;                 // Thread name
  
 // ------------------------------------------------------------------------------------
 
   // Constructor, create the thread
   // It is not running by default
-  WatchDog (int _w, String _id, String _devicePort, boolean _buffer, boolean _isPort, int _bautRate, PApplet _p) {
-    wait = _w;
+  WatchDog (int _wait, String _id, String _devicePort, boolean _buffer, boolean _isPort, int _bautRate, boolean _isArduino, PApplet _p) {
+    wait = _wait;
     p = _p;
     running = false;
     deviceInstanciated = false;
@@ -1792,7 +2069,9 @@ String 	id;                 // Thread name
     buffer = _buffer;
     isPort = _isPort;
     bautRate = _bautRate;
+    isArduino =_isArduino;
     id = _id;
+    conValue = 255;
   }
 
 // ------------------------------------------------------------------------------------
@@ -1824,16 +2103,16 @@ String 	id;                 // Thread name
  
   public void check(){
 
-  	if (!deviceInstanciated){
-  		sleep(3000);
-  		deviceInit();
+    if (!deviceInstanciated){
+      sleep(3000);
+      deviceInit();
       println("deviceInstanciated not true: " + id);
-  	}else if(deviceInstanciated && deviceLost){
-  		sleep(3000);
-  		port.stop();
-  		deviceInit();
+    }else if(deviceInstanciated && deviceLost){
+      sleep(3000);
+      port.stop();
+      deviceInit();
       println("deviceLost and new Init: " + id);
-  	}
+    }
 
   }
 
@@ -1850,58 +2129,61 @@ String 	id;                 // Thread name
 // ------------------------------------------------------------------------------------
 
   public void sleep(int sleepTime){
-	try {
-	    sleep((long)(sleepTime));
-	  } catch (Exception e) {
-	  }
+  try {
+      sleep((long)(sleepTime));
+    } catch (Exception e) {
+    }
 
   }
 
 // ------------------------------------------------------------------------------------
 
   public void checkHeartBeat(){
-  	if(id.equals("PulseMeter")){
-	  if(millis() -  heartBeat >= 5000 && deviceInstanciated){
-	    println(id + " heartBeat lost");
-	    deviceLost = true;
-	  }
-	}else if (id.equals("Arduino")){
-		if (isFirstContact){
-	    	if (millis() -  heartBeat >= 5000 && deviceInstanciated){
-	      		isFirstContact = false;
-	      		deviceLost = true;
-	      		println(id + " heartBeat lost");
-	      		robotConValue = 100;
-	    	}
-  		}
-	}
+  if(id.equals("PulseMeter")){
+    if(millis() -  heartBeat >= 5000 && deviceInstanciated){
+      println(id + " heartBeat lost");
+      deviceLost = true;
+    }
+  }else if (isArduino){
+    if (isFirstContact){
+        if (millis() -  heartBeat >= 5000 && deviceInstanciated){
+            isFirstContact = false;
+            deviceLost = true;
+            println(id + " heartBeat lost");
+            conValue = 100;
+        }
+      }
+  }
   }
 
 // ------------------------------------------------------------------------------------  
 
-	public void deviceInit() {
-
-	  if(isPort){ 
-	    try {
-	      port = new Serial(p, devicePort, bautRate);
-	      port.clear();
-	      if(buffer){
-			port.bufferUntil(end);
-	      }
-	      deviceInstanciated = true;
-	      deviceLost = false;
-        if(id.equals("Arduino")){
+  public void deviceInit() {
+println("In Init: " + id);
+    if(isPort){ 
+      println("In is Port: " + id );
+      try {
+        port = new Serial(p, devicePort, bautRate);
+        port.clear();
+        if(buffer){
+          port.bufferUntil(end);
+        }
+        deviceInstanciated = true;
+        deviceLost = false;
+        println("In try"); 
+        if(isArduino){
+         // println("In first Contact"); 
         isFirstContact = false;
         }
-	    } 
-	    catch (Exception e) {
-	      println(e);
-	      deviceInstanciated = false;
-	      deviceLost = true;
-	      // println(id + " port received an exepction: " + e);
-	    }
-	  } 
-	}
+      } 
+      catch (Exception e) {
+        println(e);
+        deviceInstanciated = false;
+        deviceLost = true;
+        // println(id + " port received an exepction: " + e);
+      }
+    } 
+  }
 
 }
   static public void main(String[] passedArgs) {

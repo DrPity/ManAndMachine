@@ -9,6 +9,7 @@ class ConnectionLight {
 	Textlabel mindWave;
 	Textlabel pulseMeter;
 	Textlabel robot;
+	Textlabel travers;
 	PShape circle;
 	
 // ------------------------------------------------------------------------------------
@@ -28,6 +29,9 @@ class ConnectionLight {
 		robot = new Textlabel(controlP5,"Robot", x + 16, y + 4);
 		robot.setFont(createFont("Helvetica", 10));
 		robot.setColorValue(255);
+		travers = new Textlabel(controlP5,"Travers", x + 16, y + 4);
+		travers.setFont(createFont("Helvetica", 10));
+		travers.setColorValue(255);
 	}
 	
 // ------------------------------------------------------------------------------------	

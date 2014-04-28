@@ -5,32 +5,35 @@ import processing.serial.*;
 import java.awt.Frame;
 
 private int     end                 = 10;
-private int     pulsMeterConValue   = 200;
-private int     robotConValue       = 200;
 private int     pose                = 1;
 private int     gAngle              = 90;
 private int     debugVariable       = 0;
 private int     z                   = 120;
 private int     gGripperWidth       = 0;
 private int     bioValue            = 0;
+private int     globalID            = 0;
 private int     speed               = 0;
 private int     recordColor         = color(127, 127, 127);
 private int     id                  = 0;
-private int     storingID                  = 0;
+private int     storingID           = 0;
 private int     packetCount         = 0;
 private int     globalMax;
 private int     tableIndex          = 0;
 private int     tableIndexStoring   = 0;
 private int     receivedHeartRate   = 0;
+private int     voice               = 0;
 private byte    caReturn            = 13;
 private String  heartRateString    = "NA";
-private String  inChar;
+private String  inCharA;
+private String  inCharM;
 private String  scaleMode;
 private String  arduinoPort         = "/dev/tty.usbmodem1421";
+private String  melziPort           = "/dev/tty.usbserial-AH01SIVE";
 private String  pulseMeterPort      = "/dev/tty.BerryMed-SerialPort";
 private float   angle               = 0;
 private float   aVelocity           = 0.05;
 private boolean isRobotReadyToMove  = false;
+private boolean isTraversReadyToMove  = false;
 private boolean isFirstContact      = false;
 private boolean isRobotStarted      = false;
 private boolean isRecording         = false;
@@ -41,16 +44,23 @@ private boolean isReadyToStore      = true;
 private boolean gridYisDrawn        = false;
 private boolean gridXisDrawn        = false;
 private boolean isArduinoPort       = false;
+private boolean isMelziPort         = false;
 private boolean isPulseMeterPort    = false;
 private boolean isDataToGraph       = false;
 private boolean isTimerStarted      = false;
-
+private boolean isTableSpeechLoaded = false;
+private boolean isReadyForButtonCommands = false;
+private boolean newSay              = false;
+private boolean newPosition         = false;
+private boolean stepForward         = false;
+private boolean stepBack            = false;
+private boolean nextStep            = false;
 
 // ------------------------------------------------------------------------------------
 // Println console;
 PImage bg;
-Table table, tableRm;
-WatchDog wPm, wA;
+Table table, tableRm, tablePositions;
+WatchDog wPm, wA, wM;
 ControlFont font;
 Client myClient;
 Drawings drawings;
@@ -59,18 +69,20 @@ Kinect kinect;
 HelperClass helpers;
 ManageCLE mindWaveCLE;
 ManageSE manageSE;
+TextToSpeech textToSpeech;
 Robot robot;
 
 Channel[] channels = new Channel[11];
 Graph mindWave, emg, ecg, eda;
 Textlabel lableHeartRate, textHeartRate, timerLable, lableID, textID, fRate, headlineText_1, headlineText_2;
-ConnectionLight connectionLight, bluetoothConnection, robotConnection;
+ConnectionLight connectionLight, bluetoothConnection, robotConnection, traversConnection;
 
 // ------------------------------------------------------------------------------------
 
 void setup() {
   frameRate(120);
 	size(displayWidth, displayHeight,P2D);
+  // size(1280,720,P2D);
   noSmooth();
   hint(ENABLE_RETINA_PIXELS);
   // bg = loadImage("brain.png");
@@ -80,16 +92,21 @@ void setup() {
   helpers = new HelperClass();
   manageSE  = new ManageSE();
   robot = new Robot();
+  robot.loadRobotData();
   helpers.checkSerialPorts();
-  // Starting WatchDog and establish Serial connection
 
-  // watchDog = new WatchDog("WatchDog", this); 
-  // watchDog.start();
-
-  wPm = new WatchDog(1,"PulseMeter", pulseMeterPort, false, isPulseMeterPort, 115200, this);
+  // WachtDog: SleepTime Thread, NameDevice, Port, Buffering, initOK?, BautRate, isTypArduino, PApplet 
+  wPm = new WatchDog(1,"PulseMeter", pulseMeterPort, false, isPulseMeterPort, 115200, false, this);
   wPm.start();
-  wA = new WatchDog(1,"Arduino", arduinoPort, true, isArduinoPort, 115200, this);
+  wA = new WatchDog(1,"Arduino", arduinoPort, true, isArduinoPort, 115200, true, this);
   wA.start();
+  wM = new WatchDog(1,"Melzi", melziPort, true, isMelziPort, 115200, true, this);
+  wM.start();
+
+  //active textToSpeech Thread
+  textToSpeech = new TextToSpeech(1);
+  textToSpeech.start();
+
  
 
 	// Set up the knobs and dials
@@ -138,12 +155,14 @@ void setup() {
 	connectionLight     = new ConnectionLight(width - 98, 10, 10);
   bluetoothConnection = new ConnectionLight(width - 98, 30, 10);
   robotConnection     = new ConnectionLight(width - 98, 50, 10);
+  traversConnection   = new ConnectionLight(width - 98, 70, 10);
   
 
 	globalMax = 0;
   isReadyToRecord = true;
-  inChar = null;
-  
+  inCharA = null;
+  inCharM = null;
+  isReadyForButtonCommands = true;
   // kinect = addControlFrame("extra", 320,240);
     
 }
@@ -157,7 +176,7 @@ void draw() {
   lableHeartRate.setValue(heartRateString);
   drawings.drawRectangle(0,0,width,round(height*0.40),0,0,255,150);
   
-  // lableID.setValue(String.valueOf(id));
+  lableID.setValue(String.valueOf(globalID));
 	
 
   mindWave.draw();
@@ -177,15 +196,18 @@ void draw() {
 	connectionLight.update(channels[0].getLatestPoint().value);
 	connectionLight.draw();
   connectionLight.mindWave.draw();
-  bluetoothConnection.update(pulsMeterConValue);
+  bluetoothConnection.update(wPm.conValue);
   bluetoothConnection.draw();
   bluetoothConnection.pulseMeter.draw();
-  robotConnection.update(robotConValue);
+  robotConnection.update(wA.conValue);
   robotConnection.draw();
   robotConnection.robot.draw();
+  traversConnection.update(wM.conValue);
+  traversConnection.draw();
+  traversConnection.travers.draw();
 
 
-  if (!isRobotStarted){
+  if (isRobotStarted){
 
     if((frameCount%10)==0){
 
@@ -245,10 +267,23 @@ void serialEvent(Serial thisPort){
   if (thisPort == wA.port && wA.deviceInstanciated){
     
     while (wA.port.available() > 0){
-      inChar = wA.port.readStringUntil(end);
+      inCharA = wA.port.readStringUntil(end);
     }
-    if (inChar != null) {
-      manageSE.arduino(inChar);
+    if (inCharA != null) {
+      manageSE.arduino(inCharA);
+    }
+  }
+
+  if (thisPort == wM.port && wM.deviceInstanciated && isMelziPort){
+    println("In melzi event");
+    
+    while (wM.port.available() > 0){
+      println("In melzi event > 0");
+      inCharM = wM.port.readStringUntil(end);
+    }
+    if (inCharM != null) {
+      println("In melzi event start manageSE");
+      manageSE.melzi(inCharM);
     }
   }
 }
@@ -257,71 +292,82 @@ void serialEvent(Serial thisPort){
 
 
 void controlEvent(ControlEvent theEvent) {
-  if(theEvent.isAssignableFrom(Textfield.class)) {
-    println("controlEvent: accessing a string from controller '"
-            +theEvent.getName()+"': "
-            +theEvent.getStringValue()
-            );
-    if(isStoring){
+  if(isReadyForButtonCommands){  
+    if(theEvent.isAssignableFrom(Textfield.class)) {
+      println("controlEvent: accessing a string from controller '"
+              +theEvent.getName()+"': "
+              +theEvent.getStringValue()
+              );
+      
+      voice = Integer.parseInt(theEvent.getStringValue());
 
-      String[] s = split(theEvent.getStringValue(), ',');
-      helpers.storePositionToTable(Integer.parseInt(s[1]),
-                                  Integer.parseInt(s[2]), 
-                                  Integer.parseInt(s[3]), 
-                                  Integer.parseInt(s[4]), 
-                                  Integer.parseInt(s[5]), 
-                                  Integer.parseInt(s[6]), 
-                                  Integer.parseInt(s[7]), 
-                                  Integer.parseInt(s[8]), 
-                                  Integer.parseInt(s[9]), 
-                                  Integer.parseInt(s[10]), 
-                                  Integer.parseInt(s[11]), 
-                                  Integer.parseInt(s[12]), 
-                                  Integer.parseInt(s[13]));
+      // if(isStoring){
 
+      //   String[] s = split(theEvent.getStringValue(), ',');
+      //   helpers.storePositionToTable(Integer.parseInt(s[1]),
+      //                               Integer.parseInt(s[2]), 
+      //                               Integer.parseInt(s[3]), 
+      //                               Integer.parseInt(s[4]), 
+      //                               Integer.parseInt(s[5]), 
+      //                               Integer.parseInt(s[6]), 
+      //                               Integer.parseInt(s[7]), 
+      //                               Integer.parseInt(s[8]), 
+      //                               Integer.parseInt(s[9]), 
+      //                               Integer.parseInt(s[10]), 
+      //                               Integer.parseInt(s[11]), 
+      //                               Integer.parseInt(s[12]), 
+      //                               Integer.parseInt(s[13]));
+
+      // }
+
+      if(theEvent.getStringValue().equals("NewTable") && isReadyToStore){
+         println("New Table Created");
+         // helpers.newStorePositionTable();
+      }
     }
 
-
-    if(theEvent.getStringValue().equals("NewTable") && isReadyToStore){
-       println("New Table Created");
-       helpers.newStorePositionTable();
+    if(theEvent.getName().equals("Reset_Robot")){
+      println("reset robot event ");
+      robot.setRobotArm( 0, 150, 80, 90, 90, 254, 200, true); 
     }
 
-  }
+    if(theEvent.getName().equals("saveBtn")){
+      println("save button event");
+    }
 
-  if(theEvent.getName().equals("Reset_Robot")){
-    println("reset robot event ");
-    robot.setRobotArm( 0, 150, 80, 90, 90, 254, 200, true); 
-  }
+    if(theEvent.getName().equals("loadBtnDefault")){
+      println("load default button");
+      globalID = 0;
+    }
 
-  if(theEvent.getName().equals("saveBtn")){
-    println("save button event");
-  }
+    if(theEvent.getName().equals("loadBtnLastPosition")){
+      println("load last Position");
+    }
 
-  if(theEvent.getName().equals("loadBtnDefault")){
-    println("load default button");
-    // tableRm = loadTable("data/RobotMovements.csv");
-  }
+    if(theEvent.getName().equals("Start_Robot")){
+    isRobotStarted = !isRobotStarted;
+      if(isRobotStarted)
+        println("robot started");
+      else
+        println("robot stoped");
+      //isTimerStarted = !isTimerStarted;
+    }
 
-  if(theEvent.getName().equals("loadBtnLastPosition")){
-    println("load last Position");
-  }
+    if(theEvent.getName().equals("Back")){
+      if(!nextStep && !stepBack){
+        stepBack = true;
+        nextStep = true;
+      }
+    }
 
-  if(theEvent.getName().equals("Start_Robot")){
-  isRobotStarted = !isRobotStarted;
-    if(isRobotStarted)
-      println("robot started");
-    else
-      println("robot stoped");
-    //isTimerStarted = !isTimerStarted;
-  }
-
-  if(theEvent.getName().equals("Test_Movement")){
-  println("load last Position");
-  }
-
-
-}
+    if(theEvent.getName().equals("Forward")){
+      if(!nextStep && !stepForward){
+        stepForward = true;
+        nextStep = true;
+      } 
+    }
+ }
+} 
 
 
 // public void Start_Recording() {

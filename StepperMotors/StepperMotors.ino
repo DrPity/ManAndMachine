@@ -124,8 +124,8 @@ void loop(){
     inByte.trim();
     
     if(inByte.equals("B") == true){
-    //serialReady = true;
-    initializeMovement();
+    serialReady = true;
+    // initializeMovement();
     // testMovement();
     // testButton();
     }
@@ -152,7 +152,7 @@ void loop(){
     watchdogActive = true;
 
   }else if ((millis() - watchdog) >= 2000){
-        // watchdogCall();
+        watchdogCall();
     }
 
   if (connectionTimeOut <= 0){
@@ -293,7 +293,7 @@ void watchdogCall() {
     Serial.print("W");   // send a capital A
     Serial.println();
     connectionTimeOut --;
-    // delay(30);
+    delay(30);
     watchdogActive = false;
 }  
 

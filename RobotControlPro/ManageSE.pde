@@ -28,8 +28,8 @@ private int[] bitArray = new int[8];
       wA.port.write("W");
       wA.port.write(10);
       println("+ Heartbeat +");
-      if(robotConValue != 00){
-        robotConValue = 00;
+      if(wA.conValue != 00){
+        wA.conValue = 00;
       }
       // serialConnection = "Connected";
     }
@@ -39,14 +39,14 @@ private int[] bitArray = new int[8];
      // println("Robot Ready for Next Position");
     }
 
-    if(!isFirstContact){
+    if(!wA.isFirstContact){
       println("In first contact");
       if (inChar.trim().equals("A")) {
         println("Connected");
         wA.heartBeat = millis();                   
         wA.port.write("B");
         wA.port.write(10);
-        isFirstContact = true;
+        wA.isFirstContact = true;
         isRobotReadyToMove = true;       
       }  
     } 
@@ -94,11 +94,11 @@ private int[] bitArray = new int[8];
         heartRateString = String.valueOf(heartRate);
         pulseString = "";
         bitArray[7] = 0;
-        if (pulsMeterConValue <= 200){
-          pulsMeterConValue = 00;
+        if (wPm.conValue <= 200){
+          wPm.conValue = 00;
         }
         if(int(heartRateString) == 255){
-          pulsMeterConValue = 100;
+          wPm.conValue = 100;
         }
       }
 
@@ -109,6 +109,42 @@ private int[] bitArray = new int[8];
 
       wPm.heartBeat = millis();
 
+  }
+
+
+   void melzi(String inChar) {
+
+   // println("In after Null");
+    // println(inChar);
+
+    if (inChar.trim().equals("W")){
+      wM.heartBeat = millis();
+      wM.port.write("W");
+      wM.port.write(10);
+      println("+ Heartbeat +");
+      if(wM.conValue != 00){
+        wM.conValue = 00;
+      }
+      // serialConnection = "Connected";
+    }
+
+    if(inChar.trim().equals("N")){
+      isTraversReadyToMove = true;
+     // println("Robot Ready for Next Position");
+    }
+
+    if(!wM.isFirstContact){
+      println("In first contact");
+      if (inChar.trim().equals("A")) {
+        println("Connected");
+        wM.heartBeat = millis();                   
+        wM.port.write("B");
+        wM.port.write(10);
+        wM.isFirstContact = true;
+        isTraversReadyToMove = true;       
+      }  
+    }
+  
   }
 
   // ------------------------------------------------------------------------------------

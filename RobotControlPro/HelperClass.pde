@@ -77,7 +77,7 @@ public void storePositionToTable(int x, int y, int z, int gripperAngle, int grip
 
 
 
-public void EndStoring() {
+public void endStoring() {
     if(isReadyToStore){
       saveTable(table, String.format("data/RobotMovements.csv"), "csv");
       println("Storing finished");
@@ -85,7 +85,6 @@ public void EndStoring() {
       isStoring = false;
     }
   }
-
 
 
 
@@ -111,9 +110,11 @@ public void EndStoring() {
        println("[" + i + "] " + Serial.list()[i]);
        // Flag serial ports as true
        if(Serial.list()[i].equals(pulseMeterPort)){
-         isPulseMeterPort = true;
+        isPulseMeterPort = true;
        }else if (Serial.list()[i].equals(arduinoPort)){
-         isArduinoPort = true;
+        isArduinoPort = true;
+       }else if (Serial.list()[i].equals(melziPort)){
+        isMelziPort = true;
        }
     }
   }  

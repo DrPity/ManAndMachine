@@ -168,7 +168,7 @@ class Robot{
 
   }
 
-// // ------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------
 
   boolean isInRange(float value, float minimum, float maximum)
   {
@@ -177,7 +177,7 @@ class Robot{
     return false;
   }
 
-// // ------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------
 
   void sendRobotData(int currentBase, int currentShoulder, int currentElbow, int currentWrist, int currentGripperAngle, int currentGripperWidth, int currentLight, int currentEasing){
 
@@ -188,6 +188,9 @@ class Robot{
     isRobotReadyToMove = false;
 
   }
+
+
+// ------------------------------------------------------------------------------------
 
 
   int findLowerBound(int strechedPosition){
@@ -201,6 +204,8 @@ class Robot{
   validStrPos = false;
   return (int) lastY;
   }
+
+// ------------------------------------------------------------------------------------
 
 
   int findUpperBound(int strechedPosition){
@@ -216,4 +221,31 @@ class Robot{
   return (int) lastY;
   }
 
+// ------------------------------------------------------------------------------------
+
+  void loadRobotData(){
+
+    tablePositions = loadTable("data/Positions.csv", "header");
+  }
+
+// ------------------------------------------------------------------------------------
+
+  void readNextRobotPosition(){
+  if(newPosition && globalID <= (tablePositions.getRowCount() -1) && globalID >= 0){
+
+        int x = tablePositions.getInt(globalID, "X");
+        int y = tablePositions.getInt(globalID, "Y");
+        int z = tablePositions.getInt(globalID, "Z");
+        int gripperAngle = tablePositions.getInt(globalID, "GripperAngle");
+        int gripperWidth = tablePositions.getInt(globalID, "GripperWidth");
+        int x1 = tablePositions.getInt(globalID, "X1");
+        int y1 = tablePositions.getInt(globalID, "Y1");
+        int turning = tablePositions.getInt(globalID, "Turning");
+        int claw = tablePositions.getInt(globalID, "Claw");
+        int stretching = tablePositions.getInt(globalID, "Streching");
+        int arousal = tablePositions.getInt(globalID, "Arousal");
+        println("[ x: " + x + " y: " + y + " z: " + z + " gripperAngle: " + gripperAngle + " gripperWidth: " + gripperWidth + " x1: " + x1 + " y1: " + y1 + " turning: " + turning + " claw: " + claw + " stretching: " + stretching + " araousal: " + arousal + " ]");
+        newPosition = false;
+      }
+  }
 }  

@@ -1,6 +1,7 @@
 class Drawings  {
-Textarea consolTextArea;
-RadioButton toggleTestMode;
+  Textarea consolTextArea;
+  RadioButton toggleTestMode;
+  float sV = 1;
 
   void drawLine(int x1, int y1, int x2, int y2, int th){
     
@@ -33,11 +34,11 @@ RadioButton toggleTestMode;
   // ------------------------------------------------------------------------------------
 
   void CP5Init(){
-  PFont fontSmallBold = createFont("ProximaNova-Bold",15);
-  PFont fontSmallLight = createFont("ProximaNova-Light",15);
-  PFont fontHeadline = createFont("ProximaNova-Thin",20);
-  PFont fontHeadline_2 = createFont("ProximaNova-Bold",20);
-  PFont fontHeadLableBig = createFont("ProximaNova-Thin",100);
+    PFont fontSmallBold = createFont("ProximaNova-Bold",15);
+    PFont fontSmallLight = createFont("ProximaNova-Light",15);
+    PFont fontHeadline = createFont("ProximaNova-Thin",20);
+    PFont fontHeadline_2 = createFont("ProximaNova-Bold",20);
+    PFont fontHeadLableBig = createFont("ProximaNova-Thin",100);
 
   // fontHeadline
 
@@ -56,8 +57,8 @@ RadioButton toggleTestMode;
   controlP5.addButton("saveBtn")
     .setValue(0)
     .setCaptionLabel("save Values")
-    .setSize(100,20)
-    .setPosition(260,round(height * 0.47))
+    .setSize(round(100*sV),round(20*sV))
+    .setPosition(round(260*sV),round(height * 0.47))
     .setColorBackground(color(0, 200, 0))
     ;
 
@@ -65,8 +66,8 @@ RadioButton toggleTestMode;
   controlP5.addButton("loadBtnDefault")
     .setValue(0)
     .setCaptionLabel("load Default")
-    .setSize(100,20)
-    .setPosition(20,round(height * 0.51))
+    .setSize(round(100*sV),round(20*sV))
+    .setPosition(round(20*sV),round(height * 0.51))
     .setColorActive(127)
     .setColorBackground(color(200, 130, 0))
     ;
@@ -74,37 +75,44 @@ RadioButton toggleTestMode;
   controlP5.addButton("loadBtnLastPosition")
     .setValue(0)
     .setCaptionLabel("load last Position")
-    .setSize(100,20)
-    .setPosition(140,round(height * 0.51))
+    .setSize(round(100*sV),round(20*sV))
+    .setPosition(round(140*sV),round(height * 0.51))
     .setColorCaptionLabel(0) 
     .setColorValueLabel(127)
     .setColorBackground(color(200, 130, 0))
     ;
   
-  controlP5.addButton("Start_Robot")
-   .setValue(0)
-   .setCaptionLabel("START ROBOT")
-   .setPosition(500,round(height * 0.42))
-   .setSize(100,20)
-   ;
+  // controlP5.addButton("Start_Robot")
+  //  .setValue(0)
+  //  .setCaptionLabel("START ROBOT")
+  //  .setPosition(round(500*sV),round(height * 0.42))
+  //  .setSize(round(100*sV),round(20*sV))
+  //  ;
   
-  controlP5.addButton("Reset_Robot")
-   .setValue(0)
-   .setCaptionLabel("RESET ROBOT")
-   .setPosition(500,round(height * 0.44))
-   .setSize(100,20)
-   ;
+  // controlP5.addButton("Reset_Robot")
+  //  .setValue(0)
+  //  .setCaptionLabel("RESET ROBOT")
+  //  .setPosition(round(500*sV),round(height * 0.44))
+  //  .setSize(round(100*sV),round(20*sV))
+  //  ;
      
-  controlP5.addButton("Test_Movement")
+  controlP5.addButton("Back")
    .setValue(0)
-   .setCaptionLabel("TEST MOVEMENT")
-   .setPosition(500,round(height * 0.46))
-   .setSize(100,20)
+   .setCaptionLabel("Back")
+   .setPosition(round(500*sV),round(height * 0.46))
+   .setSize(round(100*sV),round(20*sV))
+   ;
+
+   controlP5.addButton("Forward")
+   .setValue(0)
+   .setCaptionLabel("Forward")
+   .setPosition(round(800*sV),round(height * 0.46))
+   .setSize(round(100*sV),round(20*sV))
    ;
 
   toggleTestMode = controlP5.addRadioButton("testMode")
-         .setPosition(20,round(height * 0.458))
-         .setSize(20,10)
+         .setPosition(round(20*sV),round(height * 0.458))
+         .setSize(round(20*sV),round(10*sV))
          .setColorForeground(color(120))
          .setColorActive(color(0,190,0))
          .setColorLabel(color(255,0,0))
@@ -115,47 +123,49 @@ RadioButton toggleTestMode;
 
   lableHeartRate = controlP5.addTextlabel("lable")
                   .setText(heartRateString)
-                  .setPosition(10,160)
+                  .setPosition(round(10*sV),round(160*sV))
                   .setColorValue(255)
                   .setFont(fontHeadLableBig)
                   ;
 
   textHeartRate = controlP5.addTextlabel("label2")
                   .setText("Heart Rate")
-                  .setPosition(15,260)
+                  .setPosition(round(15*sV),round(260*sV))
                   .setColorValue(255)
                   .setFont(createFont("Helvetica",16))
                   ;
 
   timerLable = controlP5.addTextlabel("lable3")
                   .setText("00.00")
-                  .setPosition(10,20)
+                  .setPosition(round(10*sV),round(20*sV))
                   .setColorValue(255)
                   .setFont(createFont("Helvetica",50))
                   ;
   headlineText_1 = controlP5.addTextlabel("label4")
                   .setText("ROBOT CONTROLS: ")
-                  .setPosition(15,round(height * 0.42))
+                  .setPosition(round(15*sV),round(height * 0.42))
                   .setColorValue(255)
-                .setFont(fontHeadline);
+                  .setFont(fontHeadline)
+                  ;
  
-  headlineText_2 = controlP5.addTextlabel("label5")
-                .setText("ROBOT CONTROLS: ")
-                .setPosition(490,round(height * 0.42))
-                .setColorValue(255)
-                .setFont(fontHeadline_2);
+  // headlineText_2 = controlP5.addTextlabel("label5")
+  //               .setText("ROBOT CONTROLS: ")
+  //               .setPosition(round(490*sV),round(height * 0.42))
+  //               .setColorValue(255)
+  //               .setFont(fontHeadline_2)
+  //               ;
 
 
 
   controlP5.addTextfield("Enter Robot Position - Press [ ENTER ] to test")
-                .setPosition(20,round(height * 0.47))
-                .setSize(220,20)
+                .setPosition(round(20*sV),round(height * 0.47))
+                .setSize(round(220*sV),round(20*sV))
                 .setFont(fontSmallBold)
                 .setFocus(true)
                 .setColorActive(0)
                 .setColorValue(255)
                 .setColorBackground(color(255, 255))
-                 ;
+                ;
 
   // consolTextArea = controlP5.addTextarea("txt")
   //                 .setPosition(10, round(height * 0.80))
@@ -166,22 +176,22 @@ RadioButton toggleTestMode;
   //                 .setColorBackground(color(0, 100))
   //                 .setColorForeground(color(255, 100))
 
-  controlP5.addFrameRate().setInterval(10).setColor(0).setPosition(10,height - 30).setFont(fontSmallLight);
+  controlP5.addFrameRate().setInterval(10).setColor(0).setPosition(round(10*sV),height - round(30*sV)).setFont(fontSmallLight);
   // console = controlP5.addConsole(consolTextArea);              
 
 
-     // lableID = controlP5.addTextlabel("lable3")
-   //                .setText("id")
-   //                .setPosition(250,100)
-   //                .setColorValue(255)
-   //                .setFont(createFont("Helvetica",100))
-   //                ;
-   // textID = controlP5.addTextlabel("label4")
-   //                .setText("ID")
-   //                .setPosition(270,200)
-   //                .setColorValue(255)
-   //                .setFont(createFont("Helvetica",16))
-   //                ;                     
+   lableID = controlP5.addTextlabel("lable6")
+                .setText("id")
+                .setPosition(250,100)
+                .setColorValue(255)
+                .setFont(fontHeadline)
+                ;
+    textID = controlP5.addTextlabel("label7")
+                .setText("ID")
+                .setPosition(270,200)
+                .setColorValue(255)
+                .setFont(fontSmallBold)
+                ;                     
 
 
   }

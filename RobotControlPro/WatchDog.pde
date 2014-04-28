@@ -6,19 +6,22 @@ boolean deviceLost;
 String devicePort;
 boolean buffer;
 boolean isPort;
+boolean isFirstContact;
+boolean isArduino;
 long    heartBeat;
-int 	bautRate;
-Serial 	port;
+int     bautRate;
+int     conValue;
+Serial  port;
 PApplet p;
-int 	wait;                  // How many milliseconds should we wait in between executions?
-String 	id;                 // Thread name
+int   wait;                  // How many milliseconds should we wait in between executions?
+String  id;                 // Thread name
  
 // ------------------------------------------------------------------------------------
 
   // Constructor, create the thread
   // It is not running by default
-  WatchDog (int _w, String _id, String _devicePort, boolean _buffer, boolean _isPort, int _bautRate, PApplet _p) {
-    wait = _w;
+  WatchDog (int _wait, String _id, String _devicePort, boolean _buffer, boolean _isPort, int _bautRate, boolean _isArduino, PApplet _p) {
+    wait = _wait;
     p = _p;
     running = false;
     deviceInstanciated = false;
@@ -27,7 +30,9 @@ String 	id;                 // Thread name
     buffer = _buffer;
     isPort = _isPort;
     bautRate = _bautRate;
+    isArduino =_isArduino;
     id = _id;
+    conValue = 255;
   }
 
 // ------------------------------------------------------------------------------------
@@ -59,16 +64,16 @@ String 	id;                 // Thread name
  
   void check(){
 
-  	if (!deviceInstanciated){
-  		sleep(3000);
-  		deviceInit();
+    if (!deviceInstanciated){
+      sleep(3000);
+      deviceInit();
       println("deviceInstanciated not true: " + id);
-  	}else if(deviceInstanciated && deviceLost){
-  		sleep(3000);
-  		port.stop();
-  		deviceInit();
+    }else if(deviceInstanciated && deviceLost){
+      sleep(3000);
+      port.stop();
+      deviceInit();
       println("deviceLost and new Init: " + id);
-  	}
+    }
 
   }
 
@@ -85,57 +90,60 @@ String 	id;                 // Thread name
 // ------------------------------------------------------------------------------------
 
   void sleep(int sleepTime){
-	try {
-	    sleep((long)(sleepTime));
-	  } catch (Exception e) {
-	  }
+  try {
+      sleep((long)(sleepTime));
+    } catch (Exception e) {
+    }
 
   }
 
 // ------------------------------------------------------------------------------------
 
   void checkHeartBeat(){
-  	if(id.equals("PulseMeter")){
-	  if(millis() -  heartBeat >= 5000 && deviceInstanciated){
-	    println(id + " heartBeat lost");
-	    deviceLost = true;
-	  }
-	}else if (id.equals("Arduino")){
-		if (isFirstContact){
-	    	if (millis() -  heartBeat >= 5000 && deviceInstanciated){
-	      		isFirstContact = false;
-	      		deviceLost = true;
-	      		println(id + " heartBeat lost");
-	      		robotConValue = 100;
-	    	}
-  		}
-	}
+  if(id.equals("PulseMeter")){
+    if(millis() -  heartBeat >= 5000 && deviceInstanciated){
+      println(id + " heartBeat lost");
+      deviceLost = true;
+    }
+  }else if (isArduino){
+    if (isFirstContact){
+        if (millis() -  heartBeat >= 5000 && deviceInstanciated){
+            isFirstContact = false;
+            deviceLost = true;
+            println(id + " heartBeat lost");
+            conValue = 100;
+        }
+      }
+  }
   }
 
 // ------------------------------------------------------------------------------------  
 
-	void deviceInit() {
-
-	  if(isPort){ 
-	    try {
-	      port = new Serial(p, devicePort, bautRate);
-	      port.clear();
-	      if(buffer){
-			port.bufferUntil(end);
-	      }
-	      deviceInstanciated = true;
-	      deviceLost = false;
-        if(id.equals("Arduino")){
+  void deviceInit() {
+println("In Init: " + id);
+    if(isPort){ 
+      println("In is Port: " + id );
+      try {
+        port = new Serial(p, devicePort, bautRate);
+        port.clear();
+        if(buffer){
+          port.bufferUntil(end);
+        }
+        deviceInstanciated = true;
+        deviceLost = false;
+        println("In try"); 
+        if(isArduino){
+         // println("In first Contact"); 
         isFirstContact = false;
         }
-	    } 
-	    catch (Exception e) {
-	      println(e);
-	      deviceInstanciated = false;
-	      deviceLost = true;
-	      // println(id + " port received an exepction: " + e);
-	    }
-	  } 
-	}
+      } 
+      catch (Exception e) {
+        println(e);
+        deviceInstanciated = false;
+        deviceLost = true;
+        // println(id + " port received an exepction: " + e);
+      }
+    } 
+  }
 
 }
