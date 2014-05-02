@@ -33,60 +33,61 @@ class HelperClass {
     }
   }
 
-//List of robot data: x1-10,y1-10,  xx,yy to xx2,yy2, Turn towards or away TT or TA, Open or Close claw OC or CC, Stretch or Contract S or C, Arousal in %, Classification of move <A>, Other: emotions etc
-public void newStorePositionTable() {
-  isStoring = true;
-  tableRm = new Table();
-  tableRm.addColumn("ID");
-  tableRm.addColumn("X");
-  tableRm.addColumn("Y");
-  tableRm.addColumn("Z");
-  tableRm.addColumn("GripperAngle");
-  tableRm.addColumn("GripperWidth");
-  tableRm.addColumn("EyeColor");
-  tableRm.addColumn("Easing");
-  tableRm.addColumn("X1");
-  tableRm.addColumn("Y1");
-  tableRm.addColumn("Turning");
-  tableRm.addColumn("Claw");
-  tableRm.addColumn("Streching");
-  tableRm.addColumn("Arousal");
-}
+// ------------------------------------------------------------------------------------    
 
-public void storePositionToTable(int x, int y, int z, int gripperAngle, int gripperWidth, int eyeColor, int easing, int x1, int y1, int turning, int claw, int streching, int arousal){
-
-  TableRow newRow = tableRm.addRow();
-  newRow.setInt("ID", tableRm.getRowCount() -1);
-  newRow.setInt("X", x);
-  newRow.setInt("Y", y);
-  newRow.setInt("Z", z);
-  newRow.setInt("GripperAngle", gripperAngle);
-  newRow.setInt("GripperWidth", gripperWidth);
-  newRow.setInt("EyeColor", eyeColor);
-  newRow.setInt("Easing", easing);
-  newRow.setInt("X1", x1);
-  newRow.setInt("Y1", y1);
-  newRow.setInt("Turning", turning);
-  newRow.setInt("Claw", claw);
-  newRow.setInt("Streching", streching);
-  newRow.setInt("Arousal", arousal);
-  storingID =  tableRm.getRowCount() -1;
-  println("Movement Stored");
-}
-
-
-
-
-public void endStoring() {
-    if(isReadyToStore){
-      saveTable(table, String.format("data/RobotMovements.csv"), "csv");
-      println("Storing finished");
-      tableIndexStoring ++;
-      isStoring = false;
-    }
+  //List of robot data: x1-10,y1-10,  xx,yy to xx2,yy2, Turn towards or away TT or TA, Open or Close claw OC or CC, Stretch or Contract S or C, Arousal in %, Classification of move <A>, Other: emotions etc
+  public void newStorePositionTable() {
+    isStoring = true;
+    tableRm = new Table();
+    tableRm.addColumn("ID");
+    tableRm.addColumn("X");
+    tableRm.addColumn("Y");
+    tableRm.addColumn("Z");
+    tableRm.addColumn("GripperAngle");
+    tableRm.addColumn("GripperWidth");
+    tableRm.addColumn("EyeColor");
+    tableRm.addColumn("Easing");
+    tableRm.addColumn("X1");
+    tableRm.addColumn("Y1");
+    tableRm.addColumn("Turning");
+    tableRm.addColumn("Claw");
+    tableRm.addColumn("Streching");
+    tableRm.addColumn("Arousal");
   }
 
+  // ------------------------------------------------------------------------------------  
 
+  public void storePositionToTable(int x, int y, int z, int gripperAngle, int gripperWidth, int eyeColor, int easing, int x1, int y1, int turning, int claw, int streching, int arousal){
+
+    TableRow newRow = tableRm.addRow();
+    newRow.setInt("ID", tableRm.getRowCount() -1);
+    newRow.setInt("X", x);
+    newRow.setInt("Y", y);
+    newRow.setInt("Z", z);
+    newRow.setInt("GripperAngle", gripperAngle);
+    newRow.setInt("GripperWidth", gripperWidth);
+    newRow.setInt("EyeColor", eyeColor);
+    newRow.setInt("Easing", easing);
+    newRow.setInt("X1", x1);
+    newRow.setInt("Y1", y1);
+    newRow.setInt("Turning", turning);
+    newRow.setInt("Claw", claw);
+    newRow.setInt("Streching", streching);
+    newRow.setInt("Arousal", arousal);
+    storingID =  tableRm.getRowCount() -1;
+    println("Movement Stored");
+  }
+
+// ------------------------------------------------------------------------------------  
+
+  public void endStoring() {
+      if(isReadyToStore){
+        saveTable(table, String.format("data/RobotMovements.csv"), "csv");
+        println("Storing finished");
+        tableIndexStoring ++;
+        isStoring = false;
+      }
+  }
 
 // ------------------------------------------------------------------------------------  
 // Extend core's Map function to the Long datatype.
@@ -95,7 +96,7 @@ public void endStoring() {
     return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min; 
   }
 
-// ------------------------------------------------------------------------------------
+  // ------------------------------------------------------------------------------------
 
   long constrainLong(long value, long min_value, long max_value) {
     if(value > max_value) return max_value;
@@ -103,7 +104,7 @@ public void endStoring() {
     return value;
   }
 
-// ------------------------------------------------------------------------------------
+  // ------------------------------------------------------------------------------------
 
   void checkSerialPorts(){
    for (int i = 0; i < Serial.list().length; i++) {
@@ -117,6 +118,17 @@ public void endStoring() {
         isMelziPort = true;
        }
     }
-  }  
-	
+  }
+
+  // ------------------------------------------------------------------------------------
+
+  void setStep(){
+   textToSpeech.nextTextToSpeech = true;
+    if(globalID == 1){
+      robotAnimation.isNextAnimation = true;
+    }  
+
+    robotAnimation.standValue = false;
+  }
+
 }

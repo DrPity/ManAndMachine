@@ -28,15 +28,18 @@ public class RobotControlPro extends PApplet {
 
 
 
+// ------------------------------------------------------------------------------------
+
 private int     end                 = 10;
 private int     pose                = 1;
 private int     gAngle              = 90;
-private int     debugVariable       = 0;
-private int     z                   = 120;
+private int     debugVariable       = 200;
+private int     z                   = 220;
+private int     y                   = 100;
 private int     gGripperWidth       = 0;
 private int     bioValue            = 0;
 private int     globalID            = 0;
-private int     speed               = 0;
+private int     led                 = 0;
 private int     recordColor         = color(127, 127, 127);
 private int     id                  = 0;
 private int     storingID           = 0;
@@ -46,42 +49,40 @@ private int     tableIndex          = 0;
 private int     tableIndexStoring   = 0;
 private int     receivedHeartRate   = 0;
 private int     voice               = 0;
+private int     isReadyColor        = 255;
 private byte    caReturn            = 13;
-private String  heartRateString    = "NA";
+private String  heartRateString     = "Na";
 private String  inCharA;
 private String  inCharM;
 private String  scaleMode;
-private String  arduinoPort         = "/dev/tty.usbmodem1421";
-private String  melziPort           = "/dev/tty.usbserial-AH01SIVE";
-private String  pulseMeterPort      = "/dev/tty.BerryMed-SerialPort";
-private float   angle               = 0;
-private float   aVelocity           = 0.05f;
-private boolean isRobotReadyToMove  = false;
-private boolean isTraversReadyToMove  = false;
-private boolean isFirstContact      = false;
-private boolean isRobotStarted      = false;
-private boolean isRecording         = false;
-private boolean isStoring           = false;
-private boolean isEsenseEvent       = false;
-private boolean isReadyToRecord     = false;
-private boolean isReadyToStore      = true;
-private boolean gridYisDrawn        = false;
-private boolean gridXisDrawn        = false;
-private boolean isArduinoPort       = false;
-private boolean isMelziPort         = false;
-private boolean isPulseMeterPort    = false;
-private boolean isDataToGraph       = false;
-private boolean isTimerStarted      = false;
-private boolean isTableSpeechLoaded = false;
-private boolean isReadyForButtonCommands = false;
-private boolean newSay              = false;
-private boolean newPosition         = false;
-private boolean stepForward         = false;
-private boolean stepBack            = false;
-private boolean nextStep            = false;
+private String  arduinoPort               = "/dev/tty.usbmodem1d1141";
+private String  melziPort                 = "/dev/tty.usbserial-AH01SIVE";
+private String  pulseMeterPort            = "/dev/tty.BerryMed-SerialPort";
+private float   angle                     = 0;
+private float   aVelocity                 = 0.05f;
+private boolean isRobotReadyToMove        = false;
+private boolean isTraversReadyToMove      = false;
+private boolean isFirstContact            = false;
+private boolean isRobotStarted            = false;
+private boolean isRecording               = false;
+private boolean isStoring                 = false;
+private boolean isEsenseEvent             = false;
+private boolean isReadyToRecord           = false;
+private boolean isReadyToStore            = true;
+private boolean gridYisDrawn              = false;
+private boolean gridXisDrawn              = false;
+private boolean isArduinoPort             = false;
+private boolean isMelziPort               = false;
+private boolean isPulseMeterPort          = false;
+private boolean isTableSpeechLoaded       = false;
+private boolean isReadyForButtonCommands  = false;
+private boolean newSay                    = false;
+private boolean newPosition               = false;
+private boolean stepForward               = false;
+private boolean stepBack                  = false;
 
 // ------------------------------------------------------------------------------------
-// Println console;
+
 PImage bg;
 Table table, tableRm, tablePositions;
 WatchDog wPm, wA, wM;
@@ -94,30 +95,31 @@ HelperClass helpers;
 ManageCLE mindWaveCLE;
 ManageSE manageSE;
 TextToSpeech textToSpeech;
+RobotAnimation robotAnimation;
 Robot robot;
-
-Channel[] channels = new Channel[11];
-Graph mindWave, emg, ecg, eda;
-Textlabel lableHeartRate, textHeartRate, timerLable, lableID, textID, fRate, headlineText_1, headlineText_2;
+Channel[] channelsMindwave = new Channel[11];
+Channel[] channelPleth = new Channel[1];
+Graph mindWave, emg, ecg, pleth;
+Textlabel lableID, textID, fRate, headlineText_1, headlineText_2, textMindwave, attentionLevel, attentionValue, meditationLevel, meditationValue, blinkStrength, blinkValue, textPulseMeter, pulseLevel, pulseValue;
 ConnectionLight connectionLight, bluetoothConnection, robotConnection, traversConnection;
 
 // ------------------------------------------------------------------------------------
 
 public void setup() {
   frameRate(120);
-	size(displayWidth, displayHeight,P2D);
-  // size(1280,720,P2D);
+	// size(displayWidth, displayHeight,P2D);
+  size(1280,720,P2D);
   noSmooth();
   hint(ENABLE_RETINA_PIXELS);
-  // bg = loadImage("brain.png");
-  // bg.resize(width, height);
-  // background(bg);
   smooth(4);
+
   helpers = new HelperClass();
   manageSE  = new ManageSE();
   robot = new Robot();
   robot.loadRobotData();
   helpers.checkSerialPorts();
+
+// ----------------------------------------
 
   // WachtDog: SleepTime Thread, NameDevice, Port, Buffering, initOK?, BautRate, isTypArduino, PApplet 
   wPm = new WatchDog(1,"PulseMeter", pulseMeterPort, false, isPulseMeterPort, 115200, false, this);
@@ -126,12 +128,14 @@ public void setup() {
   wA.start();
   wM = new WatchDog(1,"Melzi", melziPort, true, isMelziPort, 115200, true, this);
   wM.start();
-
-  //active textToSpeech Thread
+  //activate textToSpeech thread
   textToSpeech = new TextToSpeech(1);
   textToSpeech.start();
+  //activate robotAnimation thread
+  robotAnimation = new RobotAnimation(1);
+  robotAnimation.start();
 
- 
+// ----------------------------------------
 
 	// Set up the knobs and dials
 	controlP5 = new ControlP5(this);
@@ -144,37 +148,42 @@ public void setup() {
 
 	font = new ControlFont(createFont("DIN-MediumAlternate", 12), 12);
   mindWaveCLE.connectToMindWave(this);
+
+  // ----------------------------------------
        
 	// Creat the channel objects
 	// yellow to purple and then the space in between, grays for the alphas
-	channels[0]  = new Channel("Signal Quality", color(0), "");
-	channels[1]  = new Channel("Attention", color(100), "");
-	channels[2]  = new Channel("Meditation", color(50), "");
-	channels[3]  = new Channel("Delta", color(219, 211, 42), "Dreamless Sleep");
-	channels[4]  = new Channel("Theta", color(245, 80, 71), "Drowsy");
-	channels[5]  = new Channel("Low Alpha", color(237, 0, 119), "Relaxed");
-	channels[6]  = new Channel("High Alpha", color(212, 0, 149), "Relaxed");
-	channels[7]  = new Channel("Low Beta", color(158, 18, 188), "Alert");
-	channels[8]  = new Channel("High Beta", color(116, 23, 190), "Alert");
-	channels[9]  = new Channel("Low Gamma", color(39, 25, 159), "???");
-	channels[10] = new Channel("High Gamma", color(23, 26, 153), "???");
+	channelsMindwave[0]  = new Channel("Signal Quality", color(0), "");
+	channelsMindwave[1]  = new Channel("Attention", color(100), "");
+	channelsMindwave[2]  = new Channel("Meditation", color(50), "");
+	channelsMindwave[3]  = new Channel("Delta", color(219, 211, 42), "Dreamless Sleep");
+	channelsMindwave[4]  = new Channel("Theta", color(245, 80, 71), "Drowsy");
+	channelsMindwave[5]  = new Channel("Low Alpha", color(237, 0, 119), "Relaxed");
+	channelsMindwave[6]  = new Channel("High Alpha", color(212, 0, 149), "Relaxed");
+	channelsMindwave[7]  = new Channel("Low Beta", color(158, 18, 188), "Alert");
+	channelsMindwave[8]  = new Channel("High Beta", color(116, 23, 190), "Alert");
+	channelsMindwave[9]  = new Channel("Low Gamma", color(39, 25, 159), "???");
+	channelsMindwave[10] = new Channel("High Gamma", color(23, 26, 153), "???");
 	
 	// Manual override for a couple of limits.
-	channels[0].minValue = 0;
-	channels[0].maxValue = 200;
-	channels[1].minValue = 0;
-	channels[1].maxValue = 100;
-	channels[2].minValue = 0;
-	channels[2].maxValue = 100;
-	channels[0].allowGlobal = false;
-	channels[1].allowGlobal = false;
-	channels[2].allowGlobal = false;
+	channelsMindwave[0].minValue = 0;
+	channelsMindwave[0].maxValue = 200;
+	channelsMindwave[1].minValue = 0;
+	channelsMindwave[1].maxValue = 100;
+	channelsMindwave[2].minValue = 0;
+	channelsMindwave[2].maxValue = 100;
+
+  channelPleth[0] = new Channel("Pleth", color(255, 127, 0), "???");
+  channelPleth[0].minValue = 0;
+  channelPleth[0].maxValue = 100;
 	
+// ----------------------------------------
+
 	// Set up the graph
-	mindWave = new Graph(0, 0, width, round(height * 0.10f));
-  emg = new Graph(0, round(height * 0.10f), width, round(height * 0.10f));
-  eda = new Graph(0, round(height * 0.20f), width, round(height * 0.10f));
-  ecg = new Graph(0, round(height * 0.30f), width, round(height * 0.10f));
+	mindWave = new Graph(0, 0, width, round(height * 0.10f), channelsMindwave, 1000, "Lines");
+  pleth = new Graph(0, round(height * 0.10f), width, round(height * 0.10f), channelPleth, 200, "Lines");
+  ecg = new Graph(0, round(height * 0.30f), width, round(height * 0.10f), channelPleth, 200, "Lines");
+  emg = new Graph(0, round(height * 0.20f), width, round(height * 0.10f), channelPleth, 200, "Lines");
 	
 	connectionLight     = new ConnectionLight(width - 98, 10, 10);
   bluetoothConnection = new ConnectionLight(width - 98, 30, 10);
@@ -197,27 +206,29 @@ public void draw() {
 
 
   background(180);
-  lableHeartRate.setValue(heartRateString);
-  drawings.drawRectangle(0,0,width,round(height*0.40f),0,0,255,150);
-  
+  pulseValue.setValue(heartRateString);
+  attentionValue.setValue(String.valueOf(channelsMindwave[1].getLatestPoint().value));
+  meditationValue.setValue(String.valueOf(channelsMindwave[2].getLatestPoint().value));
   lableID.setValue(String.valueOf(globalID));
-	
+  drawings.drawRectangle(0,0,width,round(height*0.40f),0,0,255,255,255,150);
+  
 
   mindWave.draw();
   mindWave.drawGrid();
-  emg.draw();
-  ecg.draw();
-  eda.draw();
+  // emg.draw();
+  // ecg.draw();
+  pleth.draw();
   drawings.drawLine(0,round(mindWave.y + (height * 0.10f)), width, round(mindWave.y + (height * 0.10f)),2);
   drawings.drawLine(0,round(emg.y + (height * 0.10f)), width, round(emg.y + (height * 0.10f)),2);
   drawings.drawLine(0,round(ecg.y + (height * 0.10f)), width, round(ecg.y + (height * 0.10f)),2);
-  drawings.drawLine(0,round(eda.y + (height * 0.10f)), width, round(eda.y + (height * 0.10f)),2);
+  drawings.drawLine(0,round(pleth.y + (height * 0.10f)), width, round(pleth.y + (height * 0.10f)),2);
   drawings.drawLine(20,round(height * 0.44f), 210, round(height * 0.44f),1);
   noStroke();
-  drawings.drawRectangle(10,10,195,300,0,0,255,150);
-  drawings.drawRectangle(10, round(height * 0.408f) ,360,300,0,0,255,150);  
-  drawings.drawRectangle(0, 0, 88, 58, width - 98, 10, 255, 150);
-	connectionLight.update(channels[0].getLatestPoint().value);
+  // drawings.drawRectangle(10,10,195,300,0,0,255,150);
+  drawings.drawRectangle(round(width*0.008f), round(height * 0.408f) ,360,300,0,0,255,255,255,150);  
+  drawings.drawRectangle(0, 0, 88, 78, width - 98, 10, 255,255,255, 150);
+  drawings.drawRectangle(round(width*0.13f), round(height * 0.49f),40,20, 0,0, 255-isReadyColor ,isReadyColor - 50,0, 220);
+	connectionLight.update(channelsMindwave[0].getLatestPoint().value);
 	connectionLight.draw();
   connectionLight.mindWave.draw();
   bluetoothConnection.update(wPm.conValue);
@@ -233,30 +244,32 @@ public void draw() {
 
   if (isRobotStarted){
 
-    if((frameCount%10)==0){
+    if((frameCount%5)==0){
 
-      float amplitude = 100;
+      float amplitude = 120;
       float x = amplitude * cos(angle);
       angle += aVelocity;
       calculateBioInput();
 
-      if (debugVariable > 0 && debugVariable <= 100){
-        gAngle = (int) map(debugVariable, 0, 100, 90, 00);
-        z = (int) map (debugVariable,0, 100, 120, 250);
-        gGripperWidth = (int) map(debugVariable, 0, 100, 0, 180);
-        speed = (int) map(debugVariable, 0, 100, 0, 255);
-      }
+      gAngle = (int) map(x, 0, 100, 90, 00);
+      z = (int) map (x,0, 100, 120, 250);
+      z = (int) map (x,0, 100, 120, 250);
+      gGripperWidth = (int) map(x, 0, 100, 0, 180);
+      led = (int) map(x, 0, 100, 0, 255);
     
-      robot.setRobotArm(x, 130, z, gAngle, gGripperWidth, speed, 1, true);
+      robot.setRobotArm(x, 130, z, gAngle, gGripperWidth, 1, true, 255, led, 255, led, 2);
       println("Robot Movement");
     }
   }
 
-  if(isTimerStarted)
-    timerLable.setValue(String.valueOf(second()));
-
   gridYisDrawn = false;
   gridXisDrawn = false;
+
+
+  if(!textToSpeech.nextTextToSpeech && !stepBack && !robotAnimation.isNextAnimation)
+    isReadyColor = 255;
+  else
+    isReadyColor = 0;
 
 }
 
@@ -264,7 +277,6 @@ public void draw() {
 
 public void clientEvent(Client  myClient) {
 
-  
 	if (myClient.available() > 0) {
   
     byte[] inBuffer = myClient.readBytesUntil(caReturn);
@@ -285,7 +297,6 @@ public void serialEvent(Serial thisPort){
 
   if (thisPort == wPm.port && wPm.deviceInstanciated){
      manageSE.newPulse();
-
   }
 
   if (thisPort == wA.port && wA.deviceInstanciated){
@@ -323,26 +334,8 @@ public void controlEvent(ControlEvent theEvent) {
               +theEvent.getStringValue()
               );
       
-      voice = Integer.parseInt(theEvent.getStringValue());
-
-      // if(isStoring){
-
-      //   String[] s = split(theEvent.getStringValue(), ',');
-      //   helpers.storePositionToTable(Integer.parseInt(s[1]),
-      //                               Integer.parseInt(s[2]), 
-      //                               Integer.parseInt(s[3]), 
-      //                               Integer.parseInt(s[4]), 
-      //                               Integer.parseInt(s[5]), 
-      //                               Integer.parseInt(s[6]), 
-      //                               Integer.parseInt(s[7]), 
-      //                               Integer.parseInt(s[8]), 
-      //                               Integer.parseInt(s[9]), 
-      //                               Integer.parseInt(s[10]), 
-      //                               Integer.parseInt(s[11]), 
-      //                               Integer.parseInt(s[12]), 
-      //                               Integer.parseInt(s[13]));
-
-      // }
+      globalID = Integer.parseInt(theEvent.getStringValue());
+      helpers.setStep();
 
       if(theEvent.getStringValue().equals("NewTable") && isReadyToStore){
          println("New Table Created");
@@ -352,7 +345,7 @@ public void controlEvent(ControlEvent theEvent) {
 
     if(theEvent.getName().equals("Reset_Robot")){
       println("reset robot event ");
-      robot.setRobotArm( 0, 150, 80, 90, 90, 254, 200, true); 
+      robot.setRobotArm( 0, 150, 50, 70, 90, 200, true, 255, 255, 255, 255, 2); 
     }
 
     if(theEvent.getName().equals("saveBtn")){
@@ -378,17 +371,23 @@ public void controlEvent(ControlEvent theEvent) {
     }
 
     if(theEvent.getName().equals("Back")){
-      if(!nextStep && !stepBack){
+      if(!textToSpeech.nextTextToSpeech && !stepBack && !robotAnimation.isNextAnimation){
+        globalID--;
+        textToSpeech.checkTableConstrains();
+        println("globalID: "+globalID);
         stepBack = true;
-        nextStep = true;
+        helpers.setStep();
       }
     }
 
     if(theEvent.getName().equals("Forward")){
-      if(!nextStep && !stepForward){
+      if(!textToSpeech.nextTextToSpeech && !stepForward && !robotAnimation.isNextAnimation){
+        globalID++;
+        textToSpeech.checkTableConstrains();
+        println("globalID: "+globalID);
         stepForward = true;
-        nextStep = true;
-      } 
+        helpers.setStep();
+      }  
     }
  }
 } 
@@ -414,27 +413,27 @@ public void keyPressed(){
       if (keyCode == LEFT){
         int yy = robot.stretching(20);
         println("#streched Position in keyPressed Left: "  + yy);
-        robot.setRobotArm(0, yy, 80, 45, 90, 255, 200, true);
+        robot.setRobotArm(0, yy, 80, 45, 90, 200, true, 255,255,0,255,2);
         println("+ IsStRun: +" + isStrRun); 
       }
       if (keyCode == RIGHT){
         int yy = robot.stretching(50);
         println("( streched Position in keyPressed Right: )"  + yy);
-        robot.setRobotArm(0, yy , 80, 45, 90, 255, 200, true);
+        robot.setRobotArm(0, yy, 80, 45, 90, 200, true, 255,255,0,255,2);
         println("+ IsStRun: +" + isStrRun); 
       }
       if (keyCode == UP){
-        // robot.setRobotArm(0, debugVariable, 80, 45, 90, 255, 200, true);
+        robot.setRobotArm(0,debugVariable,100,90,90,200,true,255,0,255,0,2);
         debugVariable += 2;
 
       }
       if (keyCode == DOWN){
-        // robot.setRobotArm(0, debugVariable, 80, 45, 90, 255, 200, true);
+        robot.setRobotArm(0,debugVariable,100,90,90,200,true,255,0,255,0,2);
         debugVariable -= 2;
       }
     }
 
-    // println("Debug Variable : " + debugVariable);
+    println("Debug Variable : " + debugVariable);
 }
 
 // ------------------------------------------------------------------------------------
@@ -457,15 +456,15 @@ public Kinect addControlFrame(String theName, int theWidth, int theHeight) {
 public void calculateBioInput(){
 
 //dont forget to replace heartRate with 100
-  bioValue = ((100 - channels[2].getLatestPoint().value) + (100 - 60))/2;
+  bioValue = ((100 - channelsMindwave[2].getLatestPoint().value) + (100 - 60))/2;
   // println("Bio Value:" + bioValue + " " + channels[2].getLatestPoint().value + " " + heartRate );
-
-
 }
 
- public boolean sketchFullScreen() {
-  return true;
-  }
+// ------------------------------------------------------------------------------------
+
+public boolean sketchFullScreen() {
+return false;
+}
 class Channel { 
 
 	String name;
@@ -516,7 +515,7 @@ class Channel {
 }
 class ConnectionLight {
 	int x, y;
-	int currentColor = 0;
+	int currentColor = color(255,0,0);
 	int goodColor = color(0, 255, 0);
 	int badColor = color(255, 255, 0);
 	int noColor = color(255, 0, 0);
@@ -569,11 +568,11 @@ class ConnectionLight {
 		// fill(255, 150);
 		// rect(0, 0, 88, 28);
 		
-		
 		// fill(currentColor);
 		ellipseMode(CORNER);
 		circle.setFill(currentColor);
 		shape(circle);
+		// println("currentColor: "+currentColor);
 		//ellipse(5, 4, diameter, diameter);
 				
 		popMatrix();
@@ -584,7 +583,8 @@ class ConnectionLight {
 class Drawings  {
   Textarea consolTextArea;
   RadioButton toggleTestMode;
-  float sV = 1;
+
+  private int sF = 1; //scaleFactor
 
   public void drawLine(int x1, int y1, int x2, int y2, int th){
     
@@ -597,10 +597,10 @@ class Drawings  {
 
   // ------------------------------------------------------------------------------------
 
-  public void drawRectangle(int x1, int y1, int x2, int y2, int tx, int ty, int f, int fa){
+  public void drawRectangle(int x1, int y1, int x2, int y2, int tx, int ty, int f1, int f2, int f3, int fa){
     pushMatrix();
     translate(tx,ty);
-    fill(f, fa);
+    fill(f1, f2, f3, fa);
     rect(x1, y1, x2, y2);
     popMatrix();
   }
@@ -621,6 +621,7 @@ class Drawings  {
     PFont fontSmallLight = createFont("ProximaNova-Light",15);
     PFont fontHeadline = createFont("ProximaNova-Thin",20);
     PFont fontHeadline_2 = createFont("ProximaNova-Bold",20);
+    PFont fontHeadline_3 = createFont("ProximaNova-Light",20);
     PFont fontHeadLableBig = createFont("ProximaNova-Thin",100);
 
   // fontHeadline
@@ -637,112 +638,162 @@ class Drawings  {
     //  .setSize(100,20)
     //  ;
   
-  controlP5.addButton("saveBtn")
-    .setValue(0)
-    .setCaptionLabel("save Values")
-    .setSize(round(100*sV),round(20*sV))
-    .setPosition(round(260*sV),round(height * 0.47f))
-    .setColorBackground(color(0, 200, 0))
-    ;
+  // controlP5.addButton("saveBtn")
+  //   .setValue(0)
+  //   .setCaptionLabel("save Values")
+  //   .setSize(round(100),round(20))
+  //   .setPosition(round(260),round(height * 0.47))
+  //   .setColorBackground(color(0, 200, 0))
+  //   ;
 
   
-  controlP5.addButton("loadBtnDefault")
-    .setValue(0)
-    .setCaptionLabel("load Default")
-    .setSize(round(100*sV),round(20*sV))
-    .setPosition(round(20*sV),round(height * 0.51f))
-    .setColorActive(127)
-    .setColorBackground(color(200, 130, 0))
-    ;
+  // controlP5.addButton("loadBtnDefault")
+  //   .setValue(0)
+  //   .setCaptionLabel("load Default")
+  //   .setSize(round(100),round(20))
+  //   .setPosition(round(20),round(height * 0.51))
+  //   .setColorActive(127)
+  //   .setColorBackground(color(200, 130, 0))
+  //   ;
 
-  controlP5.addButton("loadBtnLastPosition")
-    .setValue(0)
-    .setCaptionLabel("load last Position")
-    .setSize(round(100*sV),round(20*sV))
-    .setPosition(round(140*sV),round(height * 0.51f))
-    .setColorCaptionLabel(0) 
-    .setColorValueLabel(127)
-    .setColorBackground(color(200, 130, 0))
-    ;
+  // controlP5.addButton("loadBtnLastPosition")
+  //   .setValue(0)
+  //   .setCaptionLabel("load last Position")
+  //   .setSize(round(100),round(20))
+  //   .setPosition(round(140),round(height * 0.51))
+  //   .setColorCaptionLabel(0) 
+  //   .setColorValueLabel(127)
+  //   .setColorBackground(color(200, 130, 0))
+  //   ;
   
-  // controlP5.addButton("Start_Robot")
-  //  .setValue(0)
-  //  .setCaptionLabel("START ROBOT")
-  //  .setPosition(round(500*sV),round(height * 0.42))
-  //  .setSize(round(100*sV),round(20*sV))
-  //  ;
+  controlP5.addButton("Start_Robot")
+   .setValue(0)
+   .setCaptionLabel("START ROBOT")
+   .setPosition(round(500),round(height * 0.42f))
+   .setSize(round(100),round(20))
+   ;
   
-  // controlP5.addButton("Reset_Robot")
-  //  .setValue(0)
-  //  .setCaptionLabel("RESET ROBOT")
-  //  .setPosition(round(500*sV),round(height * 0.44))
-  //  .setSize(round(100*sV),round(20*sV))
-  //  ;
+  controlP5.addButton("Reset_Robot")
+   .setValue(0)
+   .setCaptionLabel("RESET ROBOT")
+   .setPosition(round(width*0.3f),round(height * 0.44f))
+   .setSize(round(100),round(20))
+   ;
      
   controlP5.addButton("Back")
    .setValue(0)
    .setCaptionLabel("Back")
-   .setPosition(round(500*sV),round(height * 0.46f))
-   .setSize(round(100*sV),round(20*sV))
+   .setPosition(round(width*0.07f),round(height * 0.53f))
+   .setSize(round(100*sF),round(20*sF))
    ;
 
    controlP5.addButton("Forward")
    .setValue(0)
    .setCaptionLabel("Forward")
-   .setPosition(round(800*sV),round(height * 0.46f))
-   .setSize(round(100*sV),round(20*sV))
+   .setPosition(round(width*0.13f),round(height * 0.53f))
+   .setSize(round(100*sF),round(20*sF))
    ;
 
-  toggleTestMode = controlP5.addRadioButton("testMode")
-         .setPosition(round(20*sV),round(height * 0.458f))
-         .setSize(round(20*sV),round(10*sV))
-         .setColorForeground(color(120))
-         .setColorActive(color(0,190,0))
-         .setColorLabel(color(255,0,0))
-         .addItem("Toggle Test Mode",1)
-         ;      
+  // toggleTestMode = controlP5.addRadioButton("testMode")
+  //        .setPosition(round(20),round(height * 0.458))
+  //        .setSize(round(20),round(10))
+  //        .setColorForeground(color(120))
+  //        .setColorActive(color(0,190,0))
+  //        .setColorLabel(color(255,0,0))
+  //        .addItem("Toggle Test Mode",1)
+  //        ;      
 
 // ------------------------------------------------------------------------------------
 
-  lableHeartRate = controlP5.addTextlabel("lable")
-                  .setText(heartRateString)
-                  .setPosition(round(10*sV),round(160*sV))
-                  .setColorValue(255)
-                  .setFont(fontHeadLableBig)
-                  ;
+// -------------    Mindwave Lables   ---------------------
 
-  textHeartRate = controlP5.addTextlabel("label2")
-                  .setText("Heart Rate")
-                  .setPosition(round(15*sV),round(260*sV))
-                  .setColorValue(255)
-                  .setFont(createFont("Helvetica",16))
-                  ;
+  textMindwave = controlP5.addTextlabel("label2")
+              .setText("MINDWAVE")
+              .setPosition(round(width*0.01f),round(height*0.08f))
+              .setColor(0)
+              .setFont(fontSmallBold)
+              .setLetterSpacing(110);
+              ;
+  attentionLevel = controlP5.addTextlabel("attentionLevel")
+              .setText("Attention Level:")
+              .setPosition(round(width*0.07f),round(height*0.08f))
+              .setColor(0)
+              .setFont(fontSmallLight)
+              ;
+  attentionValue = controlP5.addTextlabel("attentionValue")
+              .setText("Na")
+              .setPosition(round(width*0.125f),round(height*0.076f))
+              .setColor(0)
+              .setFont(fontHeadline_3)
+              ;
+  meditationLevel = controlP5.addTextlabel("meditationLevel")
+              .setText("Meditation Level:")
+              .setPosition(round(width*0.15f),round(height*0.08f))
+              .setColor(0)
+              .setFont(fontSmallLight)
+              ;
+  meditationValue = controlP5.addTextlabel("meditationValue")
+              .setText("Na")
+              .setPosition(round(width*0.21f),round(height*0.076f))
+              .setColor(0)
+              .setFont(fontHeadline_3)
+              ;
+  blinkStrength = controlP5.addTextlabel("blinkStrength")
+              .setText("Blink Strength:")
+              .setPosition(round(width*0.235f),round(height*0.08f))
+              .setColor(0)
+              .setFont(fontSmallLight)
+              ;
+  blinkValue = controlP5.addTextlabel("blinkValue")
+              .setText("Na")
+              .setPosition(round(width*0.287f),round(height*0.076f))
+              .setColor(0)
+              .setFont(fontHeadline_3)
+              ;
 
-  timerLable = controlP5.addTextlabel("lable3")
-                  .setText("00.00")
-                  .setPosition(round(10*sV),round(20*sV))
-                  .setColorValue(255)
-                  .setFont(createFont("Helvetica",50))
-                  ;
+// -------------    Pulsemeter Lables   ---------------------
+
+  textPulseMeter = controlP5.addTextlabel("pulseMeter")
+              .setText("PULSEMETER")
+              .setPosition(round(width*0.01f),round(height*0.18f))
+              .setColor(0)
+              .setFont(fontSmallBold)
+              .setLetterSpacing(110);
+              ;
+  pulseLevel = controlP5.addTextlabel("pulseLevel")
+              .setText("Pulse:")
+              .setPosition(round(width*0.07f),round(height*0.18f))
+              .setColor(0)
+              .setFont(fontSmallLight)
+              ;
+  pulseValue = controlP5.addTextlabel("pulseValue")
+              .setText("Na")
+              .setPosition(round(width*0.095f),round(height*0.176f))
+              .setColor(0)
+              .setFont(fontHeadline_3)
+              ;                          
+
+// -------------    HeadLines   ---------------------
+
   headlineText_1 = controlP5.addTextlabel("label4")
                   .setText("ROBOT CONTROLS: ")
-                  .setPosition(round(15*sV),round(height * 0.42f))
+                  .setPosition(round(width*0.01f),round(height * 0.42f))
                   .setColorValue(255)
                   .setFont(fontHeadline)
                   ;
  
   // headlineText_2 = controlP5.addTextlabel("label5")
   //               .setText("ROBOT CONTROLS: ")
-  //               .setPosition(round(490*sV),round(height * 0.42))
+  //               .setPosition(round(490),round(height * 0.42))
   //               .setColorValue(255)
   //               .setFont(fontHeadline_2)
   //               ;
 
 
 
-  controlP5.addTextfield("Enter Robot Position - Press [ ENTER ] to test")
-                .setPosition(round(20*sV),round(height * 0.47f))
-                .setSize(round(220*sV),round(20*sV))
+  controlP5.addTextfield("Set Global ID - [ ENTER ]")
+                .setPosition(round(width*0.07f),round(height * 0.49f))
+                .setSize(100,20)
                 .setFont(fontSmallBold)
                 .setFocus(true)
                 .setColorActive(0)
@@ -759,37 +810,32 @@ class Drawings  {
   //                 .setColorBackground(color(0, 100))
   //                 .setColorForeground(color(255, 100))
 
-  controlP5.addFrameRate().setInterval(10).setColor(0).setPosition(round(10*sV),height - round(30*sV)).setFont(fontSmallLight);
+  controlP5.addFrameRate().setInterval(10).setColor(0).setPosition(round(10),height - round(30)).setFont(fontSmallLight);
   // console = controlP5.addConsole(consolTextArea);              
 
 
-   lableID = controlP5.addTextlabel("lable6")
-                .setText("id")
-                .setPosition(250,100)
+   lableID = controlP5.addTextlabel("lableID")
+                .setText("global ID")
+                .setPosition(round(width*0.01f),round(height * 0.44f))
                 .setColorValue(255)
-                .setFont(fontHeadline)
+                .setFont(fontHeadLableBig)
                 ;
     textID = controlP5.addTextlabel("label7")
                 .setText("ID")
-                .setPosition(270,200)
+                .setPosition(round(width*0.02f),round(height*0.53f))
                 .setColorValue(255)
-                .setFont(fontSmallBold)
+                .setFont(fontHeadline)
                 ;                     
 
 
   }
-
-
-
-
-
 
 }
 
 
 
 class Graph {
-	int x, y, w, h, pixelsPerSecond, gridColor, gridX, originalW, originalX;
+	int x, y, w, h, pixelsPerSecond, gridColor, gridX, originalW, originalX, timeScale;
 	long leftTime, rightTime, gridTime;
 	boolean scrollGrid;
 	String renderMode;
@@ -797,18 +843,24 @@ class Graph {
 	Slider pixelSecondsSlider;
 	RadioButton renderModeRadio;
 	RadioButton scaleRadio;
+	Channel[] thisChannels;
+	public boolean isDataToGraph;
 
 // ------------------------------------------------------------------------------------
 
-	Graph(int _x, int _y, int _w, int _h) {
+	Graph(int _x, int _y, int _w, int _h, Channel[] _thisChannels, int _timeScale, String _renderMode) {
 		x = _x;
 		y = _y;
 		w = _w;
 		h = _h;
+		timeScale = _timeScale;
+		thisChannels =  _thisChannels;
 		pixelsPerSecond = 10;
 		gridColor = color(0);
 		gridSeconds = 1; // seconds per grid line
 		scrollGrid = false;
+		isDataToGraph = false;
+		renderMode = _renderMode;
 
 
 
@@ -856,7 +908,6 @@ class Graph {
 
 		
 		//pixelsPerSecond = round(pixelSecondsSlider.value());
-		renderMode = "Lines";
 		
 
 		w = originalW;
@@ -869,7 +920,7 @@ class Graph {
 		// Figure out the left and right time bounds of the graph, based on
 		// the pixels per second value
 		rightTime = System.currentTimeMillis();
-		leftTime = rightTime - ((w / pixelsPerSecond) * 1000);
+		leftTime = rightTime - ((w / pixelsPerSecond) * timeScale);
 		
 		if(isDataToGraph){
 
@@ -881,30 +932,33 @@ class Graph {
 			// Draw each channel (pass in as constructor arg?)
 
 			noFill();				
-			// if(renderMode == "Shaded" || renderMode == "Triangles") noStroke();		
-			if(renderMode == "Lines") strokeWeight(1.5f);
+			if(renderMode == "Shaded" || renderMode == "Triangles") noStroke();		
+			if(renderMode == "Lines" || renderMode == "Curves") strokeWeight(1.5f);
+			// println("Before loop");
 			
-			for (int i = 0; i < channels.length; i++) {
-				Channel thisChannel = channels[i];
+			for (int i = 0; i < thisChannels.length; i++) {
+				Channel thisChannel = thisChannels[i];
+				// println("In for loop");
+				// println("Drawing value:" + thisChannel.getLatestPoint().value + " " + i ) ;
 				
 				if(thisChannel.graphMe) {
 				
 					//Draw the line
-					if(renderMode == "Lines") stroke(thisChannel.drawColor);
+					if(renderMode == "Lines" || renderMode == "Curves") stroke(thisChannel.drawColor);
 
-					// if(renderMode == "Shaded" || renderMode == "Triangles") {
-					// 	noStroke();
-					// 	fill(thisChannel.drawColor, 120);
-					// }
+					if(renderMode == "Shaded" || renderMode == "Triangles") {
+						noStroke();
+						fill(thisChannel.drawColor, 120);
+					}
 				
-					// if(renderMode == "Triangles") {
-					// 	beginShape(TRIANGLES);
-					// }
-					// else {
+					if(renderMode == "Triangles") {
+						beginShape(TRIANGLES);
+					}
+					else {
 						beginShape();			
-					// }
+					}
 
-					// if(renderMode == "Curves" || renderMode == "Shaded") vertex(0, h);
+					if(renderMode == "Curves") vertex(0, h);
 				
 				
 					for (int j = 0; j < thisChannel.points.size(); j++) {
@@ -927,19 +981,19 @@ class Graph {
 							// ellipseMode(CENTER);
 							// ellipse(pointX, pointY, 5, 5);
 					
-							// if(renderMode == "Curves") {
-							// 	curveVertex(pointX, pointY);					
-							// }
-							// else {
+							if(renderMode == "Curves") {
+								curveVertex(pointX, pointY);					
+							}
+							else {
 								vertex(pointX, pointY);
-							// }				
+							}				
 						}
 					}
 				}
 				
-				// if(renderMode == "Curves" || renderMode == "Shaded") vertex(w, h);
-				if(renderMode == "Lines") endShape();
-				// if(renderMode == "Shaded") endShape(CLOSE);
+				if(renderMode == "Curves") vertex(w, h);
+				if(renderMode == "Lines" || renderMode == "Curves" || renderMode == "Triangles") endShape();
+				if(renderMode == "Shaded") endShape(CLOSE);
 			}
 			
 
@@ -954,6 +1008,7 @@ class Graph {
 			// rect(10, 10, 195, 300);
 
 		}
+
 
 	}
 
@@ -1038,60 +1093,61 @@ class HelperClass {
     }
   }
 
-//List of robot data: x1-10,y1-10,  xx,yy to xx2,yy2, Turn towards or away TT or TA, Open or Close claw OC or CC, Stretch or Contract S or C, Arousal in %, Classification of move <A>, Other: emotions etc
-public void newStorePositionTable() {
-  isStoring = true;
-  tableRm = new Table();
-  tableRm.addColumn("ID");
-  tableRm.addColumn("X");
-  tableRm.addColumn("Y");
-  tableRm.addColumn("Z");
-  tableRm.addColumn("GripperAngle");
-  tableRm.addColumn("GripperWidth");
-  tableRm.addColumn("EyeColor");
-  tableRm.addColumn("Easing");
-  tableRm.addColumn("X1");
-  tableRm.addColumn("Y1");
-  tableRm.addColumn("Turning");
-  tableRm.addColumn("Claw");
-  tableRm.addColumn("Streching");
-  tableRm.addColumn("Arousal");
-}
+// ------------------------------------------------------------------------------------    
 
-public void storePositionToTable(int x, int y, int z, int gripperAngle, int gripperWidth, int eyeColor, int easing, int x1, int y1, int turning, int claw, int streching, int arousal){
-
-  TableRow newRow = tableRm.addRow();
-  newRow.setInt("ID", tableRm.getRowCount() -1);
-  newRow.setInt("X", x);
-  newRow.setInt("Y", y);
-  newRow.setInt("Z", z);
-  newRow.setInt("GripperAngle", gripperAngle);
-  newRow.setInt("GripperWidth", gripperWidth);
-  newRow.setInt("EyeColor", eyeColor);
-  newRow.setInt("Easing", easing);
-  newRow.setInt("X1", x1);
-  newRow.setInt("Y1", y1);
-  newRow.setInt("Turning", turning);
-  newRow.setInt("Claw", claw);
-  newRow.setInt("Streching", streching);
-  newRow.setInt("Arousal", arousal);
-  storingID =  tableRm.getRowCount() -1;
-  println("Movement Stored");
-}
-
-
-
-
-public void endStoring() {
-    if(isReadyToStore){
-      saveTable(table, String.format("data/RobotMovements.csv"), "csv");
-      println("Storing finished");
-      tableIndexStoring ++;
-      isStoring = false;
-    }
+  //List of robot data: x1-10,y1-10,  xx,yy to xx2,yy2, Turn towards or away TT or TA, Open or Close claw OC or CC, Stretch or Contract S or C, Arousal in %, Classification of move <A>, Other: emotions etc
+  public void newStorePositionTable() {
+    isStoring = true;
+    tableRm = new Table();
+    tableRm.addColumn("ID");
+    tableRm.addColumn("X");
+    tableRm.addColumn("Y");
+    tableRm.addColumn("Z");
+    tableRm.addColumn("GripperAngle");
+    tableRm.addColumn("GripperWidth");
+    tableRm.addColumn("EyeColor");
+    tableRm.addColumn("Easing");
+    tableRm.addColumn("X1");
+    tableRm.addColumn("Y1");
+    tableRm.addColumn("Turning");
+    tableRm.addColumn("Claw");
+    tableRm.addColumn("Streching");
+    tableRm.addColumn("Arousal");
   }
 
+  // ------------------------------------------------------------------------------------  
 
+  public void storePositionToTable(int x, int y, int z, int gripperAngle, int gripperWidth, int eyeColor, int easing, int x1, int y1, int turning, int claw, int streching, int arousal){
+
+    TableRow newRow = tableRm.addRow();
+    newRow.setInt("ID", tableRm.getRowCount() -1);
+    newRow.setInt("X", x);
+    newRow.setInt("Y", y);
+    newRow.setInt("Z", z);
+    newRow.setInt("GripperAngle", gripperAngle);
+    newRow.setInt("GripperWidth", gripperWidth);
+    newRow.setInt("EyeColor", eyeColor);
+    newRow.setInt("Easing", easing);
+    newRow.setInt("X1", x1);
+    newRow.setInt("Y1", y1);
+    newRow.setInt("Turning", turning);
+    newRow.setInt("Claw", claw);
+    newRow.setInt("Streching", streching);
+    newRow.setInt("Arousal", arousal);
+    storingID =  tableRm.getRowCount() -1;
+    println("Movement Stored");
+  }
+
+// ------------------------------------------------------------------------------------  
+
+  public void endStoring() {
+      if(isReadyToStore){
+        saveTable(table, String.format("data/RobotMovements.csv"), "csv");
+        println("Storing finished");
+        tableIndexStoring ++;
+        isStoring = false;
+      }
+  }
 
 // ------------------------------------------------------------------------------------  
 // Extend core's Map function to the Long datatype.
@@ -1100,7 +1156,7 @@ public void endStoring() {
     return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min; 
   }
 
-// ------------------------------------------------------------------------------------
+  // ------------------------------------------------------------------------------------
 
   public long constrainLong(long value, long min_value, long max_value) {
     if(value > max_value) return max_value;
@@ -1108,7 +1164,7 @@ public void endStoring() {
     return value;
   }
 
-// ------------------------------------------------------------------------------------
+  // ------------------------------------------------------------------------------------
 
   public void checkSerialPorts(){
    for (int i = 0; i < Serial.list().length; i++) {
@@ -1122,8 +1178,19 @@ public void endStoring() {
         isMelziPort = true;
        }
     }
-  }  
-	
+  }
+
+  // ------------------------------------------------------------------------------------
+
+  public void setStep(){
+   textToSpeech.nextTextToSpeech = true;
+    if(globalID == 1){
+      robotAnimation.isNextAnimation = true;
+    }  
+
+    robotAnimation.standValue = false;
+  }
+
 }
 
 
@@ -1315,7 +1382,7 @@ class ManageCLE {
 
 		try {
         org.json.JSONObject json = new org.json.JSONObject(data);
-        channels[0].addDataPoint(Integer.parseInt(json.getString("poorSignalLevel")));
+        channelsMindwave[0].addDataPoint(Integer.parseInt(json.getString("poorSignalLevel")));
       	}
       	catch (JSONException e) {
       	// println(e); 	
@@ -1326,49 +1393,49 @@ class ManageCLE {
       		org.json.JSONObject json = new org.json.JSONObject(data);   
         	org.json.JSONObject esense = json.getJSONObject("eSense");
         	if (esense != null) {
-          	channels[1].addDataPoint(Integer.parseInt(esense.getString("attention")));
-          	channels[2].addDataPoint(Integer.parseInt(esense.getString("meditation")));
-          	// print(channels[1].getLatestPoint().value);
+          	channelsMindwave[1].addDataPoint(Integer.parseInt(esense.getString("attention")));
+          	channelsMindwave[2].addDataPoint(Integer.parseInt(esense.getString("meditation")));
+          	// print(channelsMindwave[1].getLatestPoint().value);
           	isEsenseEvent = true;
         }
         
         org.json.JSONObject eegPower = json.getJSONObject("eegPower");
         
         if (eegPower != null) {
-          channels[3].addDataPoint(Integer.parseInt(eegPower.getString("delta")));
-          channels[4].addDataPoint(Integer.parseInt(eegPower.getString("theta"))); 
-          channels[5].addDataPoint(Integer.parseInt(eegPower.getString("lowAlpha")));
-          channels[6].addDataPoint(Integer.parseInt(eegPower.getString("highAlpha")));  
-          channels[7].addDataPoint(Integer.parseInt(eegPower.getString("lowBeta")));
-          channels[8].addDataPoint(Integer.parseInt(eegPower.getString("highBeta")));
-          channels[9].addDataPoint(Integer.parseInt(eegPower.getString("lowGamma")));
-          channels[10].addDataPoint(Integer.parseInt(eegPower.getString("highGamma")));
+          channelsMindwave[3].addDataPoint(Integer.parseInt(eegPower.getString("delta")));
+          channelsMindwave[4].addDataPoint(Integer.parseInt(eegPower.getString("theta"))); 
+          channelsMindwave[5].addDataPoint(Integer.parseInt(eegPower.getString("lowAlpha")));
+          channelsMindwave[6].addDataPoint(Integer.parseInt(eegPower.getString("highAlpha")));  
+          channelsMindwave[7].addDataPoint(Integer.parseInt(eegPower.getString("lowBeta")));
+          channelsMindwave[8].addDataPoint(Integer.parseInt(eegPower.getString("highBeta")));
+          channelsMindwave[9].addDataPoint(Integer.parseInt(eegPower.getString("lowGamma")));
+          channelsMindwave[10].addDataPoint(Integer.parseInt(eegPower.getString("highGamma")));
 
          	if (isRecording){
   			TableRow newRow = table.addRow();
   			newRow.setInt("ID", table.getRowCount() -1);
          	newRow.setInt("Heart_Rate", receivedHeartRate);
-  			newRow.setInt("attention", channels[1].getLatestPoint().value);
-  			newRow.setInt("meditation", channels[2].getLatestPoint().value);
-  			newRow.setInt("delta", channels[3].getLatestPoint().value);
-  			newRow.setInt("theta", channels[4].getLatestPoint().value);
-  			newRow.setInt("lowAlpha", channels[5].getLatestPoint().value);
-  			newRow.setInt("highAlpha", channels[6].getLatestPoint().value);
-  			newRow.setInt("lowBeta", channels[7].getLatestPoint().value);
-  			newRow.setInt("highBeta", channels[8].getLatestPoint().value);
-  			newRow.setInt("lowGamma", channels[9].getLatestPoint().value);
-  			newRow.setInt("highGamma", channels[10].getLatestPoint().value);
+  			newRow.setInt("attention", channelsMindwave[1].getLatestPoint().value);
+  			newRow.setInt("meditation", channelsMindwave[2].getLatestPoint().value);
+  			newRow.setInt("delta", channelsMindwave[3].getLatestPoint().value);
+  			newRow.setInt("theta", channelsMindwave[4].getLatestPoint().value);
+  			newRow.setInt("lowAlpha", channelsMindwave[5].getLatestPoint().value);
+  			newRow.setInt("highAlpha", channelsMindwave[6].getLatestPoint().value);
+  			newRow.setInt("lowBeta", channelsMindwave[7].getLatestPoint().value);
+  			newRow.setInt("highBeta", channelsMindwave[8].getLatestPoint().value);
+  			newRow.setInt("lowGamma", channelsMindwave[9].getLatestPoint().value);
+  			newRow.setInt("highGamma", channelsMindwave[10].getLatestPoint().value);
   			newRow.setInt("timestamp", millis());
           	id =  table.getRowCount() -1;
           	// println("Packeg");
   		  	}
 
-         isDataToGraph = true; 
+         mindWave.isDataToGraph = true; 
        	}
         
        	 packetCount++;
          for (int i = 0; i < 11; ++i) {
-          channels[i].graphMe = true; 
+          channelsMindwave[i].graphMe = true; 
          }
        
   	  }
@@ -1383,7 +1450,10 @@ class ManageSE {
 
 private boolean isHashtrue = false;
 private int heartRate = 0;
+private int plethRate = 0;
+private int oldPlethRate = 0;
 private String  pulseString  = "";
+private String  plethString  = "";
 private int lastPulseBit  = 0;
 private int counter = 0;
 private int[] bitArray = new int[8];
@@ -1452,8 +1522,20 @@ private int[] bitArray = new int[8];
       }
     }
 
-
-
+      // Check for pleth byte
+      if (counter == 1){
+        for(int i = 6; i >= 0; i--){
+          plethString += bitArray[i]; 
+        }
+        plethRate = unbinary(plethString);
+        plethRate = (int)(plethRate*0.2f + (oldPlethRate*0.8f));
+        plethString = "";
+        channelPleth[0].addDataPoint(plethRate);
+        // println(channelPleth[0].getLatestPoint().value);
+        channelPleth[0].graphMe = true; 
+        oldPlethRate = plethRate;
+        pleth.isDataToGraph = true;
+      }  
       // Check for 3 byte and add 7th bit to byte 4
       if (counter == 2){
         if (bitArray[6] == 1){
@@ -1651,8 +1733,8 @@ private static final Float  GRIPLENGTH   = 155.0f;   //lengh-of-grip
 private static final Float  WRIST_OFFSET = 28.0f;    //offset wrist-gripper
 
 /* Constrains of servo motors in milliseconds */
-private static final Integer  BASE_MAX            = 2300;
-private static final Integer  BASE_MIN            = 720;
+private static final Integer  BASE_MAX            = 2150;//2300;
+private static final Integer  BASE_MIN            = 800;//720;
 private static final Integer  SHOULDER_MAX        = 2350; 
 private static final Integer  SHOULDER_MIN        = 720; 
 private static final Integer  ELBOW_MAX           = 2370; 
@@ -1660,12 +1742,11 @@ private static final Integer  ELBOW_MIN           = 720;
 private static final Integer  WRIST_MAX           = 2370; 
 private static final Integer  WRIST_MIN           = 720;
 private static final Integer  GRIPPER_ANGLE_MAX   = 2400;
-private static final Integer  GRIPPER_ANGLE_MIN   = 700;
+private static final Integer  GRIPPER_ANGLE_MIN   = 600;
 private static final Integer  GRIPPER_MAX         = 2100;
 private static final Integer  GRIPPER_MIN         = 1450;  
 
 /* Dynamic values of the robot arm */
-
 private int     currentBase             = 00;
 private int     currentShoulder         = 00;
 private int     currentElbow            = 00;
@@ -1674,14 +1755,19 @@ private int     currentGripperAngle     = 00;
 private int     currentGripperWidth     = 00;
 private int     currentLight            = 00;
 private int     currentEasing           = 00;
+private int     currentBrightness       = 00;
+private int      verifCounter          = 0;
 
-private int       verifCounter          = 0;
-
-private float     lastX             = 0;
-private float     lastY             = 0;
-private float     lastZ             = 0;
-private float     lastGripperAngle  = 0;
-private float     lastGripperWidth  = 0;
+public float     lastX             = 0;
+public float     lastY             = 0;
+public float     lastZ             = 0;
+public float     lastGripperAngle  = 0;
+public int       lastGripperWidth  = 0;
+public int       lastR             = 0;
+public int       lastG             = 0;
+public int       lastB             = 0;
+public int       lastBrightness    = 0;
+public int       lastLed           = 2;
 
 private boolean     sendData        = false;
 private boolean     isDataVerified  = false;
@@ -1732,12 +1818,10 @@ class Robot{
   return (int) lastY; 
   }
 
+// ------------------------------------------------------------------------------------
 
-
-// // ------------------------------------------------------------------------------------
-
-  /* Inverse Kinematic Arithmetic: X can be + and -; Y and Z only positive. All values in mm! gripperAngleD must be according to the object in degree. gripperwidth in degree. And speed from 0-255 */
-  public void setRobotArm( float x, float y, float z, float gripperAngleD, int gripperWidth, int light, int easingResolution, boolean sendData ){
+  /* Inverse Kinematic Arithmetic: X can be + and -; Y and Z only positive. All values in mm! gripperAngleD must be according to the object in degree. gripperwidth in degree. And led from 0-255 */
+  public void setRobotArm( float x, float y, float z, float gripperAngleD, int gripperWidth, int easingResolution, boolean sendData, int brightnessStrip, int r, int g,  int b, int led){
 
     if(isRobotReadyToMove){
       /* send start byte */
@@ -1782,7 +1866,7 @@ class Robot{
         println("[ Data not verified ]");
       }
 
-      // println("x,y,z: " +  x + " " +  y + " " + z);
+      println("x,y,z: " +  x + " " +  y + " " + z);
 
       currentBase = (int) map(baseAngleD, 180, 0, BASE_MIN, BASE_MAX);
       currentShoulder = (int) map(shoulderAngleD, 0, 180, SHOULDER_MIN, SHOULDER_MAX);
@@ -1790,7 +1874,6 @@ class Robot{
       currentWrist = (int) map(wristAngleD, 0, 180, WRIST_MIN, WRIST_MAX);
       currentGripperAngle = (int) map(gripperAngleD, 0, 180, GRIPPER_ANGLE_MIN, GRIPPER_ANGLE_MAX);
       currentGripperWidth = (int) map(gripperWidth, 0, 180, GRIPPER_MIN, GRIPPER_MAX);
-      currentLight = light;
       if(easingResolution <= 0)
         currentEasing = 1;
       else
@@ -1798,12 +1881,17 @@ class Robot{
      
 
       if(isDataVerified && sendData){
-        sendRobotData( currentBase, currentShoulder, currentElbow, currentWrist, currentGripperAngle, currentGripperWidth, currentLight, currentEasing);
+        sendRobotData( currentBase, currentShoulder, currentElbow, currentWrist, currentGripperAngle, currentGripperWidth, currentEasing, currentBrightness, r, g, b, led);
         lastX = x;
         lastY = y;
         lastZ = z;
         lastGripperAngle = gripperAngleD;
         lastGripperWidth = gripperWidth;
+        lastR = r;
+        lastG = g;
+        lastB = b;
+        lastBrightness = brightnessStrip;
+        lastLed = led;
         println("Data verified and send");
         isDataVerified = false;
       }
@@ -1811,7 +1899,7 @@ class Robot{
 
   }
 
-// // ------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------
 
   public boolean isInRange(float value, float minimum, float maximum)
   {
@@ -1820,22 +1908,25 @@ class Robot{
     return false;
   }
 
-// // ------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------
 
-  public void sendRobotData(int currentBase, int currentShoulder, int currentElbow, int currentWrist, int currentGripperAngle, int currentGripperWidth, int currentLight, int currentEasing){
+  public void sendRobotData(int currentBase, int currentShoulder, int currentElbow, int currentWrist, int currentGripperAngle, int currentGripperWidth, int currentEasing, int currentBrightness, int r, int g, int b, int led){
 
-    if(isArduinoPort)
-    wA.port.write(String.format("Rr%d,%d,%d,%d,%d,%d,%d,%d\n",currentBase, currentShoulder, currentElbow, currentWrist, currentGripperAngle, currentGripperWidth, currentLight, currentEasing));
+    if(wA.deviceInstanciated)
+    wA.port.write(String.format("Rr%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d\n",currentBase, currentShoulder, currentElbow, currentWrist, currentGripperAngle, currentGripperWidth, currentEasing, currentBrightness, r, g, b, led));
     // wA.port.write(10);
-    println(String.format("(Rr%d,%d,%d,%d,%d,%d,%d,%d)",currentBase, currentShoulder, currentElbow, currentWrist, currentGripperAngle, currentGripperWidth, currentLight, currentEasing));
+    println(String.format("(Rr%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d)",currentBase, currentShoulder, currentElbow, currentWrist, currentGripperAngle, currentGripperWidth, currentEasing, currentBrightness, r, g, b, led));
     isRobotReadyToMove = false;
 
   }
 
 
+// ------------------------------------------------------------------------------------
+
+
   public int findLowerBound(int strechedPosition){
     for(int i = strechedPosition; i <= 349; i++){
-    setRobotArm(lastX, i, lastZ, lastGripperAngle, (int) lastGripperWidth, speed, 1, false);
+    setRobotArm(lastX, i, lastZ, lastGripperAngle, (int) lastGripperWidth, 1, false, 255, lastR, lastG, lastB, lastLed);
       if(validStrPos){
         validStrPos = false;
         return i;
@@ -1844,11 +1935,13 @@ class Robot{
   validStrPos = false;
   return (int) lastY;
   }
+
+// ------------------------------------------------------------------------------------
 
 
   public int findUpperBound(int strechedPosition){
     for(int i = strechedPosition; i >= 0; i--){
-    setRobotArm(lastX, i, lastZ, lastGripperAngle, (int) lastGripperWidth, speed, 1, false); 
+    setRobotArm(lastX, i, lastZ, lastGripperAngle, (int) lastGripperWidth, 1, false, 255, lastR, lastG, lastB, lastLed); 
       if(validStrPos){
         validStrPos = false;
         return i;
@@ -1859,12 +1952,14 @@ class Robot{
   return (int) lastY;
   }
 
-
+// ------------------------------------------------------------------------------------
 
   public void loadRobotData(){
 
     tablePositions = loadTable("data/Positions.csv", "header");
   }
+
+// ------------------------------------------------------------------------------------
 
   public void readNextRobotPosition(){
   if(newPosition && globalID <= (tablePositions.getRowCount() -1) && globalID >= 0){
@@ -1880,11 +1975,191 @@ class Robot{
         int claw = tablePositions.getInt(globalID, "Claw");
         int stretching = tablePositions.getInt(globalID, "Streching");
         int arousal = tablePositions.getInt(globalID, "Arousal");
+        //call streching somewhere here
+        // setRobotArm() here
         println("[ x: " + x + " y: " + y + " z: " + z + " gripperAngle: " + gripperAngle + " gripperWidth: " + gripperWidth + " x1: " + x1 + " y1: " + y1 + " turning: " + turning + " claw: " + claw + " stretching: " + stretching + " araousal: " + arousal + " ]");
         newPosition = false;
       }
   }
 }  
+class RobotAnimation extends Thread{
+
+boolean running;           // Is the thread running?  Yes or no?
+boolean isNextAnimation;
+int wait;
+long frameTime;
+boolean standValue; 
+
+float     xStand             = 0;
+float     yStand             = 0;
+float     zStand             = 0;
+float     gaStand            = 0;
+int       gwStand            = 0;
+int       rStand             = 0;
+int       gStand             = 0;
+int       bStand             = 0;
+int       lbStand            = 0;
+int       ledStand           = 2;
+
+
+// ------------------------------------------------------------------------------------
+
+	RobotAnimation(int _wait){
+
+		wait = _wait;
+	}
+
+// ------------------------------------------------------------------------------------	
+	
+	public void start () {
+    running = true;
+    println("Starting thread RobotAnimation (will execute every " + wait + " milliseconds.)");
+    frameTime = millis();
+    standValue = false;
+    super.start();
+  }
+ 
+// ------------------------------------------------------------------------------------
+ 
+  // We must implement run, this gets triggered by start()
+  public void run () {
+    // sleep(2000);
+    sleep(300);
+    while (running) {
+      if(isNextAnimation){
+        checkAnimations();
+      }
+      if(!textToSpeech.nextTextToSpeech && isRobotReadyToMove && !isNextAnimation){
+        standAnimation();
+      }
+    	sleep(wait);
+    }
+    System.out.println(id + " thread is done!");  // The thread is done when we get to the end of run()
+    quit();
+  }
+
+// ------------------------------------------------------------------------------------
+
+public void checkAnimations(){
+
+  println("In checkAnimations");
+
+  if(globalID == 1){
+    //currentBase, currentShoulder, currentElbow, currentWrist, currentGripperAngle, currentGripperWidth, currentLight, currentEasing, currentBrightness
+
+    //  BASE_MAX            = 2150;//2300;
+    //  BASE_MIN            = 800;//720;
+    //  SHOULDER_MAX        = 2350; 
+    //  SHOULDER_MIN        = 720; 
+    //  ELBOW_MAX           = 2370; 
+    //  ELBOW_MIN           = 720;
+    //  WRIST_MAX           = 2370; 
+    //  WRIST_MIN           = 720;
+    //  GRIPPER_ANGLE_MAX   = 2400;
+    //  GRIPPER_ANGLE_MIN   = 600;
+    //  GRIPPER_MAX         = 2100;
+    //  GRIPPER_MIN         = 1450;  
+
+    robot.sendRobotData(1475, 1500, 1500, 720, 675, 2100, 200, 0, 0, 0, 0, 2);
+    sleep(2000);
+    // Led
+    for(int i = 0; i <= 127; i++){
+      robot.sendRobotData(1475, 1500, 1500, 720, 675, 2100, 1, i, 255, 0, 0, 2);
+      sleep(20);
+    }
+    robot.sendRobotData(2150, 1500, 1500, 720, 650, 2100, 200, 127, 255, 255, 0,0);
+    sleep(2000);
+    robot.sendRobotData(1475, 1500, 1500, 720, 650, 2100, 200, 127, 100, 255, 0,1);
+    sleep(2000);
+    robot.sendRobotData(1475, 1500, 1500, 1800, 650, 2100, 200, 127, 100, 255, 0,1);
+    sleep(2000);
+    robot.sendRobotData(1475, 1500, 1500, 720, 650, 2100, 200, 127, 100, 255, 0,1);
+    sleep(2000);
+    robot.sendRobotData(800, 1500, 1500, 720, 650, 2100, 200, 127, 255, 0, 0,0);
+    sleep(2000);
+    robot.sendRobotData(1475, 1500, 1500, 900, 650, 1450, 200, 127, 0, 255, 0,1);
+    sleep(2000);
+    robot.sendRobotData(1475, 1500, 1500, 900, 650, 2100, 200, 127, 255, 0, 255,0);
+    sleep(2000);
+    robot.sendRobotData(1475, 1500, 1500, 900, 650, 2100, 200, 127, 255, 255, 255,1);
+    sleep(2000);
+    robot.sendRobotData(1475, 1500, 1500, 900, 650, 2100, 200, 127, 255, 0, 255,0);
+    sleep(2000);
+    robot.sendRobotData(1475, 1500, 1500, 900, 650, 2100, 200, 127, 0, 0, 255,1);
+    sleep(2000);
+    robot.sendRobotData(1475, 1500, 1500, 900, 650, 2100, 200, 127, 0, 255, 0,2);
+    sleep(2000);
+
+    for(int i = 127; i <= 255; i++){
+      robot.sendRobotData(1475, 1500, 1500, 900, 675, 2100, 1, i, 0, 255, 0, 2);
+      sleep(20);
+    }
+
+    sleep(1000);
+    robot.setRobotArm(0,150,100,90,90,200,true,255,0,255,0,2);
+    sleep(1000);
+  }
+
+isNextAnimation = false;
+
+
+}
+
+// ------------------------------------------------------------------------------------
+
+public void standAnimation(){
+
+if (true){
+
+    if((millis() - frameTime) >= 10){
+
+      float amplitude = 30;
+      float y = amplitude * cos(angle);
+      angle += aVelocity;
+
+      if(!standValue){
+        xStand = lastX;
+        yStand = lastY;
+        zStand = lastZ;
+        gaStand = lastGripperAngle;
+        gwStand = lastGripperWidth;
+        lbStand = lastBrightness;
+        rStand = lastR;
+        gStand = lastG;
+        bStand = lastB;
+        ledStand = lastLed;
+        standValue = true;
+      }  
+    
+      robot.setRobotArm(xStand, (yStand + y), zStand, gaStand, gwStand, 1, true, lbStand, rStand, gStand, bStand, ledStand);
+      frameTime = millis();
+    }
+  }
+
+}
+
+// ------------------------------------------------------------------------------------
+
+	 public void sleep(int sleepTime){
+	  try {
+	      sleep((long)(sleepTime));
+	  } catch (Exception e) {
+	    }
+
+  }
+
+// ------------------------------------------------------------------------------------
+ 
+  // Our method that quits the thread
+  public void quit() {
+    System.out.println("Quitting."); 
+    running = false;  // Setting running to false ends the loop in run()
+    // IUn case the thread is waiting. . .
+    interrupt();
+  }
+
+
+}
 class TextToSpeech extends Thread{
 
 int AGNES = 0;
@@ -1910,6 +2185,8 @@ int PIPE_ORGAN = 19;
 int TRINOIDS = 20;
 int WHISPER = 21;
 int ZARVOX = 22;
+
+// ------------------------------------------------------------------------------------
  
 String[] voices = { 
   // female
@@ -1922,12 +2199,11 @@ String[] voices = {
 
 Table tableSpeech;
 boolean running;           // Is the thread running?  Yes or no?
+boolean nextTextToSpeech;
 int wait;
 public int waitForSpeechReturn;
 
 // ------------------------------------------------------------------------------------
-
-
 
 	TextToSpeech(int _wait){
 
@@ -1938,6 +2214,7 @@ public int waitForSpeechReturn;
 	
 	public void start () {
     running = true;
+    nextTextToSpeech = false;
     waitForSpeechReturn = 0;
     println("Starting thread TextToSpeech (will execute every " + wait + " milliseconds.)");
     tableSpeech = loadTable("data/Strings.csv", "header");
@@ -1951,7 +2228,7 @@ public int waitForSpeechReturn;
     // sleep(2000);
     sleep(300);
     while (running) {
-      if(nextStep){
+      if(nextTextToSpeech){
         nextStepInTables();
       }
     	if(newSay && globalID <= (tableSpeech.getRowCount() -1) && globalID >= 0){
@@ -1999,40 +2276,43 @@ public int waitForSpeechReturn;
     interrupt();
   }
 
+// ------------------------------------------------------------------------------------
 
   public void checkTableConstrains(){
 
-  if((textToSpeech.tableSpeech.getRowCount() -1) <= (tablePositions.getRowCount() -1)){
-    if (globalID >= (tablePositions.getRowCount() -1))
-      globalID = tablePositions.getRowCount() -1;
-  }else if((textToSpeech.tableSpeech.getRowCount() -1) > (tablePositions.getRowCount() -1)){
-    if (globalID >= (textToSpeech.tableSpeech.getRowCount() -1))
-      globalID = textToSpeech.tableSpeech.getRowCount() -1;
-  }
-  if(globalID < 1){
-        globalID = 0;
+    if((tableSpeech.getRowCount() -1) <= (tablePositions.getRowCount() -1)){
+      if (globalID >= (tablePositions.getRowCount() -1))
+        globalID = tablePositions.getRowCount() -1;
+    }else if((tableSpeech.getRowCount() -1) > (tablePositions.getRowCount() -1)){
+      if (globalID >= (tableSpeech.getRowCount() -1))
+        globalID = tableSpeech.getRowCount() -1;
+    }
+    if(globalID < 1){
+          globalID = 0;
+    }
+
   }
 
-}
+// ------------------------------------------------------------------------------------
 
-public void nextStepInTables(){
-  while(nextStep){
-    if(waitForSpeechReturn == 0){
-      newSay = true;
-      newPosition = true;
-      robot.readNextRobotPosition();
-      if(stepForward){
-        globalID ++;
-        stepForward = false;
-      }else if (stepBack){
-        globalID--;
-        stepBack = false;
-      }  
-      nextStep = false;
-      checkTableConstrains();
+  public void nextStepInTables(){
+    while(nextTextToSpeech){
+      if(waitForSpeechReturn == 0){
+        newSay = true;
+        newPosition = true;
+        robot.readNextRobotPosition();
+        if(stepForward){
+          // globalID ++;
+          stepForward = false;
+        }else if (stepBack){
+          // globalID--;
+          stepBack = false;
+        }  
+        nextTextToSpeech = false;
+        checkTableConstrains();
+      }
     }
   }
-}
 
 
 
@@ -2088,6 +2368,7 @@ String  id;                 // Thread name
   // We must implement run, this gets triggered by start()
   public void run () {
     // sleep(2000);
+    println(id + " " + conValue);
     deviceInit();
     sleep(300);
     while (running) {

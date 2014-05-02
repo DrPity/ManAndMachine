@@ -18,6 +18,7 @@ ChangePosition_Class::ChangePosition_Class(int minMillisCC, int maxMillisCW){
 	_maxMillisCW = maxMillisCW;
   easing_resolution = 1;
   _easingValue = 0;
+  currentPosition = 0;
 
   reachedTarget = false;
 }
@@ -56,6 +57,8 @@ int ChangePosition_Class::nextEasedStep(){
     reachedTarget = true;
   }
   _currentPosition = _startPosition + _direction * _easedPosition;
-   Serial.println(_currentPosition);
+  Serial.print("In easing: ");
+  Serial.println(_currentPosition);
+  currentPosition = _currentPosition;
   return(_currentPosition);
  }

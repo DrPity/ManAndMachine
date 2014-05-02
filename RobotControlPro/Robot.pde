@@ -8,8 +8,8 @@ private static final Float  GRIPLENGTH   = 155.0;   //lengh-of-grip
 private static final Float  WRIST_OFFSET = 28.0;    //offset wrist-gripper
 
 /* Constrains of servo motors in milliseconds */
-private static final Integer  BASE_MAX            = 2300;
-private static final Integer  BASE_MIN            = 720;
+private static final Integer  BASE_MAX            = 2150;//2300;
+private static final Integer  BASE_MIN            = 800;//720;
 private static final Integer  SHOULDER_MAX        = 2350; 
 private static final Integer  SHOULDER_MIN        = 720; 
 private static final Integer  ELBOW_MAX           = 2370; 
@@ -17,12 +17,11 @@ private static final Integer  ELBOW_MIN           = 720;
 private static final Integer  WRIST_MAX           = 2370; 
 private static final Integer  WRIST_MIN           = 720;
 private static final Integer  GRIPPER_ANGLE_MAX   = 2400;
-private static final Integer  GRIPPER_ANGLE_MIN   = 700;
+private static final Integer  GRIPPER_ANGLE_MIN   = 600;
 private static final Integer  GRIPPER_MAX         = 2100;
 private static final Integer  GRIPPER_MIN         = 1450;  
 
 /* Dynamic values of the robot arm */
-
 private int     currentBase             = 00;
 private int     currentShoulder         = 00;
 private int     currentElbow            = 00;
@@ -31,14 +30,19 @@ private int     currentGripperAngle     = 00;
 private int     currentGripperWidth     = 00;
 private int     currentLight            = 00;
 private int     currentEasing           = 00;
+private int     currentBrightness       = 00;
+private int      verifCounter          = 0;
 
-private int       verifCounter          = 0;
-
-private float     lastX             = 0;
-private float     lastY             = 0;
-private float     lastZ             = 0;
-private float     lastGripperAngle  = 0;
-private float     lastGripperWidth  = 0;
+public float     lastX             = 0;
+public float     lastY             = 0;
+public float     lastZ             = 0;
+public float     lastGripperAngle  = 0;
+public int       lastGripperWidth  = 0;
+public int       lastR             = 0;
+public int       lastG             = 0;
+public int       lastB             = 0;
+public int       lastBrightness    = 0;
+public int       lastLed           = 2;
 
 private boolean     sendData        = false;
 private boolean     isDataVerified  = false;
@@ -89,12 +93,10 @@ class Robot{
   return (int) lastY; 
   }
 
+// ------------------------------------------------------------------------------------
 
-
-// // ------------------------------------------------------------------------------------
-
-  /* Inverse Kinematic Arithmetic: X can be + and -; Y and Z only positive. All values in mm! gripperAngleD must be according to the object in degree. gripperwidth in degree. And speed from 0-255 */
-  void setRobotArm( float x, float y, float z, float gripperAngleD, int gripperWidth, int light, int easingResolution, boolean sendData ){
+  /* Inverse Kinematic Arithmetic: X can be + and -; Y and Z only positive. All values in mm! gripperAngleD must be according to the object in degree. gripperwidth in degree. And led from 0-255 */
+  void setRobotArm( float x, float y, float z, float gripperAngleD, int gripperWidth, int easingResolution, boolean sendData, int brightnessStrip, int r, int g,  int b, int led){
 
     if(isRobotReadyToMove){
       /* send start byte */
@@ -139,7 +141,7 @@ class Robot{
         println("[ Data not verified ]");
       }
 
-      // println("x,y,z: " +  x + " " +  y + " " + z);
+      println("x,y,z: " +  x + " " +  y + " " + z);
 
       currentBase = (int) map(baseAngleD, 180, 0, BASE_MIN, BASE_MAX);
       currentShoulder = (int) map(shoulderAngleD, 0, 180, SHOULDER_MIN, SHOULDER_MAX);
@@ -147,7 +149,6 @@ class Robot{
       currentWrist = (int) map(wristAngleD, 0, 180, WRIST_MIN, WRIST_MAX);
       currentGripperAngle = (int) map(gripperAngleD, 0, 180, GRIPPER_ANGLE_MIN, GRIPPER_ANGLE_MAX);
       currentGripperWidth = (int) map(gripperWidth, 0, 180, GRIPPER_MIN, GRIPPER_MAX);
-      currentLight = light;
       if(easingResolution <= 0)
         currentEasing = 1;
       else
@@ -155,12 +156,17 @@ class Robot{
      
 
       if(isDataVerified && sendData){
-        sendRobotData( currentBase, currentShoulder, currentElbow, currentWrist, currentGripperAngle, currentGripperWidth, currentLight, currentEasing);
+        sendRobotData( currentBase, currentShoulder, currentElbow, currentWrist, currentGripperAngle, currentGripperWidth, currentEasing, currentBrightness, r, g, b, led);
         lastX = x;
         lastY = y;
         lastZ = z;
         lastGripperAngle = gripperAngleD;
         lastGripperWidth = gripperWidth;
+        lastR = r;
+        lastG = g;
+        lastB = b;
+        lastBrightness = brightnessStrip;
+        lastLed = led;
         println("Data verified and send");
         isDataVerified = false;
       }
@@ -179,12 +185,12 @@ class Robot{
 
 // ------------------------------------------------------------------------------------
 
-  void sendRobotData(int currentBase, int currentShoulder, int currentElbow, int currentWrist, int currentGripperAngle, int currentGripperWidth, int currentLight, int currentEasing){
+  void sendRobotData(int currentBase, int currentShoulder, int currentElbow, int currentWrist, int currentGripperAngle, int currentGripperWidth, int currentEasing, int currentBrightness, int r, int g, int b, int led){
 
-    if(isArduinoPort)
-    wA.port.write(String.format("Rr%d,%d,%d,%d,%d,%d,%d,%d\n",currentBase, currentShoulder, currentElbow, currentWrist, currentGripperAngle, currentGripperWidth, currentLight, currentEasing));
+    if(wA.deviceInstanciated)
+    wA.port.write(String.format("Rr%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d\n",currentBase, currentShoulder, currentElbow, currentWrist, currentGripperAngle, currentGripperWidth, currentEasing, currentBrightness, r, g, b, led));
     // wA.port.write(10);
-    println(String.format("(Rr%d,%d,%d,%d,%d,%d,%d,%d)",currentBase, currentShoulder, currentElbow, currentWrist, currentGripperAngle, currentGripperWidth, currentLight, currentEasing));
+    println(String.format("(Rr%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d)",currentBase, currentShoulder, currentElbow, currentWrist, currentGripperAngle, currentGripperWidth, currentEasing, currentBrightness, r, g, b, led));
     isRobotReadyToMove = false;
 
   }
@@ -195,7 +201,7 @@ class Robot{
 
   int findLowerBound(int strechedPosition){
     for(int i = strechedPosition; i <= 349; i++){
-    setRobotArm(lastX, i, lastZ, lastGripperAngle, (int) lastGripperWidth, speed, 1, false);
+    setRobotArm(lastX, i, lastZ, lastGripperAngle, (int) lastGripperWidth, 1, false, 255, lastR, lastG, lastB, lastLed);
       if(validStrPos){
         validStrPos = false;
         return i;
@@ -210,7 +216,7 @@ class Robot{
 
   int findUpperBound(int strechedPosition){
     for(int i = strechedPosition; i >= 0; i--){
-    setRobotArm(lastX, i, lastZ, lastGripperAngle, (int) lastGripperWidth, speed, 1, false); 
+    setRobotArm(lastX, i, lastZ, lastGripperAngle, (int) lastGripperWidth, 1, false, 255, lastR, lastG, lastB, lastLed); 
       if(validStrPos){
         validStrPos = false;
         return i;
@@ -244,6 +250,8 @@ class Robot{
         int claw = tablePositions.getInt(globalID, "Claw");
         int stretching = tablePositions.getInt(globalID, "Streching");
         int arousal = tablePositions.getInt(globalID, "Arousal");
+        //call streching somewhere here
+        // setRobotArm() here
         println("[ x: " + x + " y: " + y + " z: " + z + " gripperAngle: " + gripperAngle + " gripperWidth: " + gripperWidth + " x1: " + x1 + " y1: " + y1 + " turning: " + turning + " claw: " + claw + " stretching: " + stretching + " araousal: " + arousal + " ]");
         newPosition = false;
       }

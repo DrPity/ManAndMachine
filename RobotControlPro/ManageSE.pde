@@ -2,7 +2,10 @@ class ManageSE {
 
 private boolean isHashtrue = false;
 private int heartRate = 0;
+private int plethRate = 0;
+private int oldPlethRate = 0;
 private String  pulseString  = "";
+private String  plethString  = "";
 private int lastPulseBit  = 0;
 private int counter = 0;
 private int[] bitArray = new int[8];
@@ -71,8 +74,20 @@ private int[] bitArray = new int[8];
       }
     }
 
-
-
+      // Check for pleth byte
+      if (counter == 1){
+        for(int i = 6; i >= 0; i--){
+          plethString += bitArray[i]; 
+        }
+        plethRate = unbinary(plethString);
+        plethRate = (int)(plethRate*0.2 + (oldPlethRate*0.8));
+        plethString = "";
+        channelPleth[0].addDataPoint(plethRate);
+        // println(channelPleth[0].getLatestPoint().value);
+        channelPleth[0].graphMe = true; 
+        oldPlethRate = plethRate;
+        pleth.isDataToGraph = true;
+      }  
       // Check for 3 byte and add 7th bit to byte 4
       if (counter == 2){
         if (bitArray[6] == 1){

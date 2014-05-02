@@ -1,6 +1,6 @@
 class ConnectionLight {
 	int x, y;
-	int currentColor = 0;
+	int currentColor = color(255,0,0);
 	int goodColor = color(0, 255, 0);
 	int badColor = color(255, 255, 0);
 	int noColor = color(255, 0, 0);
@@ -53,11 +53,11 @@ class ConnectionLight {
 		// fill(255, 150);
 		// rect(0, 0, 88, 28);
 		
-		
 		// fill(currentColor);
 		ellipseMode(CORNER);
 		circle.setFill(currentColor);
 		shape(circle);
+		// println("currentColor: "+currentColor);
 		//ellipse(5, 4, diameter, diameter);
 				
 		popMatrix();

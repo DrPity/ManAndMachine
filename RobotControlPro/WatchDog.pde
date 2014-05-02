@@ -49,6 +49,7 @@ String  id;                 // Thread name
   // We must implement run, this gets triggered by start()
   void run () {
     // sleep(2000);
+    println(id + " " + conValue);
     deviceInit();
     sleep(300);
     while (running) {

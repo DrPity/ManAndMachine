@@ -41,7 +41,7 @@ class ManageCLE {
 
 		try {
         org.json.JSONObject json = new org.json.JSONObject(data);
-        channels[0].addDataPoint(Integer.parseInt(json.getString("poorSignalLevel")));
+        channelsMindwave[0].addDataPoint(Integer.parseInt(json.getString("poorSignalLevel")));
       	}
       	catch (JSONException e) {
       	// println(e); 	
@@ -52,49 +52,49 @@ class ManageCLE {
       		org.json.JSONObject json = new org.json.JSONObject(data);   
         	org.json.JSONObject esense = json.getJSONObject("eSense");
         	if (esense != null) {
-          	channels[1].addDataPoint(Integer.parseInt(esense.getString("attention")));
-          	channels[2].addDataPoint(Integer.parseInt(esense.getString("meditation")));
-          	// print(channels[1].getLatestPoint().value);
+          	channelsMindwave[1].addDataPoint(Integer.parseInt(esense.getString("attention")));
+          	channelsMindwave[2].addDataPoint(Integer.parseInt(esense.getString("meditation")));
+          	// print(channelsMindwave[1].getLatestPoint().value);
           	isEsenseEvent = true;
         }
         
         org.json.JSONObject eegPower = json.getJSONObject("eegPower");
         
         if (eegPower != null) {
-          channels[3].addDataPoint(Integer.parseInt(eegPower.getString("delta")));
-          channels[4].addDataPoint(Integer.parseInt(eegPower.getString("theta"))); 
-          channels[5].addDataPoint(Integer.parseInt(eegPower.getString("lowAlpha")));
-          channels[6].addDataPoint(Integer.parseInt(eegPower.getString("highAlpha")));  
-          channels[7].addDataPoint(Integer.parseInt(eegPower.getString("lowBeta")));
-          channels[8].addDataPoint(Integer.parseInt(eegPower.getString("highBeta")));
-          channels[9].addDataPoint(Integer.parseInt(eegPower.getString("lowGamma")));
-          channels[10].addDataPoint(Integer.parseInt(eegPower.getString("highGamma")));
+          channelsMindwave[3].addDataPoint(Integer.parseInt(eegPower.getString("delta")));
+          channelsMindwave[4].addDataPoint(Integer.parseInt(eegPower.getString("theta"))); 
+          channelsMindwave[5].addDataPoint(Integer.parseInt(eegPower.getString("lowAlpha")));
+          channelsMindwave[6].addDataPoint(Integer.parseInt(eegPower.getString("highAlpha")));  
+          channelsMindwave[7].addDataPoint(Integer.parseInt(eegPower.getString("lowBeta")));
+          channelsMindwave[8].addDataPoint(Integer.parseInt(eegPower.getString("highBeta")));
+          channelsMindwave[9].addDataPoint(Integer.parseInt(eegPower.getString("lowGamma")));
+          channelsMindwave[10].addDataPoint(Integer.parseInt(eegPower.getString("highGamma")));
 
          	if (isRecording){
   			TableRow newRow = table.addRow();
   			newRow.setInt("ID", table.getRowCount() -1);
          	newRow.setInt("Heart_Rate", receivedHeartRate);
-  			newRow.setInt("attention", channels[1].getLatestPoint().value);
-  			newRow.setInt("meditation", channels[2].getLatestPoint().value);
-  			newRow.setInt("delta", channels[3].getLatestPoint().value);
-  			newRow.setInt("theta", channels[4].getLatestPoint().value);
-  			newRow.setInt("lowAlpha", channels[5].getLatestPoint().value);
-  			newRow.setInt("highAlpha", channels[6].getLatestPoint().value);
-  			newRow.setInt("lowBeta", channels[7].getLatestPoint().value);
-  			newRow.setInt("highBeta", channels[8].getLatestPoint().value);
-  			newRow.setInt("lowGamma", channels[9].getLatestPoint().value);
-  			newRow.setInt("highGamma", channels[10].getLatestPoint().value);
+  			newRow.setInt("attention", channelsMindwave[1].getLatestPoint().value);
+  			newRow.setInt("meditation", channelsMindwave[2].getLatestPoint().value);
+  			newRow.setInt("delta", channelsMindwave[3].getLatestPoint().value);
+  			newRow.setInt("theta", channelsMindwave[4].getLatestPoint().value);
+  			newRow.setInt("lowAlpha", channelsMindwave[5].getLatestPoint().value);
+  			newRow.setInt("highAlpha", channelsMindwave[6].getLatestPoint().value);
+  			newRow.setInt("lowBeta", channelsMindwave[7].getLatestPoint().value);
+  			newRow.setInt("highBeta", channelsMindwave[8].getLatestPoint().value);
+  			newRow.setInt("lowGamma", channelsMindwave[9].getLatestPoint().value);
+  			newRow.setInt("highGamma", channelsMindwave[10].getLatestPoint().value);
   			newRow.setInt("timestamp", millis());
           	id =  table.getRowCount() -1;
           	// println("Packeg");
   		  	}
 
-         isDataToGraph = true; 
+         mindWave.isDataToGraph = true; 
        	}
         
        	 packetCount++;
          for (int i = 0; i < 11; ++i) {
-          channels[i].graphMe = true; 
+          channelsMindwave[i].graphMe = true; 
          }
        
   	  }

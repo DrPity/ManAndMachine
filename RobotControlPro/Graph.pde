@@ -1,5 +1,5 @@
 class Graph {
-	int x, y, w, h, pixelsPerSecond, gridColor, gridX, originalW, originalX;
+	int x, y, w, h, pixelsPerSecond, gridColor, gridX, originalW, originalX, timeScale;
 	long leftTime, rightTime, gridTime;
 	boolean scrollGrid;
 	String renderMode;
@@ -7,18 +7,24 @@ class Graph {
 	Slider pixelSecondsSlider;
 	RadioButton renderModeRadio;
 	RadioButton scaleRadio;
+	Channel[] thisChannels;
+	public boolean isDataToGraph;
 
 // ------------------------------------------------------------------------------------
 
-	Graph(int _x, int _y, int _w, int _h) {
+	Graph(int _x, int _y, int _w, int _h, Channel[] _thisChannels, int _timeScale, String _renderMode) {
 		x = _x;
 		y = _y;
 		w = _w;
 		h = _h;
+		timeScale = _timeScale;
+		thisChannels =  _thisChannels;
 		pixelsPerSecond = 10;
 		gridColor = color(0);
 		gridSeconds = 1; // seconds per grid line
 		scrollGrid = false;
+		isDataToGraph = false;
+		renderMode = _renderMode;
 
 
 
@@ -66,7 +72,6 @@ class Graph {
 
 		
 		//pixelsPerSecond = round(pixelSecondsSlider.value());
-		renderMode = "Lines";
 		
 
 		w = originalW;
@@ -79,7 +84,7 @@ class Graph {
 		// Figure out the left and right time bounds of the graph, based on
 		// the pixels per second value
 		rightTime = System.currentTimeMillis();
-		leftTime = rightTime - ((w / pixelsPerSecond) * 1000);
+		leftTime = rightTime - ((w / pixelsPerSecond) * timeScale);
 		
 		if(isDataToGraph){
 
@@ -91,30 +96,33 @@ class Graph {
 			// Draw each channel (pass in as constructor arg?)
 
 			noFill();				
-			// if(renderMode == "Shaded" || renderMode == "Triangles") noStroke();		
-			if(renderMode == "Lines") strokeWeight(1.5);
+			if(renderMode == "Shaded" || renderMode == "Triangles") noStroke();		
+			if(renderMode == "Lines" || renderMode == "Curves") strokeWeight(1.5);
+			// println("Before loop");
 			
-			for (int i = 0; i < channels.length; i++) {
-				Channel thisChannel = channels[i];
+			for (int i = 0; i < thisChannels.length; i++) {
+				Channel thisChannel = thisChannels[i];
+				// println("In for loop");
+				// println("Drawing value:" + thisChannel.getLatestPoint().value + " " + i ) ;
 				
 				if(thisChannel.graphMe) {
 				
 					//Draw the line
-					if(renderMode == "Lines") stroke(thisChannel.drawColor);
+					if(renderMode == "Lines" || renderMode == "Curves") stroke(thisChannel.drawColor);
 
-					// if(renderMode == "Shaded" || renderMode == "Triangles") {
-					// 	noStroke();
-					// 	fill(thisChannel.drawColor, 120);
-					// }
+					if(renderMode == "Shaded" || renderMode == "Triangles") {
+						noStroke();
+						fill(thisChannel.drawColor, 120);
+					}
 				
-					// if(renderMode == "Triangles") {
-					// 	beginShape(TRIANGLES);
-					// }
-					// else {
+					if(renderMode == "Triangles") {
+						beginShape(TRIANGLES);
+					}
+					else {
 						beginShape();			
-					// }
+					}
 
-					// if(renderMode == "Curves" || renderMode == "Shaded") vertex(0, h);
+					if(renderMode == "Curves") vertex(0, h);
 				
 				
 					for (int j = 0; j < thisChannel.points.size(); j++) {
@@ -137,19 +145,19 @@ class Graph {
 							// ellipseMode(CENTER);
 							// ellipse(pointX, pointY, 5, 5);
 					
-							// if(renderMode == "Curves") {
-							// 	curveVertex(pointX, pointY);					
-							// }
-							// else {
+							if(renderMode == "Curves") {
+								curveVertex(pointX, pointY);					
+							}
+							else {
 								vertex(pointX, pointY);
-							// }				
+							}				
 						}
 					}
 				}
 				
-				// if(renderMode == "Curves" || renderMode == "Shaded") vertex(w, h);
-				if(renderMode == "Lines") endShape();
-				// if(renderMode == "Shaded") endShape(CLOSE);
+				if(renderMode == "Curves") vertex(w, h);
+				if(renderMode == "Lines" || renderMode == "Curves" || renderMode == "Triangles") endShape();
+				if(renderMode == "Shaded") endShape(CLOSE);
 			}
 			
 
@@ -164,6 +172,7 @@ class Graph {
 			// rect(10, 10, 195, 300);
 
 		}
+
 
 	}
 

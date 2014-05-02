@@ -37,6 +37,7 @@ String[] voices = {
 
 Table tableSpeech;
 boolean running;           // Is the thread running?  Yes or no?
+boolean nextTextToSpeech;
 int wait;
 public int waitForSpeechReturn;
 
@@ -51,6 +52,7 @@ public int waitForSpeechReturn;
 	
 	void start () {
     running = true;
+    nextTextToSpeech = false;
     waitForSpeechReturn = 0;
     println("Starting thread TextToSpeech (will execute every " + wait + " milliseconds.)");
     tableSpeech = loadTable("data/Strings.csv", "header");
@@ -64,7 +66,7 @@ public int waitForSpeechReturn;
     // sleep(2000);
     sleep(300);
     while (running) {
-      if(nextStep){
+      if(nextTextToSpeech){
         nextStepInTables();
       }
     	if(newSay && globalID <= (tableSpeech.getRowCount() -1) && globalID >= 0){
@@ -116,12 +118,12 @@ public int waitForSpeechReturn;
 
   void checkTableConstrains(){
 
-    if((textToSpeech.tableSpeech.getRowCount() -1) <= (tablePositions.getRowCount() -1)){
+    if((tableSpeech.getRowCount() -1) <= (tablePositions.getRowCount() -1)){
       if (globalID >= (tablePositions.getRowCount() -1))
         globalID = tablePositions.getRowCount() -1;
-    }else if((textToSpeech.tableSpeech.getRowCount() -1) > (tablePositions.getRowCount() -1)){
-      if (globalID >= (textToSpeech.tableSpeech.getRowCount() -1))
-        globalID = textToSpeech.tableSpeech.getRowCount() -1;
+    }else if((tableSpeech.getRowCount() -1) > (tablePositions.getRowCount() -1)){
+      if (globalID >= (tableSpeech.getRowCount() -1))
+        globalID = tableSpeech.getRowCount() -1;
     }
     if(globalID < 1){
           globalID = 0;
@@ -132,19 +134,19 @@ public int waitForSpeechReturn;
 // ------------------------------------------------------------------------------------
 
   void nextStepInTables(){
-    while(nextStep){
+    while(nextTextToSpeech){
       if(waitForSpeechReturn == 0){
         newSay = true;
         newPosition = true;
         robot.readNextRobotPosition();
         if(stepForward){
-          globalID ++;
+          // globalID ++;
           stepForward = false;
         }else if (stepBack){
-          globalID--;
+          // globalID--;
           stepBack = false;
         }  
-        nextStep = false;
+        nextTextToSpeech = false;
         checkTableConstrains();
       }
     }

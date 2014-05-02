@@ -192,19 +192,19 @@ void loop(){
     }
   }
 
-  if(digitalRead(C_MIN_PIN) == HIGH){
-    digitalWrite(C_ENABLE_PIN, HIGH);
-  }else{
-    digitalWrite(C_ENABLE_PIN, LOW);
-  }
+  // if(digitalRead(C_MIN_PIN) == HIGH){
+  //   digitalWrite(C_ENABLE_PIN, HIGH);
+  // }else{
+  //   digitalWrite(C_ENABLE_PIN, LOW);
+  // }
 
-  if(digitalRead(A_MIN_PIN) == HIGH){
-    digitalWrite(A_ENABLE_PIN, HIGH);
-    digitalWrite(B_ENABLE_PIN, HIGH);
-  }else{
-    digitalWrite(A_ENABLE_PIN, LOW);
-    digitalWrite(B_ENABLE_PIN, LOW);
-  }
+  // if(digitalRead(A_MIN_PIN) == HIGH){
+  //   digitalWrite(A_ENABLE_PIN, HIGH);
+  //   digitalWrite(B_ENABLE_PIN, HIGH);
+  // }else{
+  //   digitalWrite(A_ENABLE_PIN, LOW);
+  //   digitalWrite(B_ENABLE_PIN, LOW);
+  // }
 
 
 }
@@ -293,7 +293,7 @@ void watchdogCall() {
     Serial.print("W");   // send a capital A
     Serial.println();
     connectionTimeOut --;
-    delay(30);
+    // delay(30);
     watchdogActive = false;
 }  
 

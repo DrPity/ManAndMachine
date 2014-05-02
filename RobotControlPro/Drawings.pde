@@ -1,7 +1,8 @@
 class Drawings  {
   Textarea consolTextArea;
   RadioButton toggleTestMode;
-  float sV = 1;
+
+  private int sF = 1; //scaleFactor
 
   void drawLine(int x1, int y1, int x2, int y2, int th){
     
@@ -14,10 +15,10 @@ class Drawings  {
 
   // ------------------------------------------------------------------------------------
 
-  void drawRectangle(int x1, int y1, int x2, int y2, int tx, int ty, int f, int fa){
+  void drawRectangle(int x1, int y1, int x2, int y2, int tx, int ty, int f1, int f2, int f3, int fa){
     pushMatrix();
     translate(tx,ty);
-    fill(f, fa);
+    fill(f1, f2, f3, fa);
     rect(x1, y1, x2, y2);
     popMatrix();
   }
@@ -38,6 +39,7 @@ class Drawings  {
     PFont fontSmallLight = createFont("ProximaNova-Light",15);
     PFont fontHeadline = createFont("ProximaNova-Thin",20);
     PFont fontHeadline_2 = createFont("ProximaNova-Bold",20);
+    PFont fontHeadline_3 = createFont("ProximaNova-Light",20);
     PFont fontHeadLableBig = createFont("ProximaNova-Thin",100);
 
   // fontHeadline
@@ -54,112 +56,162 @@ class Drawings  {
     //  .setSize(100,20)
     //  ;
   
-  controlP5.addButton("saveBtn")
-    .setValue(0)
-    .setCaptionLabel("save Values")
-    .setSize(round(100*sV),round(20*sV))
-    .setPosition(round(260*sV),round(height * 0.47))
-    .setColorBackground(color(0, 200, 0))
-    ;
+  // controlP5.addButton("saveBtn")
+  //   .setValue(0)
+  //   .setCaptionLabel("save Values")
+  //   .setSize(round(100),round(20))
+  //   .setPosition(round(260),round(height * 0.47))
+  //   .setColorBackground(color(0, 200, 0))
+  //   ;
 
   
-  controlP5.addButton("loadBtnDefault")
-    .setValue(0)
-    .setCaptionLabel("load Default")
-    .setSize(round(100*sV),round(20*sV))
-    .setPosition(round(20*sV),round(height * 0.51))
-    .setColorActive(127)
-    .setColorBackground(color(200, 130, 0))
-    ;
+  // controlP5.addButton("loadBtnDefault")
+  //   .setValue(0)
+  //   .setCaptionLabel("load Default")
+  //   .setSize(round(100),round(20))
+  //   .setPosition(round(20),round(height * 0.51))
+  //   .setColorActive(127)
+  //   .setColorBackground(color(200, 130, 0))
+  //   ;
 
-  controlP5.addButton("loadBtnLastPosition")
-    .setValue(0)
-    .setCaptionLabel("load last Position")
-    .setSize(round(100*sV),round(20*sV))
-    .setPosition(round(140*sV),round(height * 0.51))
-    .setColorCaptionLabel(0) 
-    .setColorValueLabel(127)
-    .setColorBackground(color(200, 130, 0))
-    ;
+  // controlP5.addButton("loadBtnLastPosition")
+  //   .setValue(0)
+  //   .setCaptionLabel("load last Position")
+  //   .setSize(round(100),round(20))
+  //   .setPosition(round(140),round(height * 0.51))
+  //   .setColorCaptionLabel(0) 
+  //   .setColorValueLabel(127)
+  //   .setColorBackground(color(200, 130, 0))
+  //   ;
   
-  // controlP5.addButton("Start_Robot")
-  //  .setValue(0)
-  //  .setCaptionLabel("START ROBOT")
-  //  .setPosition(round(500*sV),round(height * 0.42))
-  //  .setSize(round(100*sV),round(20*sV))
-  //  ;
+  controlP5.addButton("Start_Robot")
+   .setValue(0)
+   .setCaptionLabel("START ROBOT")
+   .setPosition(round(500),round(height * 0.42))
+   .setSize(round(100),round(20))
+   ;
   
-  // controlP5.addButton("Reset_Robot")
-  //  .setValue(0)
-  //  .setCaptionLabel("RESET ROBOT")
-  //  .setPosition(round(500*sV),round(height * 0.44))
-  //  .setSize(round(100*sV),round(20*sV))
-  //  ;
+  controlP5.addButton("Reset_Robot")
+   .setValue(0)
+   .setCaptionLabel("RESET ROBOT")
+   .setPosition(round(width*0.3),round(height * 0.44))
+   .setSize(round(100),round(20))
+   ;
      
   controlP5.addButton("Back")
    .setValue(0)
    .setCaptionLabel("Back")
-   .setPosition(round(500*sV),round(height * 0.46))
-   .setSize(round(100*sV),round(20*sV))
+   .setPosition(round(width*0.07),round(height * 0.53))
+   .setSize(round(100*sF),round(20*sF))
    ;
 
    controlP5.addButton("Forward")
    .setValue(0)
    .setCaptionLabel("Forward")
-   .setPosition(round(800*sV),round(height * 0.46))
-   .setSize(round(100*sV),round(20*sV))
+   .setPosition(round(width*0.13),round(height * 0.53))
+   .setSize(round(100*sF),round(20*sF))
    ;
 
-  toggleTestMode = controlP5.addRadioButton("testMode")
-         .setPosition(round(20*sV),round(height * 0.458))
-         .setSize(round(20*sV),round(10*sV))
-         .setColorForeground(color(120))
-         .setColorActive(color(0,190,0))
-         .setColorLabel(color(255,0,0))
-         .addItem("Toggle Test Mode",1)
-         ;      
+  // toggleTestMode = controlP5.addRadioButton("testMode")
+  //        .setPosition(round(20),round(height * 0.458))
+  //        .setSize(round(20),round(10))
+  //        .setColorForeground(color(120))
+  //        .setColorActive(color(0,190,0))
+  //        .setColorLabel(color(255,0,0))
+  //        .addItem("Toggle Test Mode",1)
+  //        ;      
 
 // ------------------------------------------------------------------------------------
 
-  lableHeartRate = controlP5.addTextlabel("lable")
-                  .setText(heartRateString)
-                  .setPosition(round(10*sV),round(160*sV))
-                  .setColorValue(255)
-                  .setFont(fontHeadLableBig)
-                  ;
+// -------------    Mindwave Lables   ---------------------
 
-  textHeartRate = controlP5.addTextlabel("label2")
-                  .setText("Heart Rate")
-                  .setPosition(round(15*sV),round(260*sV))
-                  .setColorValue(255)
-                  .setFont(createFont("Helvetica",16))
-                  ;
+  textMindwave = controlP5.addTextlabel("label2")
+              .setText("MINDWAVE")
+              .setPosition(round(width*0.01),round(height*0.08))
+              .setColor(0)
+              .setFont(fontSmallBold)
+              .setLetterSpacing(110);
+              ;
+  attentionLevel = controlP5.addTextlabel("attentionLevel")
+              .setText("Attention Level:")
+              .setPosition(round(width*0.07),round(height*0.08))
+              .setColor(0)
+              .setFont(fontSmallLight)
+              ;
+  attentionValue = controlP5.addTextlabel("attentionValue")
+              .setText("Na")
+              .setPosition(round(width*0.125),round(height*0.076))
+              .setColor(0)
+              .setFont(fontHeadline_3)
+              ;
+  meditationLevel = controlP5.addTextlabel("meditationLevel")
+              .setText("Meditation Level:")
+              .setPosition(round(width*0.15),round(height*0.08))
+              .setColor(0)
+              .setFont(fontSmallLight)
+              ;
+  meditationValue = controlP5.addTextlabel("meditationValue")
+              .setText("Na")
+              .setPosition(round(width*0.21),round(height*0.076))
+              .setColor(0)
+              .setFont(fontHeadline_3)
+              ;
+  blinkStrength = controlP5.addTextlabel("blinkStrength")
+              .setText("Blink Strength:")
+              .setPosition(round(width*0.235),round(height*0.08))
+              .setColor(0)
+              .setFont(fontSmallLight)
+              ;
+  blinkValue = controlP5.addTextlabel("blinkValue")
+              .setText("Na")
+              .setPosition(round(width*0.287),round(height*0.076))
+              .setColor(0)
+              .setFont(fontHeadline_3)
+              ;
 
-  timerLable = controlP5.addTextlabel("lable3")
-                  .setText("00.00")
-                  .setPosition(round(10*sV),round(20*sV))
-                  .setColorValue(255)
-                  .setFont(createFont("Helvetica",50))
-                  ;
+// -------------    Pulsemeter Lables   ---------------------
+
+  textPulseMeter = controlP5.addTextlabel("pulseMeter")
+              .setText("PULSEMETER")
+              .setPosition(round(width*0.01),round(height*0.18))
+              .setColor(0)
+              .setFont(fontSmallBold)
+              .setLetterSpacing(110);
+              ;
+  pulseLevel = controlP5.addTextlabel("pulseLevel")
+              .setText("Pulse:")
+              .setPosition(round(width*0.07),round(height*0.18))
+              .setColor(0)
+              .setFont(fontSmallLight)
+              ;
+  pulseValue = controlP5.addTextlabel("pulseValue")
+              .setText("Na")
+              .setPosition(round(width*0.095),round(height*0.176))
+              .setColor(0)
+              .setFont(fontHeadline_3)
+              ;                          
+
+// -------------    HeadLines   ---------------------
+
   headlineText_1 = controlP5.addTextlabel("label4")
                   .setText("ROBOT CONTROLS: ")
-                  .setPosition(round(15*sV),round(height * 0.42))
+                  .setPosition(round(width*0.01),round(height * 0.42))
                   .setColorValue(255)
                   .setFont(fontHeadline)
                   ;
  
   // headlineText_2 = controlP5.addTextlabel("label5")
   //               .setText("ROBOT CONTROLS: ")
-  //               .setPosition(round(490*sV),round(height * 0.42))
+  //               .setPosition(round(490),round(height * 0.42))
   //               .setColorValue(255)
   //               .setFont(fontHeadline_2)
   //               ;
 
 
 
-  controlP5.addTextfield("Enter Robot Position - Press [ ENTER ] to test")
-                .setPosition(round(20*sV),round(height * 0.47))
-                .setSize(round(220*sV),round(20*sV))
+  controlP5.addTextfield("Set Global ID - [ ENTER ]")
+                .setPosition(round(width*0.07),round(height * 0.49))
+                .setSize(100,20)
                 .setFont(fontSmallBold)
                 .setFocus(true)
                 .setColorActive(0)
@@ -176,30 +228,25 @@ class Drawings  {
   //                 .setColorBackground(color(0, 100))
   //                 .setColorForeground(color(255, 100))
 
-  controlP5.addFrameRate().setInterval(10).setColor(0).setPosition(round(10*sV),height - round(30*sV)).setFont(fontSmallLight);
+  controlP5.addFrameRate().setInterval(10).setColor(0).setPosition(round(10),height - round(30)).setFont(fontSmallLight);
   // console = controlP5.addConsole(consolTextArea);              
 
 
-   lableID = controlP5.addTextlabel("lable6")
-                .setText("id")
-                .setPosition(250,100)
+   lableID = controlP5.addTextlabel("lableID")
+                .setText("global ID")
+                .setPosition(round(width*0.01),round(height * 0.44))
                 .setColorValue(255)
-                .setFont(fontHeadline)
+                .setFont(fontHeadLableBig)
                 ;
     textID = controlP5.addTextlabel("label7")
                 .setText("ID")
-                .setPosition(270,200)
+                .setPosition(round(width*0.02),round(height*0.53))
                 .setColorValue(255)
-                .setFont(fontSmallBold)
+                .setFont(fontHeadline)
                 ;                     
 
 
   }
-
-
-
-
-
 
 }
 

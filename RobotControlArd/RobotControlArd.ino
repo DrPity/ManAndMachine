@@ -15,11 +15,16 @@
 const int servoPins[] = {2, 3, 4, 5, 6, 7};
 const int ledPin = 13;
 
-int parameterArray[6];
-int splitArray[6]; 
+int parameterArray[12];
+int splitArray[12]; 
 int light = 0;
-int easingRes = 0;
+int easingRes = 200;
 int counter = 1;
+int brightness = 0;
+int red = 0;
+int green = 0;
+int blue = 0;
+int led = 2;
 
 
 bool robotIsReadyToMove   = true;
@@ -29,6 +34,7 @@ bool jointReachedTarget []   = {false,false,false,false,false,false};
 bool serialReady    = false;
 bool watchdogActive = false;
 bool robotData      = false;
+bool initRobot = false;
 
 
 int bMinDegree = 0;
@@ -47,11 +53,12 @@ int eMaxDegree = 180;
 int hMaxDegree = 180;
 int cMaxDegree = 180;
 
+
 int connectionTimeOut = 10;
-int base              = 1500;
+int base              = 1475;
 int shoulder          = 1500;
-int elbow             = 1500;
-int wrist             = 1500;
+int elbow             = 2300;
+int wrist             = 800;
 int gripper           = 1500;
 int gripperAngle      = 1500;
 char end              = '\n';
@@ -102,8 +109,13 @@ void setup()
    for (int i = 0; i < 6; ++i)
   {
     servoList[i]->attach(servoPins[i]);
-    //Serial.println(testAttach);
   }
+
+  for (int i = 0; i < 6; ++i)
+  {
+    chPosition[i]->easing_resolution = easingRes;
+  }
+
 
   establishContact();
   parkPosition();
@@ -143,6 +155,14 @@ void loop(){
     // sendConfirmationData(1, base, shoulder, elbow, wrist, gripperAngle, gripper, light);
     // Serial.println("New Position");
        
+    }
+
+    if(inByte.equals("I")){
+
+      if(!initRobot){
+  
+      }
+
     }
 
   }
@@ -204,7 +224,6 @@ void loop(){
     }
   }
 
-
 }
 
 //END OF MAIN LOOP
@@ -224,19 +243,25 @@ void parkPosition(){
 
   // send_serial_command(1500, 1500, 1500, 1500, 1500, 1500, 300);
 
-  // // chPosition[0]->setPosition(1500);
-  // // chPosition[1]->setPosition(1500);
-  // // chPosition[2]->setPosition(1500);
-  // // chPosition[3]->setPosition(1500);
-  // // chPosition[4]->setPosition(1500);
-  // // chPosition[5]->setPosition(1500);
+  chPosition[0]->setPosition(base);
+  chPosition[1]->setPosition(shoulder);
+  chPosition[2]->setPosition(elbow);
+  chPosition[3]->setPosition(wrist);
+  chPosition[4]->setPosition(gripperAngle);
+  chPosition[5]->setPosition(gripper);
 
-  chPosition[0]->setPosition(1500);
-  chPosition[1]->setPosition(1500);
-  chPosition[2]->setPosition(1500);
-  chPosition[3]->setPosition(1500);
-  chPosition[4]->setPosition(1500);
-  chPosition[5]->setPosition(1500);
+
+  // servoList[0]->writeMicroseconds(base);
+  // servoList[1]->writeMicroseconds(shoulder);
+  // servoList[2]->writeMicroseconds(elbow);
+  // servoList[3]->writeMicroseconds(wrist);
+  // servoList[4]->writeMicroseconds(gripperAngle);
+
+  strip.setBrightness(0);
+  
+
+  strip.show();
+
 
 
 
@@ -246,7 +271,7 @@ void parkPosition(){
 
 int splitString(String inByte){
 
-for (int i = 0; i <= 7; i++){
+for (int i = 0; i <= 12; i++){
   if(i == 0){
     splitArray[i] = inByte.indexOf(',');
     parameterArray[i] = inByte.substring(2,splitArray[i]).toInt();
@@ -262,11 +287,15 @@ for (int i = 0; i <= 7; i++){
   wrist         = parameterArray[3];
   gripperAngle  = parameterArray[4];
   gripper       = parameterArray[5];
-  light         = parameterArray[6];
-  easingRes     = parameterArray[7];
+  easingRes     = parameterArray[6];
+  brightness    = parameterArray[7];
+  red           = parameterArray[8];
+  green         = parameterArray[9];
+  blue          = parameterArray[10];
+  led           = parameterArray[11];
 
 
-    for (int i = 0; i < 6; ++i)
+  for (int i = 0; i < 6; ++i)
   {
     chPosition[i]->easing_resolution = easingRes;
   }
@@ -296,10 +325,16 @@ for (int i = 0; i <= 7; i++){
   // Serial.println(easingRes);
   
 
+  strip.setBrightness(brightness);
 
-
-  strip.setPixelColor(0, strip.Color(light, 255-light, 0));
-  strip.setPixelColor(1, strip.Color(light, 255-light, 0));
+  if(led == 0){
+    strip.setPixelColor(0, strip.Color(red, green, blue));
+  }else if(led == 1){
+    strip.setPixelColor(1, strip.Color(red, green, blue));
+  }else if(led == 2){
+    strip.setPixelColor(0, strip.Color(red, green, blue));
+    strip.setPixelColor(1, strip.Color(red, green, blue));
+  }
   
 
   strip.show();
@@ -357,15 +392,14 @@ void watchdogCall() {
     Serial.print("W");   // send a capital A
     Serial.println();
     connectionTimeOut --;
-    delay(30);
     watchdogActive = false;
 }  
 
 // ------------------------------------------------------------------------------------
 
 void establishContact() {
-  strip.setPixelColor(0, strip.Color(0, 255, 0));
-  strip.setPixelColor(1, strip.Color(0, 255, 0));
+  strip.setPixelColor(0, strip.Color(255, 0, 0));
+  strip.setPixelColor(1, strip.Color(255, 0, 0));
   strip.show();
    // Serial.println("Hello World...");
   delay(1000);  // do not print too fast!
@@ -376,52 +410,3 @@ void establishContact() {
     delay(300);
   }
 }
-
-// void send_serial_command(int servoNr, int servoPosition, int light){
-
-//   Serial1.print("#");
-//   Serial1.print(servoNr,DEC);
-//   Serial1.print("P");
-//   Serial1.print(servoPosition,DEC);
-//   Serial1.print("T");
-//   Serial1.print(light,DEC);
-//   Serial1.print('\r');
-//   Serial1.print('\n');
-
-// } 
-
-
-// void send_serial_command(int baseAngleInt,int shoulderAngleInt,int elbowAngleInt,int wristAngleInt,int gripAngleInt,int gripperWidthInt,int light){
-
-//  Serial1.print("#");
-//   Serial1.print(1,DEC);
-//   Serial1.print("P");
-//   Serial1.print(baseAngleInt,DEC);
-//  Serial1.print("#");
-//   Serial1.print(2,DEC);
-//   Serial1.print("P");
-//   Serial1.print(shoulderAngleInt,DEC);
-//  Serial1.print("#");
-//   Serial1.print(3,DEC);
-//   Serial1.print("P");
-//   Serial1.print(elbowAngleInt,DEC);
-//  Serial1.print("#");
-//   Serial1.print(4,DEC);
-//   Serial1.print("P");
-//   Serial1.print(wristAngleInt,DEC);
-//  Serial1.print("#");
-//   Serial1.print(5,DEC);
-//   Serial1.print("P");
-//   Serial1.print(gripAngleInt,DEC);
-//  Serial1.print("#");
-//   Serial1.print(6,DEC);
-//   Serial1.print("P");
-//   Serial1.print(gripperWidthInt,DEC);
-//   Serial1.print("T");
-//   Serial1.print(light,DEC);
-//   Serial1.print('\r');
-//   Serial1.print('\n');
-
-//   // requestNextPosition();
-
-// }
