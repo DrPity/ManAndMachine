@@ -1,3 +1,5 @@
-ID,X,Y,Z,GripperAngle,GripperWidth,X1,Y1,Turning,Claw,Streching,Arousal
-0,-100,150,60,60,180,0,0,1,180,100,100
-0,100,150,60,60,180,0,0,1,180,100,100
+ID,X,Y,Z,GripperAngle,GripperRotation,GripperWidth,Easing,Brightness,r,g,b,X1,Y1
+0,0,0,0,0,0,0,0,0,0,0,0,0,
+1,0,0,0,0,0,0,0,0,0,0,0,0,0
+2,-324,20,100,33,178,62,200,255,0,0,255,0,0
+3,-4,184,184,42,126,90,200,255,0,255,0,0,0

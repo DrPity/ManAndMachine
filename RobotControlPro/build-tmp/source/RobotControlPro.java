@@ -33,7 +33,7 @@ public class RobotControlPro extends PApplet {
 private int     end                 = 10;
 private int     pose                = 1;
 private int     gAngle              = 90;
-private int     debugVariable       = 200;
+private int     debugVariable       = 4;
 private int     z                   = 220;
 private int     y                   = 100;
 private int     gGripperWidth       = 0;
@@ -81,7 +81,7 @@ private boolean newPosition               = false;
 private boolean stepForward               = false;
 private boolean stepBack                  = false;
 
-// ------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------------
 
 PImage bg;
 Table table, tableRm, tablePositions;
@@ -107,8 +107,8 @@ ConnectionLight connectionLight, bluetoothConnection, robotConnection, traversCo
 
 public void setup() {
   frameRate(120);
-	// size(displayWidth, displayHeight,P2D);
-  size(1280,720,P2D);
+	size(displayWidth, displayHeight,P2D);
+  // size(1280,720,P2D);
   noSmooth();
   hint(ENABLE_RETINA_PIXELS);
   smooth(4);
@@ -257,7 +257,7 @@ public void draw() {
       gGripperWidth = (int) map(x, 0, 100, 0, 180);
       led = (int) map(x, 0, 100, 0, 255);
     
-      robot.setRobotArm(x, 130, z, gAngle, gGripperWidth, 1, true, 255, led, 255, led, 2);
+      robot.setRobotArm(x, 130, z, gAngle, gAngle, gGripperWidth, 1, true, 255, led, 255, led, 2);
       println("Robot Movement");
     }
   }
@@ -334,61 +334,102 @@ public void controlEvent(ControlEvent theEvent) {
               +theEvent.getStringValue()
               );
       
-      globalID = Integer.parseInt(theEvent.getStringValue());
+      //globalID = Integer.parseInt(theEvent.getStringValue());
+      //helpers.setStep();
+
+      String[] list = split(theEvent.getStringValue(), ',');
+      if (list.length == 1){
+        println(list.length + "Arrrrrrrg");
+        globalID = Integer.parseInt(list[0]);
+        helpers.setStep();
+      }else if (list.length == 6){
+        robot.setRobotArm( Integer.parseInt(list[0]), Integer.parseInt(list[1]), Integer.parseInt(list[2]), Integer.parseInt(list[3]), Integer.parseInt(list[4]), Integer.parseInt(list[5]), 200, true, 255, 255, 255, 255, 2); 
+      }
+
+    }
+
+  if(theEvent.getName().equals("Reset_Robot")){
+    println("reset robot event ");
+    robot.setRobotArm( 0, 150, 50, 70, 90, 90, 200, true, 255, 255, 255, 255, 2); 
+  }
+
+  if(theEvent.getName().equals("X+")){
+    robot.setRobotArm((lastX + debugVariable), lastY, lastZ, lastGripperAngle, lastGripperRotation, lastGripperWidth, 1, true, 255, lastR, lastG, lastB, lastLed);
+      println("X+");
+  }
+  if(theEvent.getName().equals("X-")){
+    robot.setRobotArm(lastX - debugVariable, lastY, lastZ, lastGripperAngle, lastGripperRotation, lastGripperWidth, 1, true, 255, lastR, lastG, lastB, lastLed);
+    println("X-");
+  }
+  if(theEvent.getName().equals("Y+")){
+    robot.setRobotArm(lastX, lastY + debugVariable, lastZ, lastGripperAngle, lastGripperRotation, lastGripperWidth, 1, true, 255, lastR, lastG, lastB, lastLed);
+    println("Y+");
+  }
+  if(theEvent.getName().equals("Y-")){
+    robot.setRobotArm(lastX, lastY - debugVariable, lastZ, lastGripperAngle, lastGripperRotation, lastGripperWidth, 1, true, 255, lastR, lastG, lastB, lastLed);
+    println("Y-");
+  }
+  if(theEvent.getName().equals("Z+")){
+    robot.setRobotArm(lastX, lastY, lastZ + debugVariable, lastGripperAngle, lastGripperRotation, lastGripperWidth, 1, true, 255, lastR, lastG, lastB, lastLed);
+    println("Z+");
+  }
+  if(theEvent.getName().equals("Z-")){
+    robot.setRobotArm(lastX, lastY, lastZ - debugVariable, lastGripperAngle, lastGripperRotation, lastGripperWidth, 1, true, 255, lastR, lastG, lastB, lastLed);
+    println("Z-");
+  }
+  if(theEvent.getName().equals("GA+")){
+    robot.setRobotArm(lastX, lastY, lastZ, lastGripperAngle + debugVariable, lastGripperRotation, lastGripperWidth, 1, true, 255, lastR, lastG, lastB, lastLed);
+    println("GA+");
+  }
+  if(theEvent.getName().equals("GA-")){
+    robot.setRobotArm(lastX, lastY, lastZ, lastGripperAngle - debugVariable, lastGripperRotation, lastGripperWidth, 1, true, 255, lastR, lastG, lastB, lastLed);
+    println("GA-");
+  }
+  if(theEvent.getName().equals("GR+")){
+    robot.setRobotArm(lastX, lastY, lastZ, lastGripperAngle, lastGripperRotation + debugVariable, lastGripperWidth, 1, true, 255, lastR, lastG, lastB, lastLed);
+    println("GR+");
+  }
+  if(theEvent.getName().equals("GR-")){
+    robot.setRobotArm(lastX, lastY, lastZ, lastGripperAngle, lastGripperRotation - debugVariable, lastGripperWidth, 1, true, 255, lastR, lastG, lastB, lastLed);
+    println("GR-");
+  }
+   if(theEvent.getName().equals("GC+")){
+  robot.setRobotArm(lastX, lastY, lastZ, lastGripperAngle, lastGripperRotation, lastGripperWidth + debugVariable, 1, true, 255, lastR, lastG, lastB, lastLed);
+  println("GC+");
+  }
+  if(theEvent.getName().equals("GC-")){
+    robot.setRobotArm(lastX, lastY, lastZ, lastGripperAngle, lastGripperRotation, lastGripperWidth - debugVariable, 1, true, 255, lastR, lastG, lastB, lastLed);
+    println("GC-");
+  }
+
+  if(theEvent.getName().equals("Start_Robot")){
+  isRobotStarted = !isRobotStarted;
+    if(isRobotStarted)
+      println("robot started");
+    else
+      println("robot stoped");
+    //isTimerStarted = !isTimerStarted;
+  }
+
+  if(theEvent.getName().equals("Back")){
+    if(!textToSpeech.nextTextToSpeech && !stepBack && !robotAnimation.isNextAnimation){
+      globalID--;
+      textToSpeech.checkTableConstrains();
+      println("globalID: "+globalID);
+      stepBack = true;
       helpers.setStep();
-
-      if(theEvent.getStringValue().equals("NewTable") && isReadyToStore){
-         println("New Table Created");
-         // helpers.newStorePositionTable();
-      }
     }
+  }
 
-    if(theEvent.getName().equals("Reset_Robot")){
-      println("reset robot event ");
-      robot.setRobotArm( 0, 150, 50, 70, 90, 200, true, 255, 255, 255, 255, 2); 
-    }
-
-    if(theEvent.getName().equals("saveBtn")){
-      println("save button event");
-    }
-
-    if(theEvent.getName().equals("loadBtnDefault")){
-      println("load default button");
-      globalID = 0;
-    }
-
-    if(theEvent.getName().equals("loadBtnLastPosition")){
-      println("load last Position");
-    }
-
-    if(theEvent.getName().equals("Start_Robot")){
-    isRobotStarted = !isRobotStarted;
-      if(isRobotStarted)
-        println("robot started");
-      else
-        println("robot stoped");
-      //isTimerStarted = !isTimerStarted;
-    }
-
-    if(theEvent.getName().equals("Back")){
-      if(!textToSpeech.nextTextToSpeech && !stepBack && !robotAnimation.isNextAnimation){
-        globalID--;
-        textToSpeech.checkTableConstrains();
-        println("globalID: "+globalID);
-        stepBack = true;
-        helpers.setStep();
-      }
-    }
-
-    if(theEvent.getName().equals("Forward")){
-      if(!textToSpeech.nextTextToSpeech && !stepForward && !robotAnimation.isNextAnimation){
-        globalID++;
-        textToSpeech.checkTableConstrains();
-        println("globalID: "+globalID);
-        stepForward = true;
-        helpers.setStep();
-      }  
-    }
+  if(theEvent.getName().equals("Forward")){
+    if(!textToSpeech.nextTextToSpeech && !stepForward && !robotAnimation.isNextAnimation){
+      globalID++;
+      textToSpeech.checkTableConstrains();
+      println("globalID: "+globalID);
+      stepForward = true;
+      helpers.setStep();
+    }  
+  }
  }
 } 
 
@@ -413,23 +454,23 @@ public void keyPressed(){
       if (keyCode == LEFT){
         int yy = robot.stretching(20);
         println("#streched Position in keyPressed Left: "  + yy);
-        robot.setRobotArm(0, yy, 80, 45, 90, 200, true, 255,255,0,255,2);
+        robot.setRobotArm(0, yy, 80, 45, 90, 90, 200, true, 255,255,0,255,2);
         println("+ IsStRun: +" + isStrRun); 
       }
       if (keyCode == RIGHT){
         int yy = robot.stretching(50);
         println("( streched Position in keyPressed Right: )"  + yy);
-        robot.setRobotArm(0, yy, 80, 45, 90, 200, true, 255,255,0,255,2);
+        robot.setRobotArm(0, yy, 80, 45, 90, 90, 200, true, 255,255,0,255,2);
         println("+ IsStRun: +" + isStrRun); 
       }
       if (keyCode == UP){
-        robot.setRobotArm(0,debugVariable,100,90,90,200,true,255,0,255,0,2);
-        debugVariable += 2;
+         robot.setRobotArm(0,debugVariable,200,45,90,90,200,true,255,0,255,0,2);
+        // debugVariable += 2;
 
       }
       if (keyCode == DOWN){
-        robot.setRobotArm(0,debugVariable,100,90,90,200,true,255,0,255,0,2);
-        debugVariable -= 2;
+         robot.setRobotArm(0,debugVariable,200,45,90,90,200,true,255,0,255,0,2);
+        // debugVariable -= 2;
       }
     }
 
@@ -463,7 +504,7 @@ public void calculateBioInput(){
 // ------------------------------------------------------------------------------------
 
 public boolean sketchFullScreen() {
-return false;
+return true;
 }
 class Channel { 
 
@@ -638,15 +679,101 @@ class Drawings  {
     //  .setSize(100,20)
     //  ;
   
-  // controlP5.addButton("saveBtn")
-  //   .setValue(0)
-  //   .setCaptionLabel("save Values")
-  //   .setSize(round(100),round(20))
-  //   .setPosition(round(260),round(height * 0.47))
-  //   .setColorBackground(color(0, 200, 0))
-  //   ;
+  controlP5.addButton("X+")
+    .setValue(0)
+    .setCaptionLabel("X+")
+    .setSize(round(30),round(30))
+    .setPosition(440,round(height * 0.55f))
+    .setColorBackground(color(0, 200, 0))
+    ;
 
+  controlP5.addButton("X-")
+    .setValue(0)
+    .setCaptionLabel("X-")
+    .setSize(round(30),round(30))
+    .setPosition(440,round(height * 0.60f))
+    .setColorBackground(color(0, 200, 0))
+    ;
   
+  controlP5.addButton("Y+")
+    .setValue(0)
+    .setCaptionLabel("Y+")
+    .setSize(round(30),round(30))
+    .setPosition(490,round(height * 0.55f))
+    .setColorBackground(color(0, 200, 0))
+    ;
+
+  controlP5.addButton("Y-")
+    .setValue(0)
+    .setCaptionLabel("Y-")
+    .setSize(round(30),round(30))
+    .setPosition(490,round(height * 0.60f))
+    .setColorBackground(color(0, 200, 0))
+    ;
+
+  controlP5.addButton("Z+")
+    .setValue(0)
+    .setCaptionLabel("Z+")
+    .setSize(round(30),round(30))
+    .setPosition(540,round(height * 0.55f))
+    .setColorBackground(color(0, 200, 0))
+    ;
+
+  controlP5.addButton("Z-")
+    .setValue(0)
+    .setCaptionLabel("Z-")
+    .setSize(round(30),round(30))
+    .setPosition(540,round(height * 0.60f))
+    .setColorBackground(color(0, 200, 0))
+    ;
+  
+  controlP5.addButton("GA+")
+    .setValue(0)
+    .setCaptionLabel("GA+")
+    .setSize(round(30),round(30))
+    .setPosition(590,round(height * 0.55f))
+    .setColorBackground(color(0, 200, 0))
+    ;
+
+  controlP5.addButton("GA-")
+    .setValue(0)
+    .setCaptionLabel("GA-")
+    .setSize(round(30),round(30))
+    .setPosition(590,round(height * 0.60f))
+    .setColorBackground(color(0, 200, 0))
+    ;
+
+  controlP5.addButton("GC+")
+  .setValue(0)
+  .setCaptionLabel("GC+")
+  .setSize(round(30),round(30))
+  .setPosition(640,round(height * 0.55f))
+  .setColorBackground(color(0, 200, 0))
+  ;
+
+  controlP5.addButton("GC-")
+    .setValue(0)
+    .setCaptionLabel("GC-")
+    .setSize(round(30),round(30))
+    .setPosition(640,round(height * 0.60f))
+    .setColorBackground(color(0, 200, 0))
+    ;
+
+  controlP5.addButton("GR+")
+    .setValue(0)
+    .setCaptionLabel("GR+")
+    .setSize(round(30),round(30))
+    .setPosition(690,round(height * 0.55f))
+    .setColorBackground(color(0, 200, 0))
+    ;
+
+  controlP5.addButton("GR-")
+    .setValue(0)
+    .setCaptionLabel("GR-")
+    .setSize(round(30),round(30))
+    .setPosition(690,round(height * 0.60f))
+    .setColorBackground(color(0, 200, 0))
+    ;  
   // controlP5.addButton("loadBtnDefault")
   //   .setValue(0)
   //   .setCaptionLabel("load Default")
@@ -666,19 +793,19 @@ class Drawings  {
   //   .setColorBackground(color(200, 130, 0))
   //   ;
   
-  controlP5.addButton("Start_Robot")
-   .setValue(0)
-   .setCaptionLabel("START ROBOT")
-   .setPosition(round(500),round(height * 0.42f))
-   .setSize(round(100),round(20))
-   ;
+  // controlP5.addButton("Start_Robot")
+  //  .setValue(0)
+  //  .setCaptionLabel("START ROBOT")
+  //  .setPosition(round(500),round(height * 0.42))
+  //  .setSize(round(100),round(20))
+  //  ;
   
-  controlP5.addButton("Reset_Robot")
-   .setValue(0)
-   .setCaptionLabel("RESET ROBOT")
-   .setPosition(round(width*0.3f),round(height * 0.44f))
-   .setSize(round(100),round(20))
-   ;
+  // controlP5.addButton("Reset_Robot")
+  //  .setValue(0)
+  //  .setCaptionLabel("RESET ROBOT")
+  //  .setPosition(round(width*0.3),round(height * 0.44))
+  //  .setSize(round(100),round(20))
+  //  ;
      
   controlP5.addButton("Back")
    .setValue(0)
@@ -793,7 +920,7 @@ class Drawings  {
 
   controlP5.addTextfield("Set Global ID - [ ENTER ]")
                 .setPosition(round(width*0.07f),round(height * 0.49f))
-                .setSize(100,20)
+                .setSize(150,20)
                 .setFont(fontSmallBold)
                 .setFocus(true)
                 .setColorActive(0)
@@ -1752,6 +1879,7 @@ private int     currentShoulder         = 00;
 private int     currentElbow            = 00;
 private int     currentWrist            = 00;
 private int     currentGripperAngle     = 00;
+private int     currentGripperRotation  = 00;
 private int     currentGripperWidth     = 00;
 private int     currentLight            = 00;
 private int     currentEasing           = 00;
@@ -1763,6 +1891,7 @@ public float     lastY             = 0;
 public float     lastZ             = 0;
 public float     lastGripperAngle  = 0;
 public int       lastGripperWidth  = 0;
+public int       lastGripperRotation  = 0;
 public int       lastR             = 0;
 public int       lastG             = 0;
 public int       lastB             = 0;
@@ -1821,7 +1950,7 @@ class Robot{
 // ------------------------------------------------------------------------------------
 
   /* Inverse Kinematic Arithmetic: X can be + and -; Y and Z only positive. All values in mm! gripperAngleD must be according to the object in degree. gripperwidth in degree. And led from 0-255 */
-  public void setRobotArm( float x, float y, float z, float gripperAngleD, int gripperWidth, int easingResolution, boolean sendData, int brightnessStrip, int r, int g,  int b, int led){
+  public void setRobotArm( float x, float y, float z, float gripperAngleD, int gripperRotation, int gripperWidth, int easingResolution, boolean sendData, int brightnessStrip, int r, int g,  int b, int led){
 
     if(isRobotReadyToMove){
       /* send start byte */
@@ -1866,14 +1995,15 @@ class Robot{
         println("[ Data not verified ]");
       }
 
-      println("x,y,z: " +  x + " " +  y + " " + z);
+      println("x,y,z: " +  x + " " +  y + " " + z + " " + "gripperAngle: " + gripperAngleD +  " gripperRotation: " + gripperRotation + " gripperWidth: " + gripperWidth);
 
       currentBase = (int) map(baseAngleD, 180, 0, BASE_MIN, BASE_MAX);
       currentShoulder = (int) map(shoulderAngleD, 0, 180, SHOULDER_MIN, SHOULDER_MAX);
       currentElbow = (int) map(elbowAngleD, 180, 0, ELBOW_MIN, ELBOW_MAX);
       currentWrist = (int) map(wristAngleD, 0, 180, WRIST_MIN, WRIST_MAX);
-      currentGripperAngle = (int) map(gripperAngleD, 0, 180, GRIPPER_ANGLE_MIN, GRIPPER_ANGLE_MAX);
+      currentGripperRotation = (int) map(gripperRotation, 0, 180, GRIPPER_ANGLE_MIN, GRIPPER_ANGLE_MAX);
       currentGripperWidth = (int) map(gripperWidth, 0, 180, GRIPPER_MIN, GRIPPER_MAX);
+      currentBrightness = brightnessStrip;
       if(easingResolution <= 0)
         currentEasing = 1;
       else
@@ -1881,11 +2011,12 @@ class Robot{
      
 
       if(isDataVerified && sendData){
-        sendRobotData( currentBase, currentShoulder, currentElbow, currentWrist, currentGripperAngle, currentGripperWidth, currentEasing, currentBrightness, r, g, b, led);
+        sendRobotData( currentBase, currentShoulder, currentElbow, currentWrist, currentGripperRotation, currentGripperWidth, currentEasing, currentBrightness, r, g, b, led);
         lastX = x;
         lastY = y;
         lastZ = z;
         lastGripperAngle = gripperAngleD;
+        lastGripperRotation = gripperRotation;
         lastGripperWidth = gripperWidth;
         lastR = r;
         lastG = g;
@@ -1910,12 +2041,12 @@ class Robot{
 
 // ------------------------------------------------------------------------------------
 
-  public void sendRobotData(int currentBase, int currentShoulder, int currentElbow, int currentWrist, int currentGripperAngle, int currentGripperWidth, int currentEasing, int currentBrightness, int r, int g, int b, int led){
+  public void sendRobotData(int currentBase, int currentShoulder, int currentElbow, int currentWrist, int currentGripperRotation, int currentGripperWidth, int currentEasing, int currentBrightness, int r, int g, int b, int led){
 
     if(wA.deviceInstanciated)
-    wA.port.write(String.format("Rr%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d\n",currentBase, currentShoulder, currentElbow, currentWrist, currentGripperAngle, currentGripperWidth, currentEasing, currentBrightness, r, g, b, led));
+    wA.port.write(String.format("Rr%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d\n",currentBase, currentShoulder, currentElbow, currentWrist, currentGripperRotation, currentGripperWidth, currentEasing, currentBrightness, r, g, b, led));
     // wA.port.write(10);
-    println(String.format("(Rr%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d)",currentBase, currentShoulder, currentElbow, currentWrist, currentGripperAngle, currentGripperWidth, currentEasing, currentBrightness, r, g, b, led));
+    println(String.format("(Rr%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d)",currentBase, currentShoulder, currentElbow, currentWrist, currentGripperRotation, currentGripperWidth, currentEasing, currentBrightness, r, g, b, led));
     isRobotReadyToMove = false;
 
   }
@@ -1926,7 +2057,7 @@ class Robot{
 
   public int findLowerBound(int strechedPosition){
     for(int i = strechedPosition; i <= 349; i++){
-    setRobotArm(lastX, i, lastZ, lastGripperAngle, (int) lastGripperWidth, 1, false, 255, lastR, lastG, lastB, lastLed);
+    setRobotArm(lastX, i, lastZ, lastGripperAngle, lastGripperRotation,  (int) lastGripperWidth, 1, false, 255, lastR, lastG, lastB, lastLed);
       if(validStrPos){
         validStrPos = false;
         return i;
@@ -1941,7 +2072,7 @@ class Robot{
 
   public int findUpperBound(int strechedPosition){
     for(int i = strechedPosition; i >= 0; i--){
-    setRobotArm(lastX, i, lastZ, lastGripperAngle, (int) lastGripperWidth, 1, false, 255, lastR, lastG, lastB, lastLed); 
+    setRobotArm(lastX, i, lastZ, lastGripperAngle, lastGripperRotation,(int) lastGripperWidth, 1, false, 255, lastR, lastG, lastB, lastLed); 
       if(validStrPos){
         validStrPos = false;
         return i;
@@ -1968,16 +2099,23 @@ class Robot{
         int y = tablePositions.getInt(globalID, "Y");
         int z = tablePositions.getInt(globalID, "Z");
         int gripperAngle = tablePositions.getInt(globalID, "GripperAngle");
+        int gripperRotation = tablePositions.getInt(globalID, "GripperRotation");
         int gripperWidth = tablePositions.getInt(globalID, "GripperWidth");
+        int easing = tablePositions.getInt(globalID, "Easing");
+        int brightn = tablePositions.getInt(globalID, "Brightness");
+        int r = tablePositions.getInt(globalID, "r");
+        int g = tablePositions.getInt(globalID, "g");
+        int b = tablePositions.getInt(globalID, "b");
         int x1 = tablePositions.getInt(globalID, "X1");
         int y1 = tablePositions.getInt(globalID, "Y1");
-        int turning = tablePositions.getInt(globalID, "Turning");
-        int claw = tablePositions.getInt(globalID, "Claw");
-        int stretching = tablePositions.getInt(globalID, "Streching");
-        int arousal = tablePositions.getInt(globalID, "Arousal");
         //call streching somewhere here
         // setRobotArm() here
-        println("[ x: " + x + " y: " + y + " z: " + z + " gripperAngle: " + gripperAngle + " gripperWidth: " + gripperWidth + " x1: " + x1 + " y1: " + y1 + " turning: " + turning + " claw: " + claw + " stretching: " + stretching + " araousal: " + arousal + " ]");
+        if(globalID > 1){
+        //float x, float y, float z, float gripperAngleD, int gripperRotation, int gripperWidth, int easingResolution, boolean sendData, int brightnessStrip, int r, int g,  int b, int led
+          setRobotArm(x,y,z,gripperAngle,gripperRotation,gripperWidth,easing,true,brightn,r,g,b,2);
+          println("[ " + x + "," + y + "," + z + "," + gripperAngle + "," + gripperRotation +  "," + gripperWidth + "," + easing + "," + brightn + "," + r + "," + g + "," + b + "," + x1 + "," + y1 + " ]");
+        }
+
         newPosition = false;
       }
   }
@@ -1995,6 +2133,7 @@ float     yStand             = 0;
 float     zStand             = 0;
 float     gaStand            = 0;
 int       gwStand            = 0;
+int       grStand            = 0;
 int       rStand             = 0;
 int       gStand             = 0;
 int       bStand             = 0;
@@ -2067,6 +2206,7 @@ public void checkAnimations(){
       robot.sendRobotData(1475, 1500, 1500, 720, 675, 2100, 1, i, 255, 0, 0, 2);
       sleep(20);
     }
+    sleep(1000);
     robot.sendRobotData(2150, 1500, 1500, 720, 650, 2100, 200, 127, 255, 255, 0,0);
     sleep(2000);
     robot.sendRobotData(1475, 1500, 1500, 720, 650, 2100, 200, 127, 100, 255, 0,1);
@@ -2096,7 +2236,7 @@ public void checkAnimations(){
     }
 
     sleep(1000);
-    robot.setRobotArm(0,150,100,90,90,200,true,255,0,255,0,2);
+    robot.setRobotArm(0,219,200,45,90,90,200,true,255,0,255,0,2);
     sleep(1000);
   }
 
@@ -2109,11 +2249,11 @@ isNextAnimation = false;
 
 public void standAnimation(){
 
-if (true){
+if (false){
 
     if((millis() - frameTime) >= 10){
 
-      float amplitude = 30;
+      float amplitude = 10;
       float y = amplitude * cos(angle);
       angle += aVelocity;
 
@@ -2122,6 +2262,7 @@ if (true){
         yStand = lastY;
         zStand = lastZ;
         gaStand = lastGripperAngle;
+        grStand = lastGripperRotation;
         gwStand = lastGripperWidth;
         lbStand = lastBrightness;
         rStand = lastR;
@@ -2131,7 +2272,7 @@ if (true){
         standValue = true;
       }  
     
-      robot.setRobotArm(xStand, (yStand + y), zStand, gaStand, gwStand, 1, true, lbStand, rStand, gStand, bStand, ledStand);
+      robot.setRobotArm((xStand + y), yStand, (zStand +(y/2)), gaStand, grStand, gwStand, 1, true, lbStand, rStand, gStand, bStand, ledStand);
       frameTime = millis();
     }
   }

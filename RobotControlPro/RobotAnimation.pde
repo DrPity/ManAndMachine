@@ -11,6 +11,7 @@ float     yStand             = 0;
 float     zStand             = 0;
 float     gaStand            = 0;
 int       gwStand            = 0;
+int       grStand            = 0;
 int       rStand             = 0;
 int       gStand             = 0;
 int       bStand             = 0;
@@ -83,6 +84,7 @@ void checkAnimations(){
       robot.sendRobotData(1475, 1500, 1500, 720, 675, 2100, 1, i, 255, 0, 0, 2);
       sleep(20);
     }
+    sleep(1000);
     robot.sendRobotData(2150, 1500, 1500, 720, 650, 2100, 200, 127, 255, 255, 0,0);
     sleep(2000);
     robot.sendRobotData(1475, 1500, 1500, 720, 650, 2100, 200, 127, 100, 255, 0,1);
@@ -112,7 +114,7 @@ void checkAnimations(){
     }
 
     sleep(1000);
-    robot.setRobotArm(0,150,100,90,90,200,true,255,0,255,0,2);
+    robot.setRobotArm(0,219,200,45,90,90,200,true,255,0,255,0,2);
     sleep(1000);
   }
 
@@ -125,11 +127,11 @@ isNextAnimation = false;
 
 void standAnimation(){
 
-if (true){
+if (false){
 
     if((millis() - frameTime) >= 10){
 
-      float amplitude = 30;
+      float amplitude = 10;
       float y = amplitude * cos(angle);
       angle += aVelocity;
 
@@ -138,6 +140,7 @@ if (true){
         yStand = lastY;
         zStand = lastZ;
         gaStand = lastGripperAngle;
+        grStand = lastGripperRotation;
         gwStand = lastGripperWidth;
         lbStand = lastBrightness;
         rStand = lastR;
@@ -147,7 +150,7 @@ if (true){
         standValue = true;
       }  
     
-      robot.setRobotArm(xStand, (yStand + y), zStand, gaStand, gwStand, 1, true, lbStand, rStand, gStand, bStand, ledStand);
+      robot.setRobotArm((xStand + y), yStand, (zStand +(y/2)), gaStand, grStand, gwStand, 1, true, lbStand, rStand, gStand, bStand, ledStand);
       frameTime = millis();
     }
   }

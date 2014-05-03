@@ -314,98 +314,95 @@ void controlEvent(ControlEvent theEvent) {
       //helpers.setStep();
 
       String[] list = split(theEvent.getStringValue(), ',');
-      if (list.length == 1){
-        println(list.length + "Arrrrrrrg");
+      robot.setRobotArm( Integer.parseInt(list[0]), Integer.parseInt(list[1]), Integer.parseInt(list[2]), Integer.parseInt(list[3]), Integer.parseInt(list[4]), Integer.parseInt(list[5]), 200, true, 255, 255, 255, 255, 2); 
+
+      if (list.size() <= 1){
         globalID = Integer.parseInt(list[0]);
-        helpers.setStep();
-      }else if (list.length == 6){
-        robot.setRobotArm( Integer.parseInt(list[0]), Integer.parseInt(list[1]), Integer.parseInt(list[2]), Integer.parseInt(list[3]), Integer.parseInt(list[4]), Integer.parseInt(list[5]), 200, true, 255, 255, 255, 255, 2); 
       }
-
     }
 
-  if(theEvent.getName().equals("Reset_Robot")){
-    println("reset robot event ");
-    robot.setRobotArm( 0, 150, 50, 70, 90, 90, 200, true, 255, 255, 255, 255, 2); 
-  }
-
-  if(theEvent.getName().equals("X+")){
-    robot.setRobotArm((lastX + debugVariable), lastY, lastZ, lastGripperAngle, lastGripperRotation, lastGripperWidth, 1, true, 255, lastR, lastG, lastB, lastLed);
-      println("X+");
-  }
-  if(theEvent.getName().equals("X-")){
-    robot.setRobotArm(lastX - debugVariable, lastY, lastZ, lastGripperAngle, lastGripperRotation, lastGripperWidth, 1, true, 255, lastR, lastG, lastB, lastLed);
-    println("X-");
-  }
-  if(theEvent.getName().equals("Y+")){
-    robot.setRobotArm(lastX, lastY + debugVariable, lastZ, lastGripperAngle, lastGripperRotation, lastGripperWidth, 1, true, 255, lastR, lastG, lastB, lastLed);
-    println("Y+");
-  }
-  if(theEvent.getName().equals("Y-")){
-    robot.setRobotArm(lastX, lastY - debugVariable, lastZ, lastGripperAngle, lastGripperRotation, lastGripperWidth, 1, true, 255, lastR, lastG, lastB, lastLed);
-    println("Y-");
-  }
-  if(theEvent.getName().equals("Z+")){
-    robot.setRobotArm(lastX, lastY, lastZ + debugVariable, lastGripperAngle, lastGripperRotation, lastGripperWidth, 1, true, 255, lastR, lastG, lastB, lastLed);
-    println("Z+");
-  }
-  if(theEvent.getName().equals("Z-")){
-    robot.setRobotArm(lastX, lastY, lastZ - debugVariable, lastGripperAngle, lastGripperRotation, lastGripperWidth, 1, true, 255, lastR, lastG, lastB, lastLed);
-    println("Z-");
-  }
-  if(theEvent.getName().equals("GA+")){
-    robot.setRobotArm(lastX, lastY, lastZ, lastGripperAngle + debugVariable, lastGripperRotation, lastGripperWidth, 1, true, 255, lastR, lastG, lastB, lastLed);
-    println("GA+");
-  }
-  if(theEvent.getName().equals("GA-")){
-    robot.setRobotArm(lastX, lastY, lastZ, lastGripperAngle - debugVariable, lastGripperRotation, lastGripperWidth, 1, true, 255, lastR, lastG, lastB, lastLed);
-    println("GA-");
-  }
-  if(theEvent.getName().equals("GR+")){
-    robot.setRobotArm(lastX, lastY, lastZ, lastGripperAngle, lastGripperRotation + debugVariable, lastGripperWidth, 1, true, 255, lastR, lastG, lastB, lastLed);
-    println("GR+");
-  }
-  if(theEvent.getName().equals("GR-")){
-    robot.setRobotArm(lastX, lastY, lastZ, lastGripperAngle, lastGripperRotation - debugVariable, lastGripperWidth, 1, true, 255, lastR, lastG, lastB, lastLed);
-    println("GR-");
-  }
-   if(theEvent.getName().equals("GC+")){
-  robot.setRobotArm(lastX, lastY, lastZ, lastGripperAngle, lastGripperRotation, lastGripperWidth + debugVariable, 1, true, 255, lastR, lastG, lastB, lastLed);
-  println("GC+");
-  }
-  if(theEvent.getName().equals("GC-")){
-    robot.setRobotArm(lastX, lastY, lastZ, lastGripperAngle, lastGripperRotation, lastGripperWidth - debugVariable, 1, true, 255, lastR, lastG, lastB, lastLed);
-    println("GC-");
-  }
-
-  if(theEvent.getName().equals("Start_Robot")){
-  isRobotStarted = !isRobotStarted;
-    if(isRobotStarted)
-      println("robot started");
-    else
-      println("robot stoped");
-    //isTimerStarted = !isTimerStarted;
-  }
-
-  if(theEvent.getName().equals("Back")){
-    if(!textToSpeech.nextTextToSpeech && !stepBack && !robotAnimation.isNextAnimation){
-      globalID--;
-      textToSpeech.checkTableConstrains();
-      println("globalID: "+globalID);
-      stepBack = true;
-      helpers.setStep();
+    if(theEvent.getName().equals("Reset_Robot")){
+      println("reset robot event ");
+      robot.setRobotArm( 0, 150, 50, 70, 90, 90, 200, true, 255, 255, 255, 255, 2); 
     }
-  }
 
-  if(theEvent.getName().equals("Forward")){
-    if(!textToSpeech.nextTextToSpeech && !stepForward && !robotAnimation.isNextAnimation){
-      globalID++;
-      textToSpeech.checkTableConstrains();
-      println("globalID: "+globalID);
-      stepForward = true;
-      helpers.setStep();
-    }  
-  }
+    if(theEvent.getName().equals("X+")){
+      robot.setRobotArm((lastX + debugVariable), lastY, lastZ, lastGripperAngle, lastGripperRotation, lastGripperWidth, 1, true, 255, lastR, lastG, lastB, lastLed);
+        println("X+");
+    }
+    if(theEvent.getName().equals("X-")){
+      robot.setRobotArm(lastX - debugVariable, lastY, lastZ, lastGripperAngle, lastGripperRotation, lastGripperWidth, 1, true, 255, lastR, lastG, lastB, lastLed);
+      println("X-");
+    }
+    if(theEvent.getName().equals("Y+")){
+      robot.setRobotArm(lastX, lastY + debugVariable, lastZ, lastGripperAngle, lastGripperRotation, lastGripperWidth, 1, true, 255, lastR, lastG, lastB, lastLed);
+      println("Y+");
+    }
+    if(theEvent.getName().equals("Y-")){
+      robot.setRobotArm(lastX, lastY - debugVariable, lastZ, lastGripperAngle, lastGripperRotation, lastGripperWidth, 1, true, 255, lastR, lastG, lastB, lastLed);
+      println("Y-");
+    }
+    if(theEvent.getName().equals("Z+")){
+      robot.setRobotArm(lastX, lastY, lastZ + debugVariable, lastGripperAngle, lastGripperRotation, lastGripperWidth, 1, true, 255, lastR, lastG, lastB, lastLed);
+      println("Z+");
+    }
+    if(theEvent.getName().equals("Z-")){
+      robot.setRobotArm(lastX, lastY, lastZ - debugVariable, lastGripperAngle, lastGripperRotation, lastGripperWidth, 1, true, 255, lastR, lastG, lastB, lastLed);
+      println("Z-");
+    }
+    if(theEvent.getName().equals("GA+")){
+      robot.setRobotArm(lastX, lastY, lastZ, lastGripperAngle + debugVariable, lastGripperRotation, lastGripperWidth, 1, true, 255, lastR, lastG, lastB, lastLed);
+      println("GA+");
+    }
+    if(theEvent.getName().equals("GA-")){
+      robot.setRobotArm(lastX, lastY, lastZ, lastGripperAngle - debugVariable, lastGripperRotation, lastGripperWidth, 1, true, 255, lastR, lastG, lastB, lastLed);
+      println("GA-");
+    }
+    if(theEvent.getName().equals("GR+")){
+      robot.setRobotArm(lastX, lastY, lastZ, lastGripperAngle, lastGripperRotation + debugVariable, lastGripperWidth, 1, true, 255, lastR, lastG, lastB, lastLed);
+      println("GR+");
+    }
+    if(theEvent.getName().equals("GR-")){
+      robot.setRobotArm(lastX, lastY, lastZ, lastGripperAngle, lastGripperRotation - debugVariable, lastGripperWidth, 1, true, 255, lastR, lastG, lastB, lastLed);
+      println("GR-");
+    }
+     if(theEvent.getName().equals("GC+")){
+    robot.setRobotArm(lastX, lastY, lastZ, lastGripperAngle, lastGripperRotation, lastGripperWidth + debugVariable, 1, true, 255, lastR, lastG, lastB, lastLed);
+    println("GC+");
+    }
+    if(theEvent.getName().equals("GC-")){
+      robot.setRobotArm(lastX, lastY, lastZ, lastGripperAngle, lastGripperRotation, lastGripperWidth - debugVariable, 1, true, 255, lastR, lastG, lastB, lastLed);
+      println("GC-");
+    }
+
+    if(theEvent.getName().equals("Start_Robot")){
+    isRobotStarted = !isRobotStarted;
+      if(isRobotStarted)
+        println("robot started");
+      else
+        println("robot stoped");
+      //isTimerStarted = !isTimerStarted;
+    }
+
+    if(theEvent.getName().equals("Back")){
+      if(!textToSpeech.nextTextToSpeech && !stepBack && !robotAnimation.isNextAnimation){
+        globalID--;
+        textToSpeech.checkTableConstrains();
+        println("globalID: "+globalID);
+        stepBack = true;
+        helpers.setStep();
+      }
+    }
+
+    if(theEvent.getName().equals("Forward")){
+      if(!textToSpeech.nextTextToSpeech && !stepForward && !robotAnimation.isNextAnimation){
+        globalID++;
+        textToSpeech.checkTableConstrains();
+        println("globalID: "+globalID);
+        stepForward = true;
+        helpers.setStep();
+      }  
+    }
  }
 } 
 

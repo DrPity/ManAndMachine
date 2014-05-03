@@ -56,15 +56,101 @@ class Drawings  {
     //  .setSize(100,20)
     //  ;
   
-  // controlP5.addButton("saveBtn")
-  //   .setValue(0)
-  //   .setCaptionLabel("save Values")
-  //   .setSize(round(100),round(20))
-  //   .setPosition(round(260),round(height * 0.47))
-  //   .setColorBackground(color(0, 200, 0))
-  //   ;
+  controlP5.addButton("X+")
+    .setValue(0)
+    .setCaptionLabel("X+")
+    .setSize(round(30),round(30))
+    .setPosition(440,round(height * 0.55))
+    .setColorBackground(color(0, 200, 0))
+    ;
 
+  controlP5.addButton("X-")
+    .setValue(0)
+    .setCaptionLabel("X-")
+    .setSize(round(30),round(30))
+    .setPosition(440,round(height * 0.60))
+    .setColorBackground(color(0, 200, 0))
+    ;
   
+  controlP5.addButton("Y+")
+    .setValue(0)
+    .setCaptionLabel("Y+")
+    .setSize(round(30),round(30))
+    .setPosition(490,round(height * 0.55))
+    .setColorBackground(color(0, 200, 0))
+    ;
+
+  controlP5.addButton("Y-")
+    .setValue(0)
+    .setCaptionLabel("Y-")
+    .setSize(round(30),round(30))
+    .setPosition(490,round(height * 0.60))
+    .setColorBackground(color(0, 200, 0))
+    ;
+
+  controlP5.addButton("Z+")
+    .setValue(0)
+    .setCaptionLabel("Z+")
+    .setSize(round(30),round(30))
+    .setPosition(540,round(height * 0.55))
+    .setColorBackground(color(0, 200, 0))
+    ;
+
+  controlP5.addButton("Z-")
+    .setValue(0)
+    .setCaptionLabel("Z-")
+    .setSize(round(30),round(30))
+    .setPosition(540,round(height * 0.60))
+    .setColorBackground(color(0, 200, 0))
+    ;
+  
+  controlP5.addButton("GA+")
+    .setValue(0)
+    .setCaptionLabel("GA+")
+    .setSize(round(30),round(30))
+    .setPosition(590,round(height * 0.55))
+    .setColorBackground(color(0, 200, 0))
+    ;
+
+  controlP5.addButton("GA-")
+    .setValue(0)
+    .setCaptionLabel("GA-")
+    .setSize(round(30),round(30))
+    .setPosition(590,round(height * 0.60))
+    .setColorBackground(color(0, 200, 0))
+    ;
+
+  controlP5.addButton("GC+")
+  .setValue(0)
+  .setCaptionLabel("GC+")
+  .setSize(round(30),round(30))
+  .setPosition(640,round(height * 0.55))
+  .setColorBackground(color(0, 200, 0))
+  ;
+
+  controlP5.addButton("GC-")
+    .setValue(0)
+    .setCaptionLabel("GC-")
+    .setSize(round(30),round(30))
+    .setPosition(640,round(height * 0.60))
+    .setColorBackground(color(0, 200, 0))
+    ;
+
+  controlP5.addButton("GR+")
+    .setValue(0)
+    .setCaptionLabel("GR+")
+    .setSize(round(30),round(30))
+    .setPosition(690,round(height * 0.55))
+    .setColorBackground(color(0, 200, 0))
+    ;
+
+  controlP5.addButton("GR-")
+    .setValue(0)
+    .setCaptionLabel("GR-")
+    .setSize(round(30),round(30))
+    .setPosition(690,round(height * 0.60))
+    .setColorBackground(color(0, 200, 0))
+    ;  
   // controlP5.addButton("loadBtnDefault")
   //   .setValue(0)
   //   .setCaptionLabel("load Default")
@@ -84,19 +170,19 @@ class Drawings  {
   //   .setColorBackground(color(200, 130, 0))
   //   ;
   
-  controlP5.addButton("Start_Robot")
-   .setValue(0)
-   .setCaptionLabel("START ROBOT")
-   .setPosition(round(500),round(height * 0.42))
-   .setSize(round(100),round(20))
-   ;
+  // controlP5.addButton("Start_Robot")
+  //  .setValue(0)
+  //  .setCaptionLabel("START ROBOT")
+  //  .setPosition(round(500),round(height * 0.42))
+  //  .setSize(round(100),round(20))
+  //  ;
   
-  controlP5.addButton("Reset_Robot")
-   .setValue(0)
-   .setCaptionLabel("RESET ROBOT")
-   .setPosition(round(width*0.3),round(height * 0.44))
-   .setSize(round(100),round(20))
-   ;
+  // controlP5.addButton("Reset_Robot")
+  //  .setValue(0)
+  //  .setCaptionLabel("RESET ROBOT")
+  //  .setPosition(round(width*0.3),round(height * 0.44))
+  //  .setSize(round(100),round(20))
+  //  ;
      
   controlP5.addButton("Back")
    .setValue(0)
@@ -211,7 +297,7 @@ class Drawings  {
 
   controlP5.addTextfield("Set Global ID - [ ENTER ]")
                 .setPosition(round(width*0.07),round(height * 0.49))
-                .setSize(100,20)
+                .setSize(150,20)
                 .setFont(fontSmallBold)
                 .setFocus(true)
                 .setColorActive(0)
