@@ -227,14 +227,6 @@ void loop(){
 }
 
 //END OF MAIN LOOP
-// ------------------------------------------------------------------------------------
-
-void blink(){
-  digitalWrite(ledPin, HIGH);   // set the LED on
-  delay(50);                  // wait for a second
-  digitalWrite(ledPin, LOW);    // set the LED off
-  delay(50); 
-}
 
 // ------------------------------------------------------------------------------------
 

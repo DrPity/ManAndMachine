@@ -242,7 +242,7 @@ void draw() {
   gridXisDrawn = false;
 
 
-  if(!textToSpeech.nextTextToSpeech && !stepBack && !robotAnimation.isNextAnimation)
+  if(!textToSpeech.nextTextToSpeech && !stepBack && !robotAnimation.isNextStep)
     isReadyColor = 255;
   else
     isReadyColor = 0;
@@ -388,7 +388,7 @@ void controlEvent(ControlEvent theEvent) {
   }
 
   if(theEvent.getName().equals("Back")){
-    if(!textToSpeech.nextTextToSpeech && !stepBack && !robotAnimation.isNextAnimation){
+    if(!textToSpeech.nextTextToSpeech && !stepBack && !robotAnimation.isNextStep){
       globalID--;
       textToSpeech.checkTableConstrains();
       println("globalID: "+globalID);
@@ -398,7 +398,7 @@ void controlEvent(ControlEvent theEvent) {
   }
 
   if(theEvent.getName().equals("Forward")){
-    if(!textToSpeech.nextTextToSpeech && !stepForward && !robotAnimation.isNextAnimation){
+    if(!textToSpeech.nextTextToSpeech && !stepForward && !robotAnimation.isNextStep){
       globalID++;
       textToSpeech.checkTableConstrains();
       println("globalID: "+globalID);

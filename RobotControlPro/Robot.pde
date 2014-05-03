@@ -143,7 +143,7 @@ class Robot{
         println("[ Data not verified ]");
       }
 
-      println("x,y,z: " +  x + " " +  y + " " + z + " " + "gripperAngle: " + gripperAngleD +  " gripperRotation: " + gripperRotation + " gripperWidth: " + gripperWidth);
+      println("[ " + x + "," + y + "," + z + "," + gripperAngleD + "," + gripperRotation +  "," + gripperWidth + "," + easingResolution + "," + brightnessStrip + "," + r + "," + g + "," + b + " ]");
 
       currentBase = (int) map(baseAngleD, 180, 0, BASE_MIN, BASE_MAX);
       currentShoulder = (int) map(shoulderAngleD, 0, 180, SHOULDER_MIN, SHOULDER_MAX);
@@ -171,7 +171,7 @@ class Robot{
         lastB = b;
         lastBrightness = brightnessStrip;
         lastLed = led;
-        println("Data verified and send");
+        // println("Data verified and send");
         isDataVerified = false;
       }
     }
@@ -194,7 +194,7 @@ class Robot{
     if(wA.deviceInstanciated)
     wA.port.write(String.format("Rr%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d\n",currentBase, currentShoulder, currentElbow, currentWrist, currentGripperRotation, currentGripperWidth, currentEasing, currentBrightness, r, g, b, led));
     // wA.port.write(10);
-    println(String.format("(Rr%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d)",currentBase, currentShoulder, currentElbow, currentWrist, currentGripperRotation, currentGripperWidth, currentEasing, currentBrightness, r, g, b, led));
+    // println(String.format("(Rr%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d)",currentBase, currentShoulder, currentElbow, currentWrist, currentGripperRotation, currentGripperWidth, currentEasing, currentBrightness, r, g, b, led));
     isRobotReadyToMove = false;
 
   }
@@ -256,12 +256,18 @@ class Robot{
         int b = tablePositions.getInt(globalID, "b");
         int x1 = tablePositions.getInt(globalID, "X1");
         int y1 = tablePositions.getInt(globalID, "Y1");
+        int animation = tablePositions.getInt(globalID, "Animation");
         //call streching somewhere here
         // setRobotArm() here
-        if(globalID > 1){
+        if(animation == 0){
+        robotAnimation.isAnimation = false;
         //float x, float y, float z, float gripperAngleD, int gripperRotation, int gripperWidth, int easingResolution, boolean sendData, int brightnessStrip, int r, int g,  int b, int led
           setRobotArm(x,y,z,gripperAngle,gripperRotation,gripperWidth,easing,true,brightn,r,g,b,2);
+          println("RobotTable");
           println("[ " + x + "," + y + "," + z + "," + gripperAngle + "," + gripperRotation +  "," + gripperWidth + "," + easing + "," + brightn + "," + r + "," + g + "," + b + "," + x1 + "," + y1 + " ]");
+        }else{
+          robotAnimation.movementID = animation;
+          robotAnimation.isAnimation = true;
         }
 
         newPosition = false;

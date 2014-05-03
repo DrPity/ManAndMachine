@@ -266,7 +266,7 @@ public void draw() {
   gridXisDrawn = false;
 
 
-  if(!textToSpeech.nextTextToSpeech && !stepBack && !robotAnimation.isNextAnimation)
+  if(!textToSpeech.nextTextToSpeech && !stepBack && !robotAnimation.isNextStep)
     isReadyColor = 255;
   else
     isReadyColor = 0;
@@ -412,7 +412,7 @@ public void controlEvent(ControlEvent theEvent) {
   }
 
   if(theEvent.getName().equals("Back")){
-    if(!textToSpeech.nextTextToSpeech && !stepBack && !robotAnimation.isNextAnimation){
+    if(!textToSpeech.nextTextToSpeech && !stepBack && !robotAnimation.isNextStep){
       globalID--;
       textToSpeech.checkTableConstrains();
       println("globalID: "+globalID);
@@ -422,7 +422,7 @@ public void controlEvent(ControlEvent theEvent) {
   }
 
   if(theEvent.getName().equals("Forward")){
-    if(!textToSpeech.nextTextToSpeech && !stepForward && !robotAnimation.isNextAnimation){
+    if(!textToSpeech.nextTextToSpeech && !stepForward && !robotAnimation.isNextStep){
       globalID++;
       textToSpeech.checkTableConstrains();
       println("globalID: "+globalID);
@@ -1311,8 +1311,8 @@ class HelperClass {
 
   public void setStep(){
    textToSpeech.nextTextToSpeech = true;
-    if(globalID == 1){
-      robotAnimation.isNextAnimation = true;
+    if(globalID == 1 || globalID == 3){
+      robotAnimation.isNextStep = true;
     }  
 
     robotAnimation.standValue = false;
@@ -1995,7 +1995,7 @@ class Robot{
         println("[ Data not verified ]");
       }
 
-      println("x,y,z: " +  x + " " +  y + " " + z + " " + "gripperAngle: " + gripperAngleD +  " gripperRotation: " + gripperRotation + " gripperWidth: " + gripperWidth);
+      println("[ " + x + "," + y + "," + z + "," + gripperAngleD + "," + gripperRotation +  "," + gripperWidth + "," + easingResolution + "," + brightnessStrip + "," + r + "," + g + "," + b + " ]");
 
       currentBase = (int) map(baseAngleD, 180, 0, BASE_MIN, BASE_MAX);
       currentShoulder = (int) map(shoulderAngleD, 0, 180, SHOULDER_MIN, SHOULDER_MAX);
@@ -2023,7 +2023,7 @@ class Robot{
         lastB = b;
         lastBrightness = brightnessStrip;
         lastLed = led;
-        println("Data verified and send");
+        // println("Data verified and send");
         isDataVerified = false;
       }
     }
@@ -2046,7 +2046,7 @@ class Robot{
     if(wA.deviceInstanciated)
     wA.port.write(String.format("Rr%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d\n",currentBase, currentShoulder, currentElbow, currentWrist, currentGripperRotation, currentGripperWidth, currentEasing, currentBrightness, r, g, b, led));
     // wA.port.write(10);
-    println(String.format("(Rr%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d)",currentBase, currentShoulder, currentElbow, currentWrist, currentGripperRotation, currentGripperWidth, currentEasing, currentBrightness, r, g, b, led));
+    // println(String.format("(Rr%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d)",currentBase, currentShoulder, currentElbow, currentWrist, currentGripperRotation, currentGripperWidth, currentEasing, currentBrightness, r, g, b, led));
     isRobotReadyToMove = false;
 
   }
@@ -2108,12 +2108,18 @@ class Robot{
         int b = tablePositions.getInt(globalID, "b");
         int x1 = tablePositions.getInt(globalID, "X1");
         int y1 = tablePositions.getInt(globalID, "Y1");
+        int animation = tablePositions.getInt(globalID, "Animation");
         //call streching somewhere here
         // setRobotArm() here
-        if(globalID > 1){
+        if(animation == 0){
+        robotAnimation.isAnimation = false;
         //float x, float y, float z, float gripperAngleD, int gripperRotation, int gripperWidth, int easingResolution, boolean sendData, int brightnessStrip, int r, int g,  int b, int led
           setRobotArm(x,y,z,gripperAngle,gripperRotation,gripperWidth,easing,true,brightn,r,g,b,2);
+          println("RobotTable");
           println("[ " + x + "," + y + "," + z + "," + gripperAngle + "," + gripperRotation +  "," + gripperWidth + "," + easing + "," + brightn + "," + r + "," + g + "," + b + "," + x1 + "," + y1 + " ]");
+        }else{
+          robotAnimation.movementID = animation;
+          robotAnimation.isAnimation = true;
         }
 
         newPosition = false;
@@ -2122,11 +2128,15 @@ class Robot{
 }  
 class RobotAnimation extends Thread{
 
+
+Table movements;
 boolean running;           // Is the thread running?  Yes or no?
-boolean isNextAnimation;
-int wait;
+boolean isNextStep;
+boolean isAnimation;
 long frameTime;
-boolean standValue; 
+int movementID = 0;
+int wait;
+boolean standValue;
 
 float     xStand             = 0;
 float     yStand             = 0;
@@ -2155,6 +2165,7 @@ int       ledStand           = 2;
     println("Starting thread RobotAnimation (will execute every " + wait + " milliseconds.)");
     frameTime = millis();
     standValue = false;
+    isAnimation = false;
     super.start();
   }
  
@@ -2162,14 +2173,14 @@ int       ledStand           = 2;
  
   // We must implement run, this gets triggered by start()
   public void run () {
-    // sleep(2000);
     sleep(300);
+    // loadMovementData();
     while (running) {
-      if(isNextAnimation){
+      if(isAnimation){
         checkAnimations();
       }
-      if(!textToSpeech.nextTextToSpeech && isRobotReadyToMove && !isNextAnimation){
-        standAnimation();
+      if(!textToSpeech.nextTextToSpeech && isRobotReadyToMove && !isNextStep){
+        // standAnimation();
       }
     	sleep(wait);
     }
@@ -2181,23 +2192,11 @@ int       ledStand           = 2;
 
 public void checkAnimations(){
 
-  println("In checkAnimations");
+  isNextStep = false;
 
-  if(globalID == 1){
-    //currentBase, currentShoulder, currentElbow, currentWrist, currentGripperAngle, currentGripperWidth, currentLight, currentEasing, currentBrightness
 
-    //  BASE_MAX            = 2150;//2300;
-    //  BASE_MIN            = 800;//720;
-    //  SHOULDER_MAX        = 2350; 
-    //  SHOULDER_MIN        = 720; 
-    //  ELBOW_MAX           = 2370; 
-    //  ELBOW_MIN           = 720;
-    //  WRIST_MAX           = 2370; 
-    //  WRIST_MIN           = 720;
-    //  GRIPPER_ANGLE_MAX   = 2400;
-    //  GRIPPER_ANGLE_MIN   = 600;
-    //  GRIPPER_MAX         = 2100;
-    //  GRIPPER_MIN         = 1450;  
+// --- Number 1  Diagnostic---
+  if(movementID == 1){
 
     robot.sendRobotData(1475, 1500, 1500, 720, 675, 2100, 200, 0, 0, 0, 0, 2);
     sleep(2000);
@@ -2240,43 +2239,98 @@ public void checkAnimations(){
     sleep(1000);
   }
 
-isNextAnimation = false;
+// --- Number 2 neutral forward---  
+  if(movementID == 2){
+    println("In global 3");
+    robot.setRobotArm(-4,184,184,42,126,90,200,true,255,0,255,0,2);
+    sleep(100);
+    while(isAnimation){
+      standAnimation(10, true,false,false,false,true,false);
+      sleep(15);
+      if(isNextStep){
+        println("In break");
+        isAnimation = false;
+        break;
+      }
+    }
+  }
 
+// --- Number 3 right to left---  
 
+  if(movementID == 3){
+    robot.setRobotArm(88,28,216,1,186,90,400,true,255,0,255,0,2);
+    waitForRobot();
+    robot.setRobotArm(-124,100,208,17,186,90,100,true,255,0,255,0,2);
+    waitForRobot();
+    robot.setRobotArm(88,28,216,1,186,90,100,true,255,0,255,0,2);
+    waitForRobot();
+    robot.setRobotArm(-124,100,208,17,186,90,400,true,255,0,255,0,2);
+    waitForRobot();
+    robot.setRobotArm(88,28,216,1,186,90,100,true,255,0,255,0,2);
+
+    sleep(50);
+
+  }
+
+  if(movementID == 4){
+
+    robot.sendRobotData(1475, 1500, 2300, 800, 1500, 1500, 200, 255, 0, 255, 0,2);
+    waitForRobot();
+    robot.setRobotArm(-4,184,184,42,126,90,200,true,255,0,255,0,2);
+    long frameTime = millis();
+     while((millis() - frameTime) <= 3000){
+      standAnimation(10, true,false,false,false,true,false);
+      sleep(15);
+      }
+    robot.sendRobotData(1475, 1500, 2300, 800, 1500, 1500, 200, 255, 255, 0, 0,2);
+  }
+
+isAnimation = false;
 }
 
 // ------------------------------------------------------------------------------------
 
-public void standAnimation(){
+public void standAnimation(float amp, boolean a, boolean b, boolean c, boolean d, boolean e, boolean f){
 
-if (false){
+  float amplitude = amp;
+  float k = amplitude * cos(angle);
+  float ka = 0;
+  float kb = 0;
+  float kc = 0;
+  float kd = 0;
+  float ke = 0;
+  float kf = 0;
+  angle += aVelocity;
 
-    if((millis() - frameTime) >= 10){
-
-      float amplitude = 10;
-      float y = amplitude * cos(angle);
-      angle += aVelocity;
-
-      if(!standValue){
-        xStand = lastX;
-        yStand = lastY;
-        zStand = lastZ;
-        gaStand = lastGripperAngle;
-        grStand = lastGripperRotation;
-        gwStand = lastGripperWidth;
-        lbStand = lastBrightness;
-        rStand = lastR;
-        gStand = lastG;
-        bStand = lastB;
-        ledStand = lastLed;
-        standValue = true;
-      }  
-    
-      robot.setRobotArm((xStand + y), yStand, (zStand +(y/2)), gaStand, grStand, gwStand, 1, true, lbStand, rStand, gStand, bStand, ledStand);
-      frameTime = millis();
-    }
+  if(!standValue){
+    xStand = lastX;
+    yStand = lastY;
+    zStand = lastZ;
+    gaStand = lastGripperAngle;
+    grStand = lastGripperRotation;
+    gwStand = lastGripperWidth;
+    lbStand = lastBrightness;
+    rStand = lastR;
+    gStand = lastG;
+    bStand = lastB;
+    ledStand = lastLed;
   }
 
+  if(a)
+    ka = k;
+  if(b)
+    kb = k;
+  if(c)
+    kc = k;
+  if(d)
+    kd = k;
+  if(e)
+    ke = k;
+  if(f)
+    kf = k;
+
+  robot.setRobotArm(xStand + ka, yStand + kb , zStand + kc, gaStand + kd, (int)(grStand + ke), (int)(gwStand  + kf), 1, true, lbStand, rStand, gStand, bStand, ledStand);  
+  standValue = true;
 }
 
 // ------------------------------------------------------------------------------------
@@ -2298,6 +2352,48 @@ if (false){
     // IUn case the thread is waiting. . .
     interrupt();
   }
+
+  public void waitForRobot(){
+    while(!isRobotReadyToMove){
+      sleep(20);
+    }
+  }
+
+
+//   void loadMovementData(){
+
+//     tableMovements = loadTable("data/Movements.csv", "header");
+//   }
+
+// // ------------------------------------------------------------------------------------
+
+//   void readNextRobotPosition(){
+//   if(newPosition && globalID <= (tablePositions.getRowCount() -1) && globalID >= 0){
+
+//         int x = tablePositions.getInt(globalID, "X");
+//         int y = tablePositions.getInt(globalID, "Y");
+//         int z = tablePositions.getInt(globalID, "Z");
+//         int gripperAngle = tablePositions.getInt(globalID, "GripperAngle");
+//         int gripperRotation = tablePositions.getInt(globalID, "GripperRotation");
+//         int gripperWidth = tablePositions.getInt(globalID, "GripperWidth");
+//         int easing = tablePositions.getInt(globalID, "Easing");
+//         int brightn = tablePositions.getInt(globalID, "Brightness");
+//         int r = tablePositions.getInt(globalID, "r");
+//         int g = tablePositions.getInt(globalID, "g");
+//         int b = tablePositions.getInt(globalID, "b");
+//         int x1 = tablePositions.getInt(globalID, "X1");
+//         int y1 = tablePositions.getInt(globalID, "Y1");
+//         //call streching somewhere here
+//         // setRobotArm() here
+//         if(globalID > 1){
+//         //float x, float y, float z, float gripperAngleD, int gripperRotation, int gripperWidth, int easingResolution, boolean sendData, int brightnessStrip, int r, int g,  int b, int led
+//           setRobotArm(x,y,z,gripperAngle,gripperRotation,gripperWidth,easing,true,brightn,r,g,b,2);
+//           println("[ " + x + "," + y + "," + z + "," + gripperAngle + "," + gripperRotation +  "," + gripperWidth + "," + easing + "," + brightn + "," + r + "," + g + "," + b + "," + x1 + "," + y1 + " ]");
+//         }
+
+//         newPosition = false;
+//       }
+//   }
 
 
 }
