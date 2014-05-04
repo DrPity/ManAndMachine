@@ -9,7 +9,7 @@ import java.awt.Frame;
 private int     end                 = 10;
 private int     pose                = 1;
 private int     gAngle              = 90;
-private int     debugVariable       = 4;
+private int     debugVariable       = 2;
 private int     z                   = 220;
 private int     y                   = 100;
 private int     gGripperWidth       = 0;
@@ -201,9 +201,9 @@ void draw() {
   drawings.drawLine(20,round(height * 0.44), 210, round(height * 0.44),1);
   noStroke();
   // drawings.drawRectangle(10,10,195,300,0,0,255,150);
-  drawings.drawRectangle(round(width*0.008), round(height * 0.408) ,360,300,0,0,255,255,255,150);  
+  drawings.drawRectangle(round(width*0.008), round(height * 0.408) ,400,300,0,0,255,255,255,150);  
   drawings.drawRectangle(0, 0, 88, 78, width - 98, 10, 255,255,255, 150);
-  drawings.drawRectangle(round(width*0.13), round(height * 0.49),40,20, 0,0, 255-isReadyColor ,isReadyColor - 50,0, 220);
+  drawings.drawRectangle(round(width*0.13), round(height * 0.49),40,20, 60,0, 255-isReadyColor ,isReadyColor - 50,0, 220);
 	connectionLight.update(channelsMindwave[0].getLatestPoint().value);
 	connectionLight.draw();
   connectionLight.mindWave.draw();
@@ -242,7 +242,7 @@ void draw() {
   gridXisDrawn = false;
 
 
-  if(!textToSpeech.nextTextToSpeech && !stepBack && !robotAnimation.isNextStep)
+  if(!textToSpeech.nextTextToSpeech && !robotAnimation.isAnimation && isRobotReadyToMove)
     isReadyColor = 255;
   else
     isReadyColor = 0;

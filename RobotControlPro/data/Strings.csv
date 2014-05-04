@@ -1,7 +1,27 @@
-ID,STRING
-0,tsktsktsk
-1,-
-2,And the third one
-3,fourth
-4,Ficken!!!!
-5,Hello Robert!
+ID,STRING,VOICE
+0,tsktsktsk,8,
+1,-,0
+2,-,0
+3,-,0
+4,-,0
+5,-,0
+6,-,0
+7,-,0
+8,-,0
+9,You say to me good morning?,8
+10,-,0
+11,-,0
+12,-,0
+13,-,0
+14,-,0
+15,-,0
+16,-,0
+17,-,0
+18,-,0
+19,-,0
+20,Hello super cool Robert,8
+21,-,0
+22,-,0
+23,-,0
+24,-,0
+25,-,0

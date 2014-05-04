@@ -187,14 +187,14 @@ class Drawings  {
   controlP5.addButton("Back")
    .setValue(0)
    .setCaptionLabel("Back")
-   .setPosition(round(width*0.07),round(height * 0.53))
+   .setPosition(round(width*0.09),round(height * 0.53))
    .setSize(round(100*sF),round(20*sF))
    ;
 
    controlP5.addButton("Forward")
    .setValue(0)
    .setCaptionLabel("Forward")
-   .setPosition(round(width*0.13),round(height * 0.53))
+   .setPosition(round(width*0.15),round(height * 0.53))
    .setSize(round(100*sF),round(20*sF))
    ;
 
@@ -296,7 +296,7 @@ class Drawings  {
 
 
   controlP5.addTextfield("Set Global ID - [ ENTER ]")
-                .setPosition(round(width*0.07),round(height * 0.49))
+                .setPosition(round(width*0.09),round(height * 0.49))
                 .setSize(150,20)
                 .setFont(fontSmallBold)
                 .setFocus(true)

@@ -139,7 +139,7 @@ println("In Init: " + id);
         }
       } 
       catch (Exception e) {
-        println(e);
+        // println(e);
         deviceInstanciated = false;
         deviceLost = true;
         // println(id + " port received an exepction: " + e);

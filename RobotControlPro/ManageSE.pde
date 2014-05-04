@@ -30,7 +30,7 @@ private int[] bitArray = new int[8];
       wA.heartBeat = millis();
       wA.port.write("W");
       wA.port.write(10);
-      println("+ Heartbeat +");
+      // println("+ Heartbeat +");
       if(wA.conValue != 00){
         wA.conValue = 00;
       }

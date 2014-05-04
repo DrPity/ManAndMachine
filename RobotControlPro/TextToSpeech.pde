@@ -64,17 +64,19 @@ public int waitForSpeechReturn;
   // We must implement run, this gets triggered by start()
   void run () {
     // sleep(2000);
-    sleep(300);
+    sleepTime(300);
     while (running) {
       if(nextTextToSpeech){
         nextStepInTables();
       }
     	if(newSay && globalID <= (tableSpeech.getRowCount() -1) && globalID >= 0){
     		String textString = tableSpeech.getString(globalID, "STRING");
+        voice = tableSpeech.getInt(globalID, "VOICE");
     		say(textString,voice);
     		newSay = false;
+        println("( IN VOICE )");
     	}
-    	sleep(wait);   
+    	sleepTime(wait);   
     }
     System.out.println(id + " thread is done!");  // The thread is done when we get to the end of run()
     quit();
@@ -83,6 +85,7 @@ public int waitForSpeechReturn;
 // ------------------------------------------------------------------------------------
 
 	void say(String s, int voice) {
+    waitForRobot();
 	  try {
 	    Runtime rtime = Runtime.getRuntime();
 	    Process child = rtime.exec("/usr/bin/say -v " + (voices[voice]) + " " + s);
@@ -96,7 +99,7 @@ public int waitForSpeechReturn;
 
 // ------------------------------------------------------------------------------------
 
-	 void sleep(int sleepTime){
+	private void sleepTime(int sleepTime){
 	  try {
 	      sleep((long)(sleepTime));
 	  } catch (Exception e) {
@@ -107,7 +110,7 @@ public int waitForSpeechReturn;
 // ------------------------------------------------------------------------------------
  
   // Our method that quits the thread
-  void quit() {
+  private void quit() {
     System.out.println("Quitting."); 
     running = false;  // Setting running to false ends the loop in run()
     // IUn case the thread is waiting. . .
@@ -149,6 +152,12 @@ public int waitForSpeechReturn;
         nextTextToSpeech = false;
         checkTableConstrains();
       }
+    }
+  }
+
+  private void waitForRobot(){
+    while(!isRobotReadyToMove){
+      sleepTime(10);
     }
   }
 

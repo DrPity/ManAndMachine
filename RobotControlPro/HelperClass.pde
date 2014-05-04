@@ -124,11 +124,11 @@ class HelperClass {
 
   void setStep(){
    textToSpeech.nextTextToSpeech = true;
-    if(globalID == 1 || globalID == 3){
-      robotAnimation.isNextStep = true;
-    }  
-
-    robotAnimation.standValue = false;
+    // if(globalID == 1 || globalID == 3){
+    //   robotAnimation.isNextStep = true;
+    // }  
+  robotAnimation.standValue = false;
+  robotAnimation.isNextStep = true;
   }
 
 }

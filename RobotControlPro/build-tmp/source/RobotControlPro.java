@@ -33,7 +33,7 @@ public class RobotControlPro extends PApplet {
 private int     end                 = 10;
 private int     pose                = 1;
 private int     gAngle              = 90;
-private int     debugVariable       = 4;
+private int     debugVariable       = 2;
 private int     z                   = 220;
 private int     y                   = 100;
 private int     gGripperWidth       = 0;
@@ -225,9 +225,9 @@ public void draw() {
   drawings.drawLine(20,round(height * 0.44f), 210, round(height * 0.44f),1);
   noStroke();
   // drawings.drawRectangle(10,10,195,300,0,0,255,150);
-  drawings.drawRectangle(round(width*0.008f), round(height * 0.408f) ,360,300,0,0,255,255,255,150);  
+  drawings.drawRectangle(round(width*0.008f), round(height * 0.408f) ,400,300,0,0,255,255,255,150);  
   drawings.drawRectangle(0, 0, 88, 78, width - 98, 10, 255,255,255, 150);
-  drawings.drawRectangle(round(width*0.13f), round(height * 0.49f),40,20, 0,0, 255-isReadyColor ,isReadyColor - 50,0, 220);
+  drawings.drawRectangle(round(width*0.13f), round(height * 0.49f),40,20, 60,0, 255-isReadyColor ,isReadyColor - 50,0, 220);
 	connectionLight.update(channelsMindwave[0].getLatestPoint().value);
 	connectionLight.draw();
   connectionLight.mindWave.draw();
@@ -266,7 +266,7 @@ public void draw() {
   gridXisDrawn = false;
 
 
-  if(!textToSpeech.nextTextToSpeech && !stepBack && !robotAnimation.isNextStep)
+  if(!textToSpeech.nextTextToSpeech && !robotAnimation.isAnimation && isRobotReadyToMove)
     isReadyColor = 255;
   else
     isReadyColor = 0;
@@ -810,14 +810,14 @@ class Drawings  {
   controlP5.addButton("Back")
    .setValue(0)
    .setCaptionLabel("Back")
-   .setPosition(round(width*0.07f),round(height * 0.53f))
+   .setPosition(round(width*0.09f),round(height * 0.53f))
    .setSize(round(100*sF),round(20*sF))
    ;
 
    controlP5.addButton("Forward")
    .setValue(0)
    .setCaptionLabel("Forward")
-   .setPosition(round(width*0.13f),round(height * 0.53f))
+   .setPosition(round(width*0.15f),round(height * 0.53f))
    .setSize(round(100*sF),round(20*sF))
    ;
 
@@ -919,7 +919,7 @@ class Drawings  {
 
 
   controlP5.addTextfield("Set Global ID - [ ENTER ]")
-                .setPosition(round(width*0.07f),round(height * 0.49f))
+                .setPosition(round(width*0.09f),round(height * 0.49f))
                 .setSize(150,20)
                 .setFont(fontSmallBold)
                 .setFocus(true)
@@ -1311,11 +1311,11 @@ class HelperClass {
 
   public void setStep(){
    textToSpeech.nextTextToSpeech = true;
-    if(globalID == 1 || globalID == 3){
-      robotAnimation.isNextStep = true;
-    }  
-
-    robotAnimation.standValue = false;
+    // if(globalID == 1 || globalID == 3){
+    //   robotAnimation.isNextStep = true;
+    // }  
+  robotAnimation.standValue = false;
+  robotAnimation.isNextStep = true;
   }
 
 }
@@ -1605,7 +1605,7 @@ private int[] bitArray = new int[8];
       wA.heartBeat = millis();
       wA.port.write("W");
       wA.port.write(10);
-      println("+ Heartbeat +");
+      // println("+ Heartbeat +");
       if(wA.conValue != 00){
         wA.conValue = 00;
       }
@@ -2046,7 +2046,7 @@ class Robot{
     if(wA.deviceInstanciated)
     wA.port.write(String.format("Rr%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d\n",currentBase, currentShoulder, currentElbow, currentWrist, currentGripperRotation, currentGripperWidth, currentEasing, currentBrightness, r, g, b, led));
     // wA.port.write(10);
-    // println(String.format("(Rr%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d)",currentBase, currentShoulder, currentElbow, currentWrist, currentGripperRotation, currentGripperWidth, currentEasing, currentBrightness, r, g, b, led));
+    println(String.format("(Rr%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d)",currentBase, currentShoulder, currentElbow, currentWrist, currentGripperRotation, currentGripperWidth, currentEasing, currentBrightness, r, g, b, led));
     isRobotReadyToMove = false;
 
   }
@@ -2166,6 +2166,7 @@ int       ledStand           = 2;
     frameTime = millis();
     standValue = false;
     isAnimation = false;
+    isNextStep = true;
     super.start();
   }
  
@@ -2173,7 +2174,7 @@ int       ledStand           = 2;
  
   // We must implement run, this gets triggered by start()
   public void run () {
-    sleep(300);
+    sleepTime(300);
     // loadMovementData();
     while (running) {
       if(isAnimation){
@@ -2182,7 +2183,7 @@ int       ledStand           = 2;
       if(!textToSpeech.nextTextToSpeech && isRobotReadyToMove && !isNextStep){
         // standAnimation();
       }
-    	sleep(wait);
+    	sleepTime(wait);
     }
     System.out.println(id + " thread is done!");  // The thread is done when we get to the end of run()
     quit();
@@ -2192,72 +2193,98 @@ int       ledStand           = 2;
 
 public void checkAnimations(){
 
-  isNextStep = false;
+  isNextStep = true;
+// int base              = 1475;
+// int shoulder          = 1500;
+// int elbow             = 2300;
+// int wrist             = 800;
+// int gripper           = 1500;
+// int gripperAngle      = 1500;
 
-
-// --- Number 1  Diagnostic---
+// --- Number 1  WakeUP---
   if(movementID == 1){
-
-    robot.sendRobotData(1475, 1500, 1500, 720, 675, 2100, 200, 0, 0, 0, 0, 2);
-    sleep(2000);
-    // Led
-    for(int i = 0; i <= 127; i++){
-      robot.sendRobotData(1475, 1500, 1500, 720, 675, 2100, 1, i, 255, 0, 0, 2);
-      sleep(20);
+  robot.sendRobotData(1475, 1500, 2300, 800, 1500, 1500, 200, 0, 0, 255, 0, 2);
+  waitForRobot();
+    for(int i = 0; i <= 255; i++){
+      robot.sendRobotData(1475, 1500, 2300, 800, 1500, 1500, 1, i, 0, 255, 0, 2);
+      waitForRobot();
     }
-    sleep(1000);
-    robot.sendRobotData(2150, 1500, 1500, 720, 650, 2100, 200, 127, 255, 255, 0,0);
-    sleep(2000);
-    robot.sendRobotData(1475, 1500, 1500, 720, 650, 2100, 200, 127, 100, 255, 0,1);
-    sleep(2000);
-    robot.sendRobotData(1475, 1500, 1500, 1800, 650, 2100, 200, 127, 100, 255, 0,1);
-    sleep(2000);
-    robot.sendRobotData(1475, 1500, 1500, 720, 650, 2100, 200, 127, 100, 255, 0,1);
-    sleep(2000);
-    robot.sendRobotData(800, 1500, 1500, 720, 650, 2100, 200, 127, 255, 0, 0,0);
-    sleep(2000);
-    robot.sendRobotData(1475, 1500, 1500, 900, 650, 1450, 200, 127, 0, 255, 0,1);
-    sleep(2000);
-    robot.sendRobotData(1475, 1500, 1500, 900, 650, 2100, 200, 127, 255, 0, 255,0);
-    sleep(2000);
-    robot.sendRobotData(1475, 1500, 1500, 900, 650, 2100, 200, 127, 255, 255, 255,1);
-    sleep(2000);
-    robot.sendRobotData(1475, 1500, 1500, 900, 650, 2100, 200, 127, 255, 0, 255,0);
-    sleep(2000);
-    robot.sendRobotData(1475, 1500, 1500, 900, 650, 2100, 200, 127, 0, 0, 255,1);
-    sleep(2000);
-    robot.sendRobotData(1475, 1500, 1500, 900, 650, 2100, 200, 127, 0, 255, 0,2);
-    sleep(2000);
-
-    for(int i = 127; i <= 255; i++){
-      robot.sendRobotData(1475, 1500, 1500, 900, 675, 2100, 1, i, 0, 255, 0, 2);
-      sleep(20);
-    }
-
-    sleep(1000);
-    robot.setRobotArm(0,219,200,45,90,90,200,true,255,0,255,0,2);
-    sleep(1000);
+    robot.sendRobotData(1475, 1500, 2300, 1200, 1500, 1500, 200, 255, 0, 255, 0,2);
+    waitForRobot();
   }
 
-// --- Number 2 neutral forward---  
-  if(movementID == 2){
+// --- Number 2  Diagnostic---
+   if(movementID == 2){
+
+    robot.setRobotArm(4.0f,172.0f,180.0f,17.0f,178,62,200,true,255,0,255,0,2);
+    waitForRobot();
+    robot.setRobotArm(332.0f,0.0f,136.0f,29.0f,178,62,200,true,255,0,255,0,2);
+    waitForRobot();
+    sleepTime(800);
+    robot.setRobotArm(4.0f,172.0f,180.0f,17.0f,178,62,200,true,255,0,255,0,2);
+    waitForRobot();
+    robot.setRobotArm(-332.0f,0.0f,136.0f,29.0f,178,62,200,true,255,0,255,0,2);
+    waitForRobot();
+    sleepTime(800);
+    robot.setRobotArm(4.0f,172.0f,180.0f,17.0f,178,62,200,true,255,0,255,0,2);
+    waitForRobot();
+    for(int i = 0; i <= 100; i++){
+      robot.setRobotArm(4.0f,172.0f,180.0f,17.0f,178,62,1,true,255,(int)random(0,255),(int)random(0, 255),(int)random(0, 255),0);
+      waitForRobot();
+      robot.setRobotArm(4.0f,172.0f,180.0f,17.0f,178,62,1,true,255,(int)random(0,255),(int)random(0, 255),(int)random(0, 255),1);
+      waitForRobot();
+    }
+    robot.setRobotArm(4.0f,172.0f,180.0f,17.0f,178,62,1,true,255,255,0,0,2);
+    waitForRobot();
+    sleepTime(500);
+    robot.setRobotArm(4.0f,184.0f,144.0f,49.0f,178,2,100,true,255,255,0,0,2);
+    waitForRobot();
+    sleepTime(500);
+    robot.setRobotArm(4.0f,184.0f,144.0f,49.0f,178,178,100,true,255,255,0,0,2);
+    waitForRobot();
+    sleepTime(500);
+    robot.setRobotArm(4.0f,208.0f,288.0f,13.0f,130,106,100,true,255,0,255,0,2);
+    waitForRobot();
+    sleepTime(500);
+    robot.setRobotArm(4.0f,148.0f,120.0f,13.0f,130,106,250,true,255,0,255,0,2);
+    waitForRobot();
+    sleepTime(500);
+    robot.setRobotArm(4.0f,172.0f,180.0f,17.0f,178,62,200,true,255,0,255,0,2);
+    waitForRobot();
+  }
+
+
+  if(movementID == 3){
+
+    robot.setRobotArm(-324,20,100,33,178,102,200,true,255,0,255,0,2);
+    waitForRobot();
+    sleepTime(800);
+    robot.setRobotArm(-324.0f,20.0f,100.0f,33.0f,130,34,300,true,255,0,0,255,2);
+    waitForRobot();
+    sleepTime(800);
+    robot.setRobotArm(-324,20,100,33,178,102,200,true,255,0,255,0,2);
+
+ 
+  }
+
+  // --- Number 4  Neutral forward---
+    if(movementID == 4){
     println("In global 3");
     robot.setRobotArm(-4,184,184,42,126,90,200,true,255,0,255,0,2);
-    sleep(100);
+    sleepTime(100);
     while(isAnimation){
-      standAnimation(10, true,false,false,false,true,false);
-      sleep(15);
-      if(isNextStep){
-        println("In break");
+      standAnimation(15,10, true,false,false,false,true,false,0);
+      if(!isNextStep){
         isAnimation = false;
+        println("In break");
         break;
       }
     }
   }
 
-// --- Number 3 right to left---  
+// --- Number 5 right to left---  
 
-  if(movementID == 3){
+  if(movementID == 5){
     robot.setRobotArm(88,28,216,1,186,90,400,true,255,0,255,0,2);
     waitForRobot();
     robot.setRobotArm(-124,100,208,17,186,90,100,true,255,0,255,0,2);
@@ -2268,74 +2295,301 @@ public void checkAnimations(){
     waitForRobot();
     robot.setRobotArm(88,28,216,1,186,90,100,true,255,0,255,0,2);
 
-    sleep(50);
+    sleepTime(50);
 
   }
 
-  if(movementID == 4){
+  if(movementID == 6){
 
     robot.sendRobotData(1475, 1500, 2300, 800, 1500, 1500, 200, 255, 0, 255, 0,2);
     waitForRobot();
     robot.setRobotArm(-4,184,184,42,126,90,200,true,255,0,255,0,2);
     long frameTime = millis();
-     while((millis() - frameTime) <= 3000){
-      standAnimation(10, true,false,false,false,true,false);
-      sleep(15);
-      }
+    standAnimation(15, 10, true,false,false,false,true,false, 3000);
     robot.sendRobotData(1475, 1500, 2300, 800, 1500, 1500, 200, 255, 255, 0, 0,2);
   }
 
+  if(movementID == 7){
+    robot.setRobotArm(-7.75081f,32.0f,92.0f,70.0f,116,66,200,true,255,0,255,0,2);
+    waitForRobot();
+    sleepTime(500);
+    robot.setRobotArm(-13.971708f,236.0f,268.0f,18.0f,116,66,200,true,255,0,255,0,2);
+    waitForRobot();
+    sleepTime(500);
+    standAnimation(5,10,true,false,false,false,false,false,1000);
+  }
+
+  if(movementID == 8){
+    robot.setRobotArm(-216,0,160,29,134,90,200,true,255,0,255,0,2);
+    waitForRobot();
+     while(isAnimation){
+      standAnimation(15,10, false,false,false,false,true,false,0);
+      if(!isNextStep){
+        isAnimation = false;
+        break;
+      }
+    }
+  }
+
+  // --- Number 9 dancing---  
+  if(movementID == 9){
+
+    robot.setRobotArm(-4,184,184,42,126,90,250,true,255,0,255,0,2);
+    waitForRobot();
+    robot.setRobotArm(-8.261391f,184.0f,184.0f,42.0f,121,90,200,true,255,255,0,255,3);
+    waitForRobot();
+    // standAnimation(10,10, false,true,true,false,true,false,10000);
+    // standAnimation(10,15, true,false,true,true,false,true,10000);
+    // robot.setRobotArm(-8.261391,184.0,184.0,42.0,121,90,300,true,255,255,0,255,2);
+    // waitForRobot();
+    // standAnimation(15,30, true,false,false,false,false,true,0);
+
+      while(isAnimation){
+        standAnimation(15,60, true,false,false,false,false,true,0);
+        if(!isNextStep){
+          isAnimation = false;
+          break;
+          //################# turn of LED'S!!!!! #############
+        }
+      }
+    }
+
+  // --- Number 10 look and listen right---  
+
+  if(movementID == 10){
+
+    robot.setRobotArm(-96,100,208,17,46,90,250,true,255,0,255,0,2);
+    waitForRobot();
+    robot.setRobotArm(-148.0f,184.0f,312.0f,1.0f,46,90,200,true,255,0,255,0,2);
+    waitForRobot();
+  
+  }
+
+
+  // --- Number 11 agressive---  
+
+  if(movementID == 11){
+
+  robot.setRobotArm(-12.0f,128.0f,-24.0f,105.0f,46,178,80,true,255,255,0,0,2);
+  waitForRobot();
+  for( int i = 0; i < 2; i++){
+    robot.setRobotArm(-12.0f,128.0f,-24.0f,105.0f,46,6,30,true,255,255,0,0,2);
+    waitForRobot();
+    robot.setRobotArm(-12.0f,128.0f,-24.0f,105.0f,46,178,30,true,255,255,0,0,2);
+    waitForRobot();
+    }
+  }
+
+  // --- Number 12 shaking head---  
+
+   if(movementID == 12){
+
+
+    robot.setRobotArm(16.0f,264.0f,176.0f,25.0f,86,142,250,true,255,0,255,0,2);
+    waitForRobot();
+    for( int i = 0; i < 5; i++){
+      robot.setRobotArm(132.0f,224.0f,176.0f,25.0f,86,142,100,true,255,0,255,0,2);
+      waitForRobot();
+      robot.setRobotArm(-132.0f,224.0f,176.0f,25.0f,86,142,100,true,255,0,255,0,2);
+      waitForRobot();
+    }
+    robot.setRobotArm(16.0f,264.0f,176.0f,25.0f,86,142,150,true,255,0,255,0,2);
+   }
+
+
+    // --- Number 13 swichting off---  
+
+   if(movementID == 13){
+    robot.sendRobotData(1475, 1500, 2300, 800, 1500, 1500, 100, 0, 0, 255, 0, 2);
+    waitForRobot();
+   }
+
+    // --- Number 13 threatend---  
+
+   if(movementID == 14){
+
+    robot.setRobotArm(-324.0f,104.0f,120.0f,29.0f,126,178,200,true,255,255,0,0,2 );
+    waitForRobot();
+    for( int i = 0; i < 2; i++){
+      robot.setRobotArm(-324.0f,104.0f,120.0f,29.0f,126,6,200,true,255,255,0,0,2);
+      waitForRobot();
+      robot.setRobotArm(-324.0f,104.0f,120.0f,29.0f,126,178,200,true,255,255,0,0,2);
+      waitForRobot();
+    }
+
+   }
+
+
+   if(movementID == 15){
+
+    robot.setRobotArm(8.0f,180.0f,120.0f,49.0f,182,86,300,true,255,0,255,0,2);
+    waitForRobot();
+    robot.setRobotArm(8.0f,145.0f,279.0f,0.0f,182,90,400,true,255,0,255,0,2);
+    waitForRobot();
+    robot.setRobotArm(8.0f,180.0f,120.0f,49.0f,182,86,400,true,255,0,255,0,2);
+    waitForRobot();
+
+   }
+
+  if(movementID == 16){
+
+    while(isAnimation){
+      robot.setRobotArm(8.0f,140.0f,272.0f,17.0f,86,30,200,true,255,0,255,0,2);
+      waitForRobot();
+      robot.setRobotArm(-152.0f,140.0f,244.0f,17.0f,134,30,200,true,255,0,255,0,2);
+      waitForRobot();
+      robot.setRobotArm(152.0f,140.0f,244.0f,17.0f,50,30,300,true,255,0,255,0,2);
+      waitForRobot();
+      robot.setRobotArm(-152.0f,140.0f,244.0f,17.0f,134,30,300,true,255,0,255,0,2);
+      waitForRobot();
+      robot.setRobotArm(152.0f,140.0f,244.0f,17.0f,50,30,300,true,255,0,255,0,2);
+      waitForRobot();
+      if(!isNextStep){
+        isAnimation = false;
+        break;
+        //################# turn of LED'S!!!!! #############
+      }
+    }
+
+   }
+
+    // --- Number 17 powerMove---  
+
+  if(movementID == 17){
+
+    while(isAnimation){
+      robot.setRobotArm(-4.0f,136.0f,92.0f,29.0f,178,146,200,true,255,255,0,0,2);
+      waitForRobot();
+      sleepTime(800);
+      robot.setRobotArm(-272.0f,10.0f,134.0f,23.0f,90,146,200,true,255,0,0,255,2);
+      waitForRobot();
+      robot.setRobotArm(-8.0f,150.0f,292.0f,17.0f,178,146,200,true,255,0,0,255,2);
+      waitForRobot();
+      robot.setRobotArm(272.0f,10.0f,134.0f,23.0f,90,146,200,true,255,0,0,255,2);
+      waitForRobot();
+      if(!isNextStep){
+        isAnimation = false;
+        break;
+        //################# turn of LED'S!!!!! #############
+      }
+    }
+
+  }
+
+  if(movementID == 18){
+    robot.setRobotArm(-4.0f,136.0f,92.0f,29.0f,178,146,200,true,33,255,0,0,2);
+    waitForRobot();
+    while(isAnimation){
+      robot.setRobotArm(-4.0f,162.0f,244.0f,29.0f,178,146,200,true,33,255,0,0,2);
+      waitForRobot();
+      sleepTime(800);
+      robot.setRobotArm(-4.0f,162.0f,202.0f,29.0f,178,146,200,true,33,255,0,0,2);
+      waitForRobot();
+      sleepTime(800);
+
+      if(!isNextStep){
+      isAnimation = false;
+      break;
+      //################# turn of LED'S!!!!! #############
+      }
+    }
+  }
+
+
+  if(movementID == 19){
+
+    robot.setRobotArm(150.0f,110.0f,216.0f,1.0f,186,90,200,true,255,0,255,0,2);
+    waitForRobot();
+    robot.setRobotArm(-150.0f,110.0f,216.0f,1.0f,186,90,200,true,255,0,255,0,2);
+    waitForRobot();
+  }
+
+
+  if(movementID == 20){
+    robot.setRobotArm(-108.0f,30.0f,180.0f,11.0f,186,30,300,true,255,255,255,0,2);
+    while(isAnimation){
+      robot.setRobotArm(-108.0f,30.0f,180.0f,11.0f,186,30,600,true,255,255,255,0,2);
+      waitForRobot();
+      robot.setRobotArm(-158.0f,30.0f,180.0f,11.0f,44,180,600,true,255,255,255,0,2);
+      waitForRobot();
+      if(!isNextStep){
+      isAnimation = false;
+      break;
+      //################# turn of LED'S!!!!! #############
+      }
+    }
+  }
+  
+
+  
+
+
+
+
+
+isNextStep = false;
 isAnimation = false;
 }
 
 // ------------------------------------------------------------------------------------
 
-public void standAnimation(float amp, boolean a, boolean b, boolean c, boolean d, boolean e, boolean f){
+public void standAnimation(int runningDelay, float amp, boolean a, boolean b, boolean c, boolean d, boolean e, boolean f, int runningTime){
+  frameTime = millis();
+  int colorValues = 0;
+  while(millis() - frameTime <= runningTime){
 
-  float amplitude = amp;
-  float k = amplitude * cos(angle);
-  float ka = 0;
-  float kb = 0;
-  float kc = 0;
-  float kd = 0;
-  float ke = 0;
-  float kf = 0;
-  angle += aVelocity;
+    float amplitude = amp;
+    float k = amplitude * cos(angle);
+    float ka = 0;
+    float kb = 0;
+    float kc = 0;
+    float kd = 0;
+    float ke = 0;
+    float kf = 0;
+    angle += aVelocity;
 
-  if(!standValue){
-    xStand = lastX;
-    yStand = lastY;
-    zStand = lastZ;
-    gaStand = lastGripperAngle;
-    grStand = lastGripperRotation;
-    gwStand = lastGripperWidth;
-    lbStand = lastBrightness;
-    rStand = lastR;
-    gStand = lastG;
-    bStand = lastB;
-    ledStand = lastLed;
-  }
+    if(!standValue){
+      xStand = lastX;
+      yStand = lastY;
+      zStand = lastZ;
+      gaStand = lastGripperAngle;
+      grStand = lastGripperRotation;
+      gwStand = lastGripperWidth;
+      lbStand = lastBrightness;
+      rStand = lastR;
+      gStand = lastG;
+      bStand = lastB;
+      ledStand = lastLed;
+    }
 
-  if(a)
-    ka = k;
-  if(b)
-    kb = k;
-  if(c)
-    kc = k;
-  if(d)
-    kd = k;
-  if(e)
-    ke = k;
-  if(f)
-    kf = k;
 
-  robot.setRobotArm(xStand + ka, yStand + kb , zStand + kc, gaStand + kd, (int)(grStand + ke), (int)(gwStand  + kf), 1, true, lbStand, rStand, gStand, bStand, ledStand);  
-  standValue = true;
+    if(a)
+      ka = k;
+    if(b)
+      kb = k;
+    if(c)
+      kc = k;
+    if(d)
+      kd = k;
+    if(e)
+      ke = k;
+    if(f)
+      kf = k;
+
+    robot.setRobotArm(xStand + ka, yStand + kb , zStand + kc, gaStand + kd, (int)(grStand + ke), (int)(gwStand  + kf), 1, true, lbStand, rStand, gStand, bStand, ledStand); 
+    
+    if(!standValue)
+      standValue = true;
+    
+    waitForRobot();
+    sleepTime(runningDelay);
+
+  }  
 }
 
 // ------------------------------------------------------------------------------------
 
-	 public void sleep(int sleepTime){
+	private void sleepTime(int sleepTime){
 	  try {
 	      sleep((long)(sleepTime));
 	  } catch (Exception e) {
@@ -2346,16 +2600,16 @@ public void standAnimation(float amp, boolean a, boolean b, boolean c, boolean d
 // ------------------------------------------------------------------------------------
  
   // Our method that quits the thread
-  public void quit() {
+  private void quit() {
     System.out.println("Quitting."); 
     running = false;  // Setting running to false ends the loop in run()
     // IUn case the thread is waiting. . .
     interrupt();
   }
 
-  public void waitForRobot(){
+  private void waitForRobot(){
     while(!isRobotReadyToMove){
-      sleep(20);
+      sleepTime(10);
     }
   }
 
@@ -2463,17 +2717,19 @@ public int waitForSpeechReturn;
   // We must implement run, this gets triggered by start()
   public void run () {
     // sleep(2000);
-    sleep(300);
+    sleepTime(300);
     while (running) {
       if(nextTextToSpeech){
         nextStepInTables();
       }
     	if(newSay && globalID <= (tableSpeech.getRowCount() -1) && globalID >= 0){
     		String textString = tableSpeech.getString(globalID, "STRING");
+        voice = tableSpeech.getInt(globalID, "VOICE");
     		say(textString,voice);
     		newSay = false;
+        println("( IN VOICE )");
     	}
-    	sleep(wait);   
+    	sleepTime(wait);   
     }
     System.out.println(id + " thread is done!");  // The thread is done when we get to the end of run()
     quit();
@@ -2482,6 +2738,7 @@ public int waitForSpeechReturn;
 // ------------------------------------------------------------------------------------
 
 	public void say(String s, int voice) {
+    waitForRobot();
 	  try {
 	    Runtime rtime = Runtime.getRuntime();
 	    Process child = rtime.exec("/usr/bin/say -v " + (voices[voice]) + " " + s);
@@ -2495,7 +2752,7 @@ public int waitForSpeechReturn;
 
 // ------------------------------------------------------------------------------------
 
-	 public void sleep(int sleepTime){
+	private void sleepTime(int sleepTime){
 	  try {
 	      sleep((long)(sleepTime));
 	  } catch (Exception e) {
@@ -2506,7 +2763,7 @@ public int waitForSpeechReturn;
 // ------------------------------------------------------------------------------------
  
   // Our method that quits the thread
-  public void quit() {
+  private void quit() {
     System.out.println("Quitting."); 
     running = false;  // Setting running to false ends the loop in run()
     // IUn case the thread is waiting. . .
@@ -2548,6 +2805,12 @@ public int waitForSpeechReturn;
         nextTextToSpeech = false;
         checkTableConstrains();
       }
+    }
+  }
+
+  private void waitForRobot(){
+    while(!isRobotReadyToMove){
+      sleepTime(10);
     }
   }
 
@@ -2695,7 +2958,7 @@ println("In Init: " + id);
         }
       } 
       catch (Exception e) {
-        println(e);
+        // println(e);
         deviceInstanciated = false;
         deviceLost = true;
         // println(id + " port received an exepction: " + e);

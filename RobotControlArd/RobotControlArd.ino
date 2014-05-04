@@ -25,6 +25,7 @@ int red = 0;
 int green = 0;
 int blue = 0;
 int led = 2;
+unsigned long loopTime;
 
 
 bool robotIsReadyToMove   = true;
@@ -35,6 +36,7 @@ bool serialReady    = false;
 bool watchdogActive = false;
 bool robotData      = false;
 bool initRobot = false;
+bool startRainbow = false;
 
 
 int bMinDegree = 0;
@@ -224,6 +226,13 @@ void loop(){
     }
   }
 
+  if(startRainbow){
+    if(millis() - loopTime >= 20){
+      rainbowCycle(20);
+      loopTime = millis();
+    }
+  }
+
 }
 
 //END OF MAIN LOOP
@@ -321,15 +330,22 @@ for (int i = 0; i <= 12; i++){
 
   if(led == 0){
     strip.setPixelColor(0, strip.Color(red, green, blue));
+    strip.show();
   }else if(led == 1){
     strip.setPixelColor(1, strip.Color(red, green, blue));
+    strip.show();
   }else if(led == 2){
     strip.setPixelColor(0, strip.Color(red, green, blue));
     strip.setPixelColor(1, strip.Color(red, green, blue));
+    strip.show();
+  }else if(led == 3){
+    startRainbow = true;
+    loopTime = millis();
+  }else if(led == 4){
+    startRainbow = false;
   }
   
 
-  strip.show();
 
   chPosition[0]->setPosition(base);
   chPosition[1]->setPosition(shoulder);
@@ -402,3 +418,27 @@ void establishContact() {
     delay(300);
   }
 }
+
+// UNTESTED!!!!!!!!!!!!!!!!!!!!!!!!
+void rainbowCycle(int wait) {
+  int j = (millis()/wait)%(256*5);
+  for(int i=0; i< 2; i++) {
+    strip.setPixelColor(i, Wheel(((i * 256 / 2) + j) & 255));
+  }
+  strip.show();
+}
+
+// Input a value 0 to 255 to get a color value.
+// The colours are a transition r - g - b - back to r.
+uint32_t Wheel(byte WheelPos) {
+  if(WheelPos < 85) {
+   return strip.Color(WheelPos * 3, 255 - WheelPos * 3, 0);
+  } else if(WheelPos < 170) {
+   WheelPos -= 85;
+   return strip.Color(255 - WheelPos * 3, 0, WheelPos * 3);
+  } else {
+   WheelPos -= 170;
+   return strip.Color(0, WheelPos * 3, 255 - WheelPos * 3);
+  }
+}
+
