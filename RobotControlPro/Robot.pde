@@ -16,8 +16,8 @@ private static final Integer  ELBOW_MAX           = 2370;
 private static final Integer  ELBOW_MIN           = 720;
 private static final Integer  WRIST_MAX           = 2370; 
 private static final Integer  WRIST_MIN           = 720;
-private static final Integer  GRIPPER_ANGLE_MAX   = 2400;
-private static final Integer  GRIPPER_ANGLE_MIN   = 600;
+private static final Integer  GRIPPER_ROTATION_MAX  = 2400;
+private static final Integer  GRIPPER_ROTATION_MIN  = 650;
 private static final Integer  GRIPPER_MAX         = 2100;
 private static final Integer  GRIPPER_MIN         = 1450;  
 
@@ -131,7 +131,7 @@ class Robot{
 
       if(!Float.isNaN(baseAngleD) && !Float.isNaN(shoulderAngleD) && !Float.isNaN(elbowAngleD) && !Float.isNaN(wristAngleD)
         && isInRange(baseAngleD, 0, 180) && isInRange(shoulderAngleD, 0, 180)
-        && isInRange(elbowAngleD, 0, 180) && isInRange(wristAngleD, 0, 180) && isInRange(gripperAngleD, 0, 180) && isInRange(gripperWidth, 0, 180)){
+        && isInRange(elbowAngleD, 0, 180) && isInRange(wristAngleD, 0, 180) && isInRange(gripperAngleD, 0, 180) && isInRange(gripperWidth, 0, 180) && isInRange(gripperRotation, 0, 180)){
         isDataVerified = true;
         println("( Data verfied )");
         if (!sendData){
@@ -149,7 +149,7 @@ class Robot{
       currentShoulder = (int) map(shoulderAngleD, 0, 180, SHOULDER_MIN, SHOULDER_MAX);
       currentElbow = (int) map(elbowAngleD, 180, 0, ELBOW_MIN, ELBOW_MAX);
       currentWrist = (int) map(wristAngleD, 0, 180, WRIST_MIN, WRIST_MAX);
-      currentGripperRotation = (int) map(gripperRotation, 0, 180, GRIPPER_ANGLE_MIN, GRIPPER_ANGLE_MAX);
+      currentGripperRotation = (int) map(gripperRotation, 0, 180, GRIPPER_ROTATION_MIN, GRIPPER_ROTATION_MAX);
       currentGripperWidth = (int) map(gripperWidth, 0, 180, GRIPPER_MIN, GRIPPER_MAX);
       currentBrightness = brightnessStrip;
       if(easingResolution <= 0)
@@ -241,8 +241,7 @@ class Robot{
 // ------------------------------------------------------------------------------------
 
   void readNextRobotPosition(){
-  if(isReadyForNewPosition && globalID <= (tablePositions.getRowCount() -1) && globalID >= 0){
-    println("[ In read next Position....isNextStep: ]" + robotAnimation.isNextStep);
+  if(globalID <= (tablePositions.getRowCount() -1) && globalID >= 0){
 
         int x = tablePositions.getInt(globalID, "X");
         int y = tablePositions.getInt(globalID, "Y");
@@ -274,5 +273,32 @@ class Robot{
 
       }
   }
+
+
+  // void checkNextStepInTable(){
+  //   if(this.waitForSpeechReturn == 0){
+  //     println("[ After speech return ]");
+  //     if(!robotAnimation.isInAnimation && robotAnimation.isNextStep){
+  //       println("[ After robot Is not in Animation ]");
+  //       robot.readNextRobotPosition();
+  //       newSay = true;
+  //       // robotAnimation.isNextStep = false;
+  //       isReadyForNewPosition = false;
+  //       if(stepForward){
+  //         // globalID ++;
+  //         stepForward = false;
+  //       }else if (stepBack){
+  //         // globalID--;
+  //         stepBack = false;
+  //       }  
+  //       this.nextTextToSpeech = false;
+  //       isReadyForNewPosition = true;
+  //       this.checkTableConstrains();
+  //     }else if(robotAnimation.isInAnimation && robotAnimation.isNextStep){
+  //       println("[ In isInAnimation break ]");
+  //       robotAnimation.isInAnimation = false;
+  //     }
+  //   }
+  // }
 
 }  

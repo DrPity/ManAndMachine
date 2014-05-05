@@ -122,10 +122,30 @@ class HelperClass {
 
   // ------------------------------------------------------------------------------------
 
-  void setStep(){
-    textToSpeech.nextTextToSpeech = true;
-    // robotAnimation.standValue = false;
-    robotAnimation.isNextStep = true;
-  }
+  void checkStep()
+  {
+    // wait for text to be done
+
+    if(!textToSpeech.speaking)
+    {
+      if (robotAnimation.isInAnimation)
+      {
+        robotAnimation.isAnimation = false;
+      }
+      else if (!robotAnimation.isInAnimation && robotAnimation.isOutOfLoop && !robotAnimation.isAnimation)
+      {
+        readyToExecuteNextStep = true;
+        checkIfReadyForNextStep = false;
+        if(stepForward)
+        {
+          stepForward = false;
+        }
+        else if (stepBack)
+        {
+          stepBack = false;
+        } 
+      }
+    }
+  }  
 
 }

@@ -76,8 +76,8 @@ private boolean isMelziPort               = false;
 private boolean isPulseMeterPort          = false;
 private boolean isTableSpeechLoaded       = false;
 private boolean isReadyForButtonCommands  = false;
-private boolean newSay                    = false;
-private boolean isReadyForNewPosition     = true;
+private boolean checkIfReadyForNextStep   = false;
+private boolean readyToExecuteNextStep    = false;
 private boolean stepForward               = false;
 private boolean stepBack                  = false;
 
@@ -273,6 +273,13 @@ public void draw() {
   else
     isReadyColor = 0;
 
+  if(checkIfReadyForNextStep)
+    helpers.checkStep();
+
+  if(readyToExecuteNextStep){
+    readyToExecuteNextStep = false;
+    robot.readNextRobotPosition();
+  }  
 
 }
 
@@ -344,7 +351,7 @@ public void controlEvent(ControlEvent theEvent) {
       if (list.length == 1){
         println(list.length + "Arrrrrrrg");
         globalID = Integer.parseInt(list[0]);
-        helpers.setStep();
+        checkIfReadyForNextStep = true;
       }else if (list.length == 6){
         robot.setRobotArm( Integer.parseInt(list[0]), Integer.parseInt(list[1]), Integer.parseInt(list[2]), Integer.parseInt(list[3]), Integer.parseInt(list[4]), Integer.parseInt(list[5]), 200, true, 255, 255, 255, 255, 2); 
       }
@@ -415,26 +422,20 @@ public void controlEvent(ControlEvent theEvent) {
   }
 
   if(theEvent.getName().equals("Back")){
-    if(!textToSpeech.nextTextToSpeech && !stepBack){
-      if (!robotAnimation.isInAnimation || robotAnimation.isInAnimation){
+    if(!stepBack && !textToSpeech.nextTextToSpeech && !checkIfReadyForNextStep){
         globalID--;
         textToSpeech.checkTableConstrains();
-        println("globalID: "+globalID);
+        checkIfReadyForNextStep = true;
         stepBack = true;
-        helpers.setStep();
-      }
     }
   }
 
   if(theEvent.getName().equals("Forward")){
-    if(!textToSpeech.nextTextToSpeech && !stepForward){
-      if (!robotAnimation.isInAnimation || robotAnimation.isInAnimation){
+    if(!stepForward && !textToSpeech.nextTextToSpeech && !checkIfReadyForNextStep){
         globalID++;
         textToSpeech.checkTableConstrains();
-        println("globalID: "+globalID);
         stepForward = true;
-        helpers.setStep();
-      }
+        checkIfReadyForNextStep = true;
     }  
   }
  }
@@ -1316,11 +1317,31 @@ class HelperClass {
 
   // ------------------------------------------------------------------------------------
 
-  public void setStep(){
-    textToSpeech.nextTextToSpeech = true;
-    // robotAnimation.standValue = false;
-    robotAnimation.isNextStep = true;
-  }
+  public void checkStep()
+  {
+    // wait for text to be done
+
+    if(!textToSpeech.speaking)
+    {
+      if (robotAnimation.isInAnimation)
+      {
+        robotAnimation.isAnimation = false;
+      }
+      else if (!robotAnimation.isInAnimation && robotAnimation.isOutOfLoop && !robotAnimation.isAnimation)
+      {
+        readyToExecuteNextStep = true;
+        checkIfReadyForNextStep = false;
+        if(stepForward)
+        {
+          stepForward = false;
+        }
+        else if (stepBack)
+        {
+          stepBack = false;
+        } 
+      }
+    }
+  }  
 
 }
 
@@ -1872,8 +1893,8 @@ private static final Integer  ELBOW_MAX           = 2370;
 private static final Integer  ELBOW_MIN           = 720;
 private static final Integer  WRIST_MAX           = 2370; 
 private static final Integer  WRIST_MIN           = 720;
-private static final Integer  GRIPPER_ANGLE_MAX   = 2400;
-private static final Integer  GRIPPER_ANGLE_MIN   = 600;
+private static final Integer  GRIPPER_ROTATION_MAX  = 2400;
+private static final Integer  GRIPPER_ROTATION_MIN  = 650;
 private static final Integer  GRIPPER_MAX         = 2100;
 private static final Integer  GRIPPER_MIN         = 1450;  
 
@@ -1987,7 +2008,7 @@ class Robot{
 
       if(!Float.isNaN(baseAngleD) && !Float.isNaN(shoulderAngleD) && !Float.isNaN(elbowAngleD) && !Float.isNaN(wristAngleD)
         && isInRange(baseAngleD, 0, 180) && isInRange(shoulderAngleD, 0, 180)
-        && isInRange(elbowAngleD, 0, 180) && isInRange(wristAngleD, 0, 180) && isInRange(gripperAngleD, 0, 180) && isInRange(gripperWidth, 0, 180)){
+        && isInRange(elbowAngleD, 0, 180) && isInRange(wristAngleD, 0, 180) && isInRange(gripperAngleD, 0, 180) && isInRange(gripperWidth, 0, 180) && isInRange(gripperRotation, 0, 180)){
         isDataVerified = true;
         println("( Data verfied )");
         if (!sendData){
@@ -2005,7 +2026,7 @@ class Robot{
       currentShoulder = (int) map(shoulderAngleD, 0, 180, SHOULDER_MIN, SHOULDER_MAX);
       currentElbow = (int) map(elbowAngleD, 180, 0, ELBOW_MIN, ELBOW_MAX);
       currentWrist = (int) map(wristAngleD, 0, 180, WRIST_MIN, WRIST_MAX);
-      currentGripperRotation = (int) map(gripperRotation, 0, 180, GRIPPER_ANGLE_MIN, GRIPPER_ANGLE_MAX);
+      currentGripperRotation = (int) map(gripperRotation, 0, 180, GRIPPER_ROTATION_MIN, GRIPPER_ROTATION_MAX);
       currentGripperWidth = (int) map(gripperWidth, 0, 180, GRIPPER_MIN, GRIPPER_MAX);
       currentBrightness = brightnessStrip;
       if(easingResolution <= 0)
@@ -2097,8 +2118,7 @@ class Robot{
 // ------------------------------------------------------------------------------------
 
   public void readNextRobotPosition(){
-  if(isReadyForNewPosition && globalID <= (tablePositions.getRowCount() -1) && globalID >= 0){
-    println("[ In read next Position....isNextStep: ]" + robotAnimation.isNextStep);
+  if(globalID <= (tablePositions.getRowCount() -1) && globalID >= 0){
 
         int x = tablePositions.getInt(globalID, "X");
         int y = tablePositions.getInt(globalID, "Y");
@@ -2131,31 +2151,58 @@ class Robot{
       }
   }
 
+
+  // void checkNextStepInTable(){
+  //   if(this.waitForSpeechReturn == 0){
+  //     println("[ After speech return ]");
+  //     if(!robotAnimation.isInAnimation && robotAnimation.isNextStep){
+  //       println("[ After robot Is not in Animation ]");
+  //       robot.readNextRobotPosition();
+  //       newSay = true;
+  //       // robotAnimation.isNextStep = false;
+  //       isReadyForNewPosition = false;
+  //       if(stepForward){
+  //         // globalID ++;
+  //         stepForward = false;
+  //       }else if (stepBack){
+  //         // globalID--;
+  //         stepBack = false;
+  //       }  
+  //       this.nextTextToSpeech = false;
+  //       isReadyForNewPosition = true;
+  //       this.checkTableConstrains();
+  //     }else if(robotAnimation.isInAnimation && robotAnimation.isNextStep){
+  //       println("[ In isInAnimation break ]");
+  //       robotAnimation.isInAnimation = false;
+  //     }
+  //   }
+  // }
+
 }  
 class RobotAnimation extends Thread{
 
 
 Table movements;
 boolean running;           // Is the thread running?  Yes or no?
-boolean isNextStep;
+boolean isOutOfLoop;
 boolean isAnimation;
 boolean isInAnimation;
 long frameTime;
 int movementID = 0;
 int wait;
-boolean standValue;
+boolean startPositionIsStored;
 
-float     xStand             = 0;
-float     yStand             = 0;
-float     zStand             = 0;
-float     gaStand            = 0;
-int       gwStand            = 0;
-int       grStand            = 0;
-int       rStand             = 0;
-int       gStand             = 0;
-int       bStand             = 0;
-int       lbStand            = 0;
-int       ledStand           = 2;
+float     xStartValue             = 0;
+float     yStartValue             = 0;
+float     zStartValue             = 0;
+float     gaStartValue            = 0;
+int       gwStartValue            = 0;
+int       grStartValue            = 0;
+int       rStartValue             = 0;
+int       gStartValue             = 0;
+int       bStartValue             = 0;
+int       lbStartValue            = 0;
+int       ledStartValue           = 2;
 
 
 // ------------------------------------------------------------------------------------
@@ -2171,9 +2218,9 @@ int       ledStand           = 2;
     running = true;
     println("Starting thread RobotAnimation (will execute every " + wait + " milliseconds.)");
     frameTime = millis();
-    standValue = false;
+    startPositionIsStored = false;
     isAnimation = false;
-    isNextStep = false;
+    isOutOfLoop = true;
     isInAnimation = false;
     super.start();
   }
@@ -2183,9 +2230,8 @@ int       ledStand           = 2;
   // We must implement run, this gets triggered by start()
   public void run () {
     sleepTime(300);
-    // loadMovementData();
     while (running) {
-      if(isAnimation && isNextStep){
+      if(isAnimation){
         println("[ In check for Animation ]");
         checkAnimations();
       }
@@ -2198,15 +2244,13 @@ int       ledStand           = 2;
 // ------------------------------------------------------------------------------------
 
 public void checkAnimations(){
-// int oldID = globalID;
-// isNextStep = false;
-println("[ In Animation check ]");
+  isOutOfLoop = false;
+  startPositionIsStored = false;
 
-
-// --- Number 1  WakeUP---
+  // --- Number 1  WakeUP---
   if(movementID == 1){
-  robot.sendRobotData(1475, 1500, 2300, 800, 1500, 1500, 200, 0, 0, 255, 0, 2);
-  waitForRobot();
+    robot.sendRobotData(1475, 1500, 2300, 800, 1500, 1500, 200, 0, 0, 255, 0, 2);
+    waitForRobot();
     for(int i = 0; i <= 255; i++){
       robot.sendRobotData(1475, 1500, 2300, 800, 1500, 1500, 1, i, 0, 255, 0, 2);
       waitForRobot();
@@ -2267,20 +2311,22 @@ println("[ In Animation check ]");
   }
 
   // --- Number 4  Neutral forward---
-    if(movementID == 4){
-    println("In global 3");
+  if(movementID == 4){
+    println(" In animation Nr 4 ");
     robot.setRobotArm(-4,184,184,42,126,90,200,true,255,0,255,0,2);
     sleepTime(100);
     isInAnimation = true;
     while(isInAnimation){
+      println("In while loop Nr 4");
       standAnimation(15,10, true,false,false,false,true,false,0);
     }
     isInAnimation = false;
   }
 
-// --- Number 5 right to left---  
+  // --- Number 5 right to left---  
 
   if(movementID == 5){
+    println(" In animation Nr 5 ");
     robot.setRobotArm(88,28,216,1,186,90,400,true,255,0,255,0,2);
     waitForRobot();
     robot.setRobotArm(-124,100,208,17,186,90,100,true,255,0,255,0,2);
@@ -2296,6 +2342,7 @@ println("[ In Animation check ]");
   }
 
   if(movementID == 6){
+    println(" In animation Nr 6 ");
     robot.sendRobotData(1475, 1500, 2300, 800, 1500, 1500, 200, 255, 0, 255, 0,2);
     waitForRobot();
     robot.setRobotArm(-4,184,184,42,126,90,200,true,255,0,255,0,2);
@@ -2305,6 +2352,7 @@ println("[ In Animation check ]");
   }
 
   if(movementID == 7){
+    println(" In animation Nr 7 ");
     robot.setRobotArm(-7.75081f,32.0f,92.0f,70.0f,116,66,200,true,255,0,255,0,2);
     waitForRobot();
     sleepTime(500);
@@ -2315,6 +2363,7 @@ println("[ In Animation check ]");
   }
 
   if(movementID == 8){
+    println(" In animation Nr 8 ");
     robot.setRobotArm(-216,0,160,29,134,90,200,true,255,0,255,0,2);
     waitForRobot();
     isInAnimation = true;
@@ -2351,7 +2400,7 @@ println("[ In Animation check ]");
     waitForRobot();
     robot.setRobotArm(-148.0f,184.0f,312.0f,1.0f,46,90,200,true,255,0,255,0,2);
     waitForRobot();
-  
+
   }
 
 
@@ -2493,6 +2542,9 @@ println("[ In Animation check ]");
     }
     isInAnimation = false;
   }
+
+  isAnimation = false;
+  isOutOfLoop = true;
 }
 // ------------------------------------------------------------------------------------
 
@@ -2511,18 +2563,20 @@ public void standAnimation(int runningDelay, float amp, boolean a, boolean b, bo
     float kf = 0;
     angle += aVelocity;
 
-    if(!standValue){
-      xStand = lastX;
-      yStand = lastY;
-      zStand = lastZ;
-      gaStand = lastGripperAngle;
-      grStand = lastGripperRotation;
-      gwStand = lastGripperWidth;
-      lbStand = lastBrightness;
-      rStand = lastR;
-      gStand = lastG;
-      bStand = lastB;
-      ledStand = lastLed;
+    if(!startPositionIsStored){
+      xStartValue = lastX;
+      yStartValue = lastY;
+      zStartValue = lastZ;
+      gaStartValue = lastGripperAngle;
+      grStartValue = lastGripperRotation;
+      gwStartValue = lastGripperWidth;
+      lbStartValue = lastBrightness;
+      rStartValue = lastR;
+      gStartValue = lastG;
+      bStartValue = lastB;
+      ledStartValue = lastLed;
+      startPositionIsStored = true;
+      println("In StartValue Value !!");
     }
 
     if(a)
@@ -2538,16 +2592,11 @@ public void standAnimation(int runningDelay, float amp, boolean a, boolean b, bo
     if(f)
       kf = k;
 
-    robot.setRobotArm(xStand + ka, yStand + kb , zStand + kc, gaStand + kd, (int)(grStand + ke), (int)(gwStand  + kf), 1, true, lbStand, rStand, gStand, bStand, ledStand); 
-    
-    if(!standValue)
-      standValue = true;
-    
+    robot.setRobotArm(xStartValue + ka, yStartValue + kb , zStartValue + kc, gaStartValue + kd, (int)(grStartValue + ke), (int)(gwStartValue  + kf), 1, true, lbStartValue, rStartValue, gStartValue, bStartValue, ledStartValue); 
     waitForRobot();
     sleepTime(runningDelay);
 
   }
-  standValue = false;
 }
 
 // ------------------------------------------------------------------------------------
@@ -2618,6 +2667,7 @@ String[] voices = {
 Table tableSpeech;
 boolean running;           // Is the thread running?  Yes or no?
 boolean nextTextToSpeech;
+boolean speaking;
 int wait;
 int waitForSpeechReturn;
 
@@ -2632,6 +2682,7 @@ int waitForSpeechReturn;
 	
 	public void start () {
     running = true;
+    speaking = false;
     nextTextToSpeech = false;
     waitForSpeechReturn = 0;
     println("Starting thread TextToSpeech (will execute every " + wait + " milliseconds.)");
@@ -2646,17 +2697,11 @@ int waitForSpeechReturn;
     // sleep(2000);
     sleepTime(300);
     while (running) {
-      // if(nextTextToSpeech && robotAnimation.isNextStep ){
-      //   nextStepInTables();
-      // }
-       if(this.nextTextToSpeech && robotAnimation.isNextStep){
-          checkNextStepInTable();
-       }
-    	if(newSay && globalID <= (tableSpeech.getRowCount() -1) && globalID >= 0){
+    	if(nextTextToSpeech && globalID <= (tableSpeech.getRowCount() -1) && globalID >= 0){
     		String textString = tableSpeech.getString(globalID, "STRING");
         voice = tableSpeech.getInt(globalID, "VOICE");
     		say(textString,voice);
-    		newSay = false;
+        waitUntilTextIsSpoken();
         println("( IN VOICE )");
     	}
     	sleepTime(wait);   
@@ -2669,6 +2714,7 @@ int waitForSpeechReturn;
 
 	public void say(String s, int voice) {
     waitForRobot();
+    speaking = true;
 	  try {
 	    Runtime rtime = Runtime.getRuntime();
 	    Process child = rtime.exec("/usr/bin/say -v " + (voices[voice]) + " " + s);
@@ -2719,50 +2765,14 @@ int waitForSpeechReturn;
 
 // ------------------------------------------------------------------------------------
 
-  // void nextStepInTables(){
-  //   while(nextTextToSpeech){
-  //     if(waitForSpeechReturn == 0){
-  //       newSay = true;
-  //       newPosition = true;
-  //       robot.readNextRobotPosition();
-  //       if(stepForward){
-  //         // globalID ++;
-  //         stepForward = false;
-  //       }else if (stepBack){
-  //         // globalID--;
-  //         stepBack = false;
-  //       }  
-  //       nextTextToSpeech = false;
-  //       checkTableConstrains();
-  //     }
-  //   }
-  // }
-
-    public void checkNextStepInTable(){
-    if(this.waitForSpeechReturn == 0){
-      println("[ After speech return ]");
-      if(!robotAnimation.isInAnimation && robotAnimation.isNextStep){
-        println("[ After robot Is not in Animation ]");
-        robot.readNextRobotPosition();
-        newSay = true;
-        robotAnimation.isNextStep = false;
-        isReadyForNewPosition = false;
-        if(stepForward){
-          // globalID ++;
-          stepForward = false;
-        }else if (stepBack){
-          // globalID--;
-          stepBack = false;
-        }  
-        this.nextTextToSpeech = false;
-        isReadyForNewPosition = true;
-        this.checkTableConstrains();
-      }else if(robotAnimation.isInAnimation && robotAnimation.isNextStep){
-        println("[ In isInAnimation break ]");
-        robotAnimation.isInAnimation = false;
+  public void waitUntilTextIsSpoken(){
+    while(speaking){
+      if(waitForSpeechReturn == 0){
+        speaking = false;
       }
     }
   }
+  
 
   private void waitForRobot(){
     while(!isRobotReadyToMove){

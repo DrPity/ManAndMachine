@@ -38,6 +38,7 @@ String[] voices = {
 Table tableSpeech;
 boolean running;           // Is the thread running?  Yes or no?
 boolean nextTextToSpeech;
+boolean speaking;
 int wait;
 int waitForSpeechReturn;
 
@@ -52,6 +53,7 @@ int waitForSpeechReturn;
 	
 	void start () {
     running = true;
+    speaking = false;
     nextTextToSpeech = false;
     waitForSpeechReturn = 0;
     println("Starting thread TextToSpeech (will execute every " + wait + " milliseconds.)");
@@ -66,17 +68,11 @@ int waitForSpeechReturn;
     // sleep(2000);
     sleepTime(300);
     while (running) {
-      // if(nextTextToSpeech && robotAnimation.isNextStep ){
-      //   nextStepInTables();
-      // }
-       if(this.nextTextToSpeech && robotAnimation.isNextStep){
-          checkNextStepInTable();
-       }
-    	if(newSay && globalID <= (tableSpeech.getRowCount() -1) && globalID >= 0){
+    	if(nextTextToSpeech && globalID <= (tableSpeech.getRowCount() -1) && globalID >= 0){
     		String textString = tableSpeech.getString(globalID, "STRING");
         voice = tableSpeech.getInt(globalID, "VOICE");
     		say(textString,voice);
-    		newSay = false;
+        waitUntilTextIsSpoken();
         println("( IN VOICE )");
     	}
     	sleepTime(wait);   
@@ -89,6 +85,7 @@ int waitForSpeechReturn;
 
 	void say(String s, int voice) {
     waitForRobot();
+    speaking = true;
 	  try {
 	    Runtime rtime = Runtime.getRuntime();
 	    Process child = rtime.exec("/usr/bin/say -v " + (voices[voice]) + " " + s);
@@ -139,50 +136,14 @@ int waitForSpeechReturn;
 
 // ------------------------------------------------------------------------------------
 
-  // void nextStepInTables(){
-  //   while(nextTextToSpeech){
-  //     if(waitForSpeechReturn == 0){
-  //       newSay = true;
-  //       newPosition = true;
-  //       robot.readNextRobotPosition();
-  //       if(stepForward){
-  //         // globalID ++;
-  //         stepForward = false;
-  //       }else if (stepBack){
-  //         // globalID--;
-  //         stepBack = false;
-  //       }  
-  //       nextTextToSpeech = false;
-  //       checkTableConstrains();
-  //     }
-  //   }
-  // }
-
-    void checkNextStepInTable(){
-    if(this.waitForSpeechReturn == 0){
-      println("[ After speech return ]");
-      if(!robotAnimation.isInAnimation && robotAnimation.isNextStep){
-        println("[ After robot Is not in Animation ]");
-        robot.readNextRobotPosition();
-        newSay = true;
-        robotAnimation.isNextStep = false;
-        isReadyForNewPosition = false;
-        if(stepForward){
-          // globalID ++;
-          stepForward = false;
-        }else if (stepBack){
-          // globalID--;
-          stepBack = false;
-        }  
-        this.nextTextToSpeech = false;
-        isReadyForNewPosition = true;
-        this.checkTableConstrains();
-      }else if(robotAnimation.isInAnimation && robotAnimation.isNextStep){
-        println("[ In isInAnimation break ]");
-        robotAnimation.isInAnimation = false;
+  void waitUntilTextIsSpoken(){
+    while(speaking){
+      if(waitForSpeechReturn == 0){
+        speaking = false;
       }
     }
   }
+  
 
   private void waitForRobot(){
     while(!isRobotReadyToMove){

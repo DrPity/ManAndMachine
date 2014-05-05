@@ -3,25 +3,25 @@ class RobotAnimation extends Thread{
 
 Table movements;
 boolean running;           // Is the thread running?  Yes or no?
-boolean isNextStep;
+boolean isOutOfLoop;
 boolean isAnimation;
 boolean isInAnimation;
 long frameTime;
 int movementID = 0;
 int wait;
-boolean standValue;
+boolean startPositionIsStored;
 
-float     xStand             = 0;
-float     yStand             = 0;
-float     zStand             = 0;
-float     gaStand            = 0;
-int       gwStand            = 0;
-int       grStand            = 0;
-int       rStand             = 0;
-int       gStand             = 0;
-int       bStand             = 0;
-int       lbStand            = 0;
-int       ledStand           = 2;
+float     xStartValue             = 0;
+float     yStartValue             = 0;
+float     zStartValue             = 0;
+float     gaStartValue            = 0;
+int       gwStartValue            = 0;
+int       grStartValue            = 0;
+int       rStartValue             = 0;
+int       gStartValue             = 0;
+int       bStartValue             = 0;
+int       lbStartValue            = 0;
+int       ledStartValue           = 2;
 
 
 // ------------------------------------------------------------------------------------
@@ -37,9 +37,9 @@ int       ledStand           = 2;
     running = true;
     println("Starting thread RobotAnimation (will execute every " + wait + " milliseconds.)");
     frameTime = millis();
-    standValue = false;
+    startPositionIsStored = false;
     isAnimation = false;
-    isNextStep = false;
+    isOutOfLoop = true;
     isInAnimation = false;
     super.start();
   }
@@ -49,9 +49,8 @@ int       ledStand           = 2;
   // We must implement run, this gets triggered by start()
   void run () {
     sleepTime(300);
-    // loadMovementData();
     while (running) {
-      if(isAnimation && isNextStep){
+      if(isAnimation){
         println("[ In check for Animation ]");
         checkAnimations();
       }
@@ -64,15 +63,13 @@ int       ledStand           = 2;
 // ------------------------------------------------------------------------------------
 
 void checkAnimations(){
-// int oldID = globalID;
-// isNextStep = false;
-println("[ In Animation check ]");
+  isOutOfLoop = false;
+  startPositionIsStored = false;
 
-
-// --- Number 1  WakeUP---
+  // --- Number 1  WakeUP---
   if(movementID == 1){
-  robot.sendRobotData(1475, 1500, 2300, 800, 1500, 1500, 200, 0, 0, 255, 0, 2);
-  waitForRobot();
+    robot.sendRobotData(1475, 1500, 2300, 800, 1500, 1500, 200, 0, 0, 255, 0, 2);
+    waitForRobot();
     for(int i = 0; i <= 255; i++){
       robot.sendRobotData(1475, 1500, 2300, 800, 1500, 1500, 1, i, 0, 255, 0, 2);
       waitForRobot();
@@ -133,20 +130,22 @@ println("[ In Animation check ]");
   }
 
   // --- Number 4  Neutral forward---
-    if(movementID == 4){
-    println("In global 3");
+  if(movementID == 4){
+    println(" In animation Nr 4 ");
     robot.setRobotArm(-4,184,184,42,126,90,200,true,255,0,255,0,2);
     sleepTime(100);
     isInAnimation = true;
     while(isInAnimation){
+      println("In while loop Nr 4");
       standAnimation(15,10, true,false,false,false,true,false,0);
     }
     isInAnimation = false;
   }
 
-// --- Number 5 right to left---  
+  // --- Number 5 right to left---  
 
   if(movementID == 5){
+    println(" In animation Nr 5 ");
     robot.setRobotArm(88,28,216,1,186,90,400,true,255,0,255,0,2);
     waitForRobot();
     robot.setRobotArm(-124,100,208,17,186,90,100,true,255,0,255,0,2);
@@ -162,6 +161,7 @@ println("[ In Animation check ]");
   }
 
   if(movementID == 6){
+    println(" In animation Nr 6 ");
     robot.sendRobotData(1475, 1500, 2300, 800, 1500, 1500, 200, 255, 0, 255, 0,2);
     waitForRobot();
     robot.setRobotArm(-4,184,184,42,126,90,200,true,255,0,255,0,2);
@@ -171,6 +171,7 @@ println("[ In Animation check ]");
   }
 
   if(movementID == 7){
+    println(" In animation Nr 7 ");
     robot.setRobotArm(-7.75081,32.0,92.0,70.0,116,66,200,true,255,0,255,0,2);
     waitForRobot();
     sleepTime(500);
@@ -181,6 +182,7 @@ println("[ In Animation check ]");
   }
 
   if(movementID == 8){
+    println(" In animation Nr 8 ");
     robot.setRobotArm(-216,0,160,29,134,90,200,true,255,0,255,0,2);
     waitForRobot();
     isInAnimation = true;
@@ -217,7 +219,7 @@ println("[ In Animation check ]");
     waitForRobot();
     robot.setRobotArm(-148.0,184.0,312.0,1.0,46,90,200,true,255,0,255,0,2);
     waitForRobot();
-  
+
   }
 
 
@@ -359,6 +361,9 @@ println("[ In Animation check ]");
     }
     isInAnimation = false;
   }
+
+  isAnimation = false;
+  isOutOfLoop = true;
 }
 // ------------------------------------------------------------------------------------
 
@@ -377,18 +382,20 @@ void standAnimation(int runningDelay, float amp, boolean a, boolean b, boolean c
     float kf = 0;
     angle += aVelocity;
 
-    if(!standValue){
-      xStand = lastX;
-      yStand = lastY;
-      zStand = lastZ;
-      gaStand = lastGripperAngle;
-      grStand = lastGripperRotation;
-      gwStand = lastGripperWidth;
-      lbStand = lastBrightness;
-      rStand = lastR;
-      gStand = lastG;
-      bStand = lastB;
-      ledStand = lastLed;
+    if(!startPositionIsStored){
+      xStartValue = lastX;
+      yStartValue = lastY;
+      zStartValue = lastZ;
+      gaStartValue = lastGripperAngle;
+      grStartValue = lastGripperRotation;
+      gwStartValue = lastGripperWidth;
+      lbStartValue = lastBrightness;
+      rStartValue = lastR;
+      gStartValue = lastG;
+      bStartValue = lastB;
+      ledStartValue = lastLed;
+      startPositionIsStored = true;
+      println("In StartValue Value !!");
     }
 
     if(a)
@@ -404,16 +411,11 @@ void standAnimation(int runningDelay, float amp, boolean a, boolean b, boolean c
     if(f)
       kf = k;
 
-    robot.setRobotArm(xStand + ka, yStand + kb , zStand + kc, gaStand + kd, (int)(grStand + ke), (int)(gwStand  + kf), 1, true, lbStand, rStand, gStand, bStand, ledStand); 
-    
-    if(!standValue)
-      standValue = true;
-    
+    robot.setRobotArm(xStartValue + ka, yStartValue + kb , zStartValue + kc, gaStartValue + kd, (int)(grStartValue + ke), (int)(gwStartValue  + kf), 1, true, lbStartValue, rStartValue, gStartValue, bStartValue, ledStartValue); 
     waitForRobot();
     sleepTime(runningDelay);
 
   }
-  standValue = false;
 }
 
 // ------------------------------------------------------------------------------------

@@ -52,8 +52,8 @@ private boolean isMelziPort               = false;
 private boolean isPulseMeterPort          = false;
 private boolean isTableSpeechLoaded       = false;
 private boolean isReadyForButtonCommands  = false;
-private boolean newSay                    = false;
-private boolean isReadyForNewPosition     = true;
+private boolean checkIfReadyForNextStep   = false;
+private boolean readyToExecuteNextStep    = false;
 private boolean stepForward               = false;
 private boolean stepBack                  = false;
 
@@ -249,6 +249,13 @@ void draw() {
   else
     isReadyColor = 0;
 
+  if(checkIfReadyForNextStep)
+    helpers.checkStep();
+
+  if(readyToExecuteNextStep){
+    readyToExecuteNextStep = false;
+    robot.readNextRobotPosition();
+  }  
 
 }
 
@@ -320,7 +327,7 @@ void controlEvent(ControlEvent theEvent) {
       if (list.length == 1){
         println(list.length + "Arrrrrrrg");
         globalID = Integer.parseInt(list[0]);
-        helpers.setStep();
+        checkIfReadyForNextStep = true;
       }else if (list.length == 6){
         robot.setRobotArm( Integer.parseInt(list[0]), Integer.parseInt(list[1]), Integer.parseInt(list[2]), Integer.parseInt(list[3]), Integer.parseInt(list[4]), Integer.parseInt(list[5]), 200, true, 255, 255, 255, 255, 2); 
       }
@@ -391,26 +398,20 @@ void controlEvent(ControlEvent theEvent) {
   }
 
   if(theEvent.getName().equals("Back")){
-    if(!textToSpeech.nextTextToSpeech && !stepBack){
-      if (!robotAnimation.isInAnimation || robotAnimation.isInAnimation){
+    if(!stepBack && !textToSpeech.nextTextToSpeech && !checkIfReadyForNextStep){
         globalID--;
         textToSpeech.checkTableConstrains();
-        println("globalID: "+globalID);
+        checkIfReadyForNextStep = true;
         stepBack = true;
-        helpers.setStep();
-      }
     }
   }
 
   if(theEvent.getName().equals("Forward")){
-    if(!textToSpeech.nextTextToSpeech && !stepForward){
-      if (!robotAnimation.isInAnimation || robotAnimation.isInAnimation){
+    if(!stepForward && !textToSpeech.nextTextToSpeech && !checkIfReadyForNextStep){
         globalID++;
         textToSpeech.checkTableConstrains();
-        println("globalID: "+globalID);
         stepForward = true;
-        helpers.setStep();
-      }
+        checkIfReadyForNextStep = true;
     }  
   }
  }
