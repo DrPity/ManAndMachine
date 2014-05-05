@@ -82,8 +82,9 @@ String  id;                 // Thread name
  
   // Our method that quits the thread
   void quit() {
-    System.out.println("Quitting."); 
+    System.out.println("Quitting.");
     running = false;  // Setting running to false ends the loop in run()
+    port.stop();
     // IUn case the thread is waiting. . .
     interrupt();
   }

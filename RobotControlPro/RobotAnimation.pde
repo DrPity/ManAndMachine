@@ -5,6 +5,7 @@ Table movements;
 boolean running;           // Is the thread running?  Yes or no?
 boolean isNextStep;
 boolean isAnimation;
+boolean isInAnimation;
 long frameTime;
 int movementID = 0;
 int wait;
@@ -38,7 +39,8 @@ int       ledStand           = 2;
     frameTime = millis();
     standValue = false;
     isAnimation = false;
-    isNextStep = true;
+    isNextStep = false;
+    isInAnimation = false;
     super.start();
   }
  
@@ -49,11 +51,9 @@ int       ledStand           = 2;
     sleepTime(300);
     // loadMovementData();
     while (running) {
-      if(isAnimation){
+      if(isAnimation && isNextStep){
+        println("[ In check for Animation ]");
         checkAnimations();
-      }
-      if(!textToSpeech.nextTextToSpeech && isRobotReadyToMove && !isNextStep){
-        // standAnimation();
       }
     	sleepTime(wait);
     }
@@ -64,14 +64,10 @@ int       ledStand           = 2;
 // ------------------------------------------------------------------------------------
 
 void checkAnimations(){
+// int oldID = globalID;
+// isNextStep = false;
+println("[ In Animation check ]");
 
-  isNextStep = true;
-// int base              = 1475;
-// int shoulder          = 1500;
-// int elbow             = 2300;
-// int wrist             = 800;
-// int gripper           = 1500;
-// int gripperAngle      = 1500;
 
 // --- Number 1  WakeUP---
   if(movementID == 1){
@@ -85,8 +81,8 @@ void checkAnimations(){
     waitForRobot();
   }
 
-// --- Number 2  Diagnostic---
-   if(movementID == 2){
+  // --- Number 2  Diagnostic---
+  if(movementID == 2){
 
     robot.setRobotArm(4.0,172.0,180.0,17.0,178,62,200,true,255,0,255,0,2);
     waitForRobot();
@@ -100,7 +96,7 @@ void checkAnimations(){
     sleepTime(800);
     robot.setRobotArm(4.0,172.0,180.0,17.0,178,62,200,true,255,0,255,0,2);
     waitForRobot();
-    for(int i = 0; i <= 100; i++){
+    for(int i = 0; i <= 10; i++){
       robot.setRobotArm(4.0,172.0,180.0,17.0,178,62,1,true,255,(int)random(0,255),(int)random(0, 255),(int)random(0, 255),0);
       waitForRobot();
       robot.setRobotArm(4.0,172.0,180.0,17.0,178,62,1,true,255,(int)random(0,255),(int)random(0, 255),(int)random(0, 255),1);
@@ -127,7 +123,6 @@ void checkAnimations(){
 
 
   if(movementID == 3){
-
     robot.setRobotArm(-324,20,100,33,178,102,200,true,255,0,255,0,2);
     waitForRobot();
     sleepTime(800);
@@ -135,8 +130,6 @@ void checkAnimations(){
     waitForRobot();
     sleepTime(800);
     robot.setRobotArm(-324,20,100,33,178,102,200,true,255,0,255,0,2);
-
- 
   }
 
   // --- Number 4  Neutral forward---
@@ -144,14 +137,11 @@ void checkAnimations(){
     println("In global 3");
     robot.setRobotArm(-4,184,184,42,126,90,200,true,255,0,255,0,2);
     sleepTime(100);
-    while(isAnimation){
+    isInAnimation = true;
+    while(isInAnimation){
       standAnimation(15,10, true,false,false,false,true,false,0);
-      if(!isNextStep){
-        isAnimation = false;
-        println("In break");
-        break;
-      }
     }
+    isInAnimation = false;
   }
 
 // --- Number 5 right to left---  
@@ -172,7 +162,6 @@ void checkAnimations(){
   }
 
   if(movementID == 6){
-
     robot.sendRobotData(1475, 1500, 2300, 800, 1500, 1500, 200, 255, 0, 255, 0,2);
     waitForRobot();
     robot.setRobotArm(-4,184,184,42,126,90,200,true,255,0,255,0,2);
@@ -194,13 +183,11 @@ void checkAnimations(){
   if(movementID == 8){
     robot.setRobotArm(-216,0,160,29,134,90,200,true,255,0,255,0,2);
     waitForRobot();
-     while(isAnimation){
+    isInAnimation = true;
+    while(isInAnimation){
       standAnimation(15,10, false,false,false,false,true,false,0);
-      if(!isNextStep){
-        isAnimation = false;
-        break;
-      }
     }
+    isInAnimation = false;  
   }
 
   // --- Number 9 dancing---  
@@ -215,16 +202,12 @@ void checkAnimations(){
     // robot.setRobotArm(-8.261391,184.0,184.0,42.0,121,90,300,true,255,255,0,255,2);
     // waitForRobot();
     // standAnimation(15,30, true,false,false,false,false,true,0);
-
-      while(isAnimation){
-        standAnimation(15,60, true,false,false,false,false,true,0);
-        if(!isNextStep){
-          isAnimation = false;
-          break;
-          //################# turn of LED'S!!!!! #############
-        }
-      }
+    isInAnimation = true;
+    while(isInAnimation){
+      standAnimation(15,60, true,false,false,false,false,true,0);
     }
+    isInAnimation = false;
+  }  
 
   // --- Number 10 look and listen right---  
 
@@ -305,7 +288,8 @@ void checkAnimations(){
 
   if(movementID == 16){
 
-    while(isAnimation){
+    isInAnimation = true;
+    while(isInAnimation){
       robot.setRobotArm(8.0,140.0,272.0,17.0,86,30,200,true,255,0,255,0,2);
       waitForRobot();
       robot.setRobotArm(-152.0,140.0,244.0,17.0,134,30,200,true,255,0,255,0,2);
@@ -316,20 +300,16 @@ void checkAnimations(){
       waitForRobot();
       robot.setRobotArm(152.0,140.0,244.0,17.0,50,30,300,true,255,0,255,0,2);
       waitForRobot();
-      if(!isNextStep){
-        isAnimation = false;
-        break;
-        //################# turn of LED'S!!!!! #############
-      }
     }
-
+    isInAnimation = false;
    }
 
     // --- Number 17 powerMove---  
 
   if(movementID == 17){
 
-    while(isAnimation){
+    isInAnimation = true;
+    while(isInAnimation){
       robot.setRobotArm(-4.0,136.0,92.0,29.0,178,146,200,true,255,255,0,0,2);
       waitForRobot();
       sleepTime(800);
@@ -339,32 +319,23 @@ void checkAnimations(){
       waitForRobot();
       robot.setRobotArm(272.0,10.0,134.0,23.0,90,146,200,true,255,0,0,255,2);
       waitForRobot();
-      if(!isNextStep){
-        isAnimation = false;
-        break;
-        //################# turn of LED'S!!!!! #############
-      }
     }
-
+    isInAnimation = false;
   }
 
   if(movementID == 18){
     robot.setRobotArm(-4.0,136.0,92.0,29.0,178,146,200,true,33,255,0,0,2);
     waitForRobot();
-    while(isAnimation){
+    isInAnimation = true;
+    while(isInAnimation){
       robot.setRobotArm(-4.0,162.0,244.0,29.0,178,146,200,true,33,255,0,0,2);
       waitForRobot();
       sleepTime(800);
       robot.setRobotArm(-4.0,162.0,202.0,29.0,178,146,200,true,33,255,0,0,2);
       waitForRobot();
       sleepTime(800);
-
-      if(!isNextStep){
-      isAnimation = false;
-      break;
-      //################# turn of LED'S!!!!! #############
-      }
     }
+    isInAnimation = false;
   }
 
 
@@ -379,30 +350,16 @@ void checkAnimations(){
 
   if(movementID == 20){
     robot.setRobotArm(-108.0,30.0,180.0,11.0,186,30,300,true,255,255,255,0,2);
-    while(isAnimation){
+    isInAnimation = true;
+    while(isInAnimation){
       robot.setRobotArm(-108.0,30.0,180.0,11.0,186,30,600,true,255,255,255,0,2);
       waitForRobot();
       robot.setRobotArm(-158.0,30.0,180.0,11.0,44,180,600,true,255,255,255,0,2);
       waitForRobot();
-      if(!isNextStep){
-      isAnimation = false;
-      break;
-      //################# turn of LED'S!!!!! #############
-      }
     }
+    isInAnimation = false;
   }
-  
-
-  
-
-
-
-
-
-isNextStep = false;
-isAnimation = false;
 }
-
 // ------------------------------------------------------------------------------------
 
 void standAnimation(int runningDelay, float amp, boolean a, boolean b, boolean c, boolean d, boolean e, boolean f, int runningTime){
@@ -434,7 +391,6 @@ void standAnimation(int runningDelay, float amp, boolean a, boolean b, boolean c
       ledStand = lastLed;
     }
 
-
     if(a)
       ka = k;
     if(b)
@@ -456,7 +412,8 @@ void standAnimation(int runningDelay, float amp, boolean a, boolean b, boolean c
     waitForRobot();
     sleepTime(runningDelay);
 
-  }  
+  }
+  standValue = false;
 }
 
 // ------------------------------------------------------------------------------------
@@ -484,42 +441,6 @@ void standAnimation(int runningDelay, float amp, boolean a, boolean b, boolean c
       sleepTime(10);
     }
   }
-
-
-//   void loadMovementData(){
-
-//     tableMovements = loadTable("data/Movements.csv", "header");
-//   }
-
-// // ------------------------------------------------------------------------------------
-
-//   void readNextRobotPosition(){
-//   if(newPosition && globalID <= (tablePositions.getRowCount() -1) && globalID >= 0){
-
-//         int x = tablePositions.getInt(globalID, "X");
-//         int y = tablePositions.getInt(globalID, "Y");
-//         int z = tablePositions.getInt(globalID, "Z");
-//         int gripperAngle = tablePositions.getInt(globalID, "GripperAngle");
-//         int gripperRotation = tablePositions.getInt(globalID, "GripperRotation");
-//         int gripperWidth = tablePositions.getInt(globalID, "GripperWidth");
-//         int easing = tablePositions.getInt(globalID, "Easing");
-//         int brightn = tablePositions.getInt(globalID, "Brightness");
-//         int r = tablePositions.getInt(globalID, "r");
-//         int g = tablePositions.getInt(globalID, "g");
-//         int b = tablePositions.getInt(globalID, "b");
-//         int x1 = tablePositions.getInt(globalID, "X1");
-//         int y1 = tablePositions.getInt(globalID, "Y1");
-//         //call streching somewhere here
-//         // setRobotArm() here
-//         if(globalID > 1){
-//         //float x, float y, float z, float gripperAngleD, int gripperRotation, int gripperWidth, int easingResolution, boolean sendData, int brightnessStrip, int r, int g,  int b, int led
-//           setRobotArm(x,y,z,gripperAngle,gripperRotation,gripperWidth,easing,true,brightn,r,g,b,2);
-//           println("[ " + x + "," + y + "," + z + "," + gripperAngle + "," + gripperRotation +  "," + gripperWidth + "," + easing + "," + brightn + "," + r + "," + g + "," + b + "," + x1 + "," + y1 + " ]");
-//         }
-
-//         newPosition = false;
-//       }
-//   }
 
 
 }

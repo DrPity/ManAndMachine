@@ -241,7 +241,8 @@ class Robot{
 // ------------------------------------------------------------------------------------
 
   void readNextRobotPosition(){
-  if(newPosition && globalID <= (tablePositions.getRowCount() -1) && globalID >= 0){
+  if(isReadyForNewPosition && globalID <= (tablePositions.getRowCount() -1) && globalID >= 0){
+    println("[ In read next Position....isNextStep: ]" + robotAnimation.isNextStep);
 
         int x = tablePositions.getInt(globalID, "X");
         int y = tablePositions.getInt(globalID, "Y");
@@ -268,9 +269,10 @@ class Robot{
         }else{
           robotAnimation.movementID = animation;
           robotAnimation.isAnimation = true;
+          println("robotAnimation.isAnimation: "+robotAnimation.isAnimation);
         }
 
-        newPosition = false;
       }
   }
+
 }  

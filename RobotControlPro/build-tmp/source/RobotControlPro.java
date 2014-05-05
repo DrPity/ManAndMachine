@@ -77,7 +77,7 @@ private boolean isPulseMeterPort          = false;
 private boolean isTableSpeechLoaded       = false;
 private boolean isReadyForButtonCommands  = false;
 private boolean newSay                    = false;
-private boolean newPosition               = false;
+private boolean isReadyForNewPosition     = true;
 private boolean stepForward               = false;
 private boolean stepBack                  = false;
 
@@ -266,10 +266,13 @@ public void draw() {
   gridXisDrawn = false;
 
 
-  if(!textToSpeech.nextTextToSpeech && !robotAnimation.isAnimation && isRobotReadyToMove)
+  if(!textToSpeech.nextTextToSpeech && !robotAnimation.isInAnimation && isRobotReadyToMove)
     isReadyColor = 255;
+  else if(!textToSpeech.nextTextToSpeech && robotAnimation.isInAnimation)
+    isReadyColor = 180;
   else
     isReadyColor = 0;
+
 
 }
 
@@ -412,22 +415,26 @@ public void controlEvent(ControlEvent theEvent) {
   }
 
   if(theEvent.getName().equals("Back")){
-    if(!textToSpeech.nextTextToSpeech && !stepBack && !robotAnimation.isNextStep){
-      globalID--;
-      textToSpeech.checkTableConstrains();
-      println("globalID: "+globalID);
-      stepBack = true;
-      helpers.setStep();
+    if(!textToSpeech.nextTextToSpeech && !stepBack){
+      if (!robotAnimation.isInAnimation || robotAnimation.isInAnimation){
+        globalID--;
+        textToSpeech.checkTableConstrains();
+        println("globalID: "+globalID);
+        stepBack = true;
+        helpers.setStep();
+      }
     }
   }
 
   if(theEvent.getName().equals("Forward")){
-    if(!textToSpeech.nextTextToSpeech && !stepForward && !robotAnimation.isNextStep){
-      globalID++;
-      textToSpeech.checkTableConstrains();
-      println("globalID: "+globalID);
-      stepForward = true;
-      helpers.setStep();
+    if(!textToSpeech.nextTextToSpeech && !stepForward){
+      if (!robotAnimation.isInAnimation || robotAnimation.isInAnimation){
+        globalID++;
+        textToSpeech.checkTableConstrains();
+        println("globalID: "+globalID);
+        stepForward = true;
+        helpers.setStep();
+      }
     }  
   }
  }
@@ -1310,12 +1317,9 @@ class HelperClass {
   // ------------------------------------------------------------------------------------
 
   public void setStep(){
-   textToSpeech.nextTextToSpeech = true;
-    // if(globalID == 1 || globalID == 3){
-    //   robotAnimation.isNextStep = true;
-    // }  
-  robotAnimation.standValue = false;
-  robotAnimation.isNextStep = true;
+    textToSpeech.nextTextToSpeech = true;
+    // robotAnimation.standValue = false;
+    robotAnimation.isNextStep = true;
   }
 
 }
@@ -2093,7 +2097,8 @@ class Robot{
 // ------------------------------------------------------------------------------------
 
   public void readNextRobotPosition(){
-  if(newPosition && globalID <= (tablePositions.getRowCount() -1) && globalID >= 0){
+  if(isReadyForNewPosition && globalID <= (tablePositions.getRowCount() -1) && globalID >= 0){
+    println("[ In read next Position....isNextStep: ]" + robotAnimation.isNextStep);
 
         int x = tablePositions.getInt(globalID, "X");
         int y = tablePositions.getInt(globalID, "Y");
@@ -2120,11 +2125,12 @@ class Robot{
         }else{
           robotAnimation.movementID = animation;
           robotAnimation.isAnimation = true;
+          println("robotAnimation.isAnimation: "+robotAnimation.isAnimation);
         }
 
-        newPosition = false;
       }
   }
+
 }  
 class RobotAnimation extends Thread{
 
@@ -2133,6 +2139,7 @@ Table movements;
 boolean running;           // Is the thread running?  Yes or no?
 boolean isNextStep;
 boolean isAnimation;
+boolean isInAnimation;
 long frameTime;
 int movementID = 0;
 int wait;
@@ -2166,7 +2173,8 @@ int       ledStand           = 2;
     frameTime = millis();
     standValue = false;
     isAnimation = false;
-    isNextStep = true;
+    isNextStep = false;
+    isInAnimation = false;
     super.start();
   }
  
@@ -2177,11 +2185,9 @@ int       ledStand           = 2;
     sleepTime(300);
     // loadMovementData();
     while (running) {
-      if(isAnimation){
+      if(isAnimation && isNextStep){
+        println("[ In check for Animation ]");
         checkAnimations();
-      }
-      if(!textToSpeech.nextTextToSpeech && isRobotReadyToMove && !isNextStep){
-        // standAnimation();
       }
     	sleepTime(wait);
     }
@@ -2192,14 +2198,10 @@ int       ledStand           = 2;
 // ------------------------------------------------------------------------------------
 
 public void checkAnimations(){
+// int oldID = globalID;
+// isNextStep = false;
+println("[ In Animation check ]");
 
-  isNextStep = true;
-// int base              = 1475;
-// int shoulder          = 1500;
-// int elbow             = 2300;
-// int wrist             = 800;
-// int gripper           = 1500;
-// int gripperAngle      = 1500;
 
 // --- Number 1  WakeUP---
   if(movementID == 1){
@@ -2213,8 +2215,8 @@ public void checkAnimations(){
     waitForRobot();
   }
 
-// --- Number 2  Diagnostic---
-   if(movementID == 2){
+  // --- Number 2  Diagnostic---
+  if(movementID == 2){
 
     robot.setRobotArm(4.0f,172.0f,180.0f,17.0f,178,62,200,true,255,0,255,0,2);
     waitForRobot();
@@ -2228,7 +2230,7 @@ public void checkAnimations(){
     sleepTime(800);
     robot.setRobotArm(4.0f,172.0f,180.0f,17.0f,178,62,200,true,255,0,255,0,2);
     waitForRobot();
-    for(int i = 0; i <= 100; i++){
+    for(int i = 0; i <= 10; i++){
       robot.setRobotArm(4.0f,172.0f,180.0f,17.0f,178,62,1,true,255,(int)random(0,255),(int)random(0, 255),(int)random(0, 255),0);
       waitForRobot();
       robot.setRobotArm(4.0f,172.0f,180.0f,17.0f,178,62,1,true,255,(int)random(0,255),(int)random(0, 255),(int)random(0, 255),1);
@@ -2255,7 +2257,6 @@ public void checkAnimations(){
 
 
   if(movementID == 3){
-
     robot.setRobotArm(-324,20,100,33,178,102,200,true,255,0,255,0,2);
     waitForRobot();
     sleepTime(800);
@@ -2263,8 +2264,6 @@ public void checkAnimations(){
     waitForRobot();
     sleepTime(800);
     robot.setRobotArm(-324,20,100,33,178,102,200,true,255,0,255,0,2);
-
- 
   }
 
   // --- Number 4  Neutral forward---
@@ -2272,14 +2271,11 @@ public void checkAnimations(){
     println("In global 3");
     robot.setRobotArm(-4,184,184,42,126,90,200,true,255,0,255,0,2);
     sleepTime(100);
-    while(isAnimation){
+    isInAnimation = true;
+    while(isInAnimation){
       standAnimation(15,10, true,false,false,false,true,false,0);
-      if(!isNextStep){
-        isAnimation = false;
-        println("In break");
-        break;
-      }
     }
+    isInAnimation = false;
   }
 
 // --- Number 5 right to left---  
@@ -2300,7 +2296,6 @@ public void checkAnimations(){
   }
 
   if(movementID == 6){
-
     robot.sendRobotData(1475, 1500, 2300, 800, 1500, 1500, 200, 255, 0, 255, 0,2);
     waitForRobot();
     robot.setRobotArm(-4,184,184,42,126,90,200,true,255,0,255,0,2);
@@ -2322,13 +2317,11 @@ public void checkAnimations(){
   if(movementID == 8){
     robot.setRobotArm(-216,0,160,29,134,90,200,true,255,0,255,0,2);
     waitForRobot();
-     while(isAnimation){
+    isInAnimation = true;
+    while(isInAnimation){
       standAnimation(15,10, false,false,false,false,true,false,0);
-      if(!isNextStep){
-        isAnimation = false;
-        break;
-      }
     }
+    isInAnimation = false;  
   }
 
   // --- Number 9 dancing---  
@@ -2343,16 +2336,12 @@ public void checkAnimations(){
     // robot.setRobotArm(-8.261391,184.0,184.0,42.0,121,90,300,true,255,255,0,255,2);
     // waitForRobot();
     // standAnimation(15,30, true,false,false,false,false,true,0);
-
-      while(isAnimation){
-        standAnimation(15,60, true,false,false,false,false,true,0);
-        if(!isNextStep){
-          isAnimation = false;
-          break;
-          //################# turn of LED'S!!!!! #############
-        }
-      }
+    isInAnimation = true;
+    while(isInAnimation){
+      standAnimation(15,60, true,false,false,false,false,true,0);
     }
+    isInAnimation = false;
+  }  
 
   // --- Number 10 look and listen right---  
 
@@ -2433,7 +2422,8 @@ public void checkAnimations(){
 
   if(movementID == 16){
 
-    while(isAnimation){
+    isInAnimation = true;
+    while(isInAnimation){
       robot.setRobotArm(8.0f,140.0f,272.0f,17.0f,86,30,200,true,255,0,255,0,2);
       waitForRobot();
       robot.setRobotArm(-152.0f,140.0f,244.0f,17.0f,134,30,200,true,255,0,255,0,2);
@@ -2444,20 +2434,16 @@ public void checkAnimations(){
       waitForRobot();
       robot.setRobotArm(152.0f,140.0f,244.0f,17.0f,50,30,300,true,255,0,255,0,2);
       waitForRobot();
-      if(!isNextStep){
-        isAnimation = false;
-        break;
-        //################# turn of LED'S!!!!! #############
-      }
     }
-
+    isInAnimation = false;
    }
 
     // --- Number 17 powerMove---  
 
   if(movementID == 17){
 
-    while(isAnimation){
+    isInAnimation = true;
+    while(isInAnimation){
       robot.setRobotArm(-4.0f,136.0f,92.0f,29.0f,178,146,200,true,255,255,0,0,2);
       waitForRobot();
       sleepTime(800);
@@ -2467,32 +2453,23 @@ public void checkAnimations(){
       waitForRobot();
       robot.setRobotArm(272.0f,10.0f,134.0f,23.0f,90,146,200,true,255,0,0,255,2);
       waitForRobot();
-      if(!isNextStep){
-        isAnimation = false;
-        break;
-        //################# turn of LED'S!!!!! #############
-      }
     }
-
+    isInAnimation = false;
   }
 
   if(movementID == 18){
     robot.setRobotArm(-4.0f,136.0f,92.0f,29.0f,178,146,200,true,33,255,0,0,2);
     waitForRobot();
-    while(isAnimation){
+    isInAnimation = true;
+    while(isInAnimation){
       robot.setRobotArm(-4.0f,162.0f,244.0f,29.0f,178,146,200,true,33,255,0,0,2);
       waitForRobot();
       sleepTime(800);
       robot.setRobotArm(-4.0f,162.0f,202.0f,29.0f,178,146,200,true,33,255,0,0,2);
       waitForRobot();
       sleepTime(800);
-
-      if(!isNextStep){
-      isAnimation = false;
-      break;
-      //################# turn of LED'S!!!!! #############
-      }
     }
+    isInAnimation = false;
   }
 
 
@@ -2507,30 +2484,16 @@ public void checkAnimations(){
 
   if(movementID == 20){
     robot.setRobotArm(-108.0f,30.0f,180.0f,11.0f,186,30,300,true,255,255,255,0,2);
-    while(isAnimation){
+    isInAnimation = true;
+    while(isInAnimation){
       robot.setRobotArm(-108.0f,30.0f,180.0f,11.0f,186,30,600,true,255,255,255,0,2);
       waitForRobot();
       robot.setRobotArm(-158.0f,30.0f,180.0f,11.0f,44,180,600,true,255,255,255,0,2);
       waitForRobot();
-      if(!isNextStep){
-      isAnimation = false;
-      break;
-      //################# turn of LED'S!!!!! #############
-      }
     }
+    isInAnimation = false;
   }
-  
-
-  
-
-
-
-
-
-isNextStep = false;
-isAnimation = false;
 }
-
 // ------------------------------------------------------------------------------------
 
 public void standAnimation(int runningDelay, float amp, boolean a, boolean b, boolean c, boolean d, boolean e, boolean f, int runningTime){
@@ -2562,7 +2525,6 @@ public void standAnimation(int runningDelay, float amp, boolean a, boolean b, bo
       ledStand = lastLed;
     }
 
-
     if(a)
       ka = k;
     if(b)
@@ -2584,7 +2546,8 @@ public void standAnimation(int runningDelay, float amp, boolean a, boolean b, bo
     waitForRobot();
     sleepTime(runningDelay);
 
-  }  
+  }
+  standValue = false;
 }
 
 // ------------------------------------------------------------------------------------
@@ -2612,42 +2575,6 @@ public void standAnimation(int runningDelay, float amp, boolean a, boolean b, bo
       sleepTime(10);
     }
   }
-
-
-//   void loadMovementData(){
-
-//     tableMovements = loadTable("data/Movements.csv", "header");
-//   }
-
-// // ------------------------------------------------------------------------------------
-
-//   void readNextRobotPosition(){
-//   if(newPosition && globalID <= (tablePositions.getRowCount() -1) && globalID >= 0){
-
-//         int x = tablePositions.getInt(globalID, "X");
-//         int y = tablePositions.getInt(globalID, "Y");
-//         int z = tablePositions.getInt(globalID, "Z");
-//         int gripperAngle = tablePositions.getInt(globalID, "GripperAngle");
-//         int gripperRotation = tablePositions.getInt(globalID, "GripperRotation");
-//         int gripperWidth = tablePositions.getInt(globalID, "GripperWidth");
-//         int easing = tablePositions.getInt(globalID, "Easing");
-//         int brightn = tablePositions.getInt(globalID, "Brightness");
-//         int r = tablePositions.getInt(globalID, "r");
-//         int g = tablePositions.getInt(globalID, "g");
-//         int b = tablePositions.getInt(globalID, "b");
-//         int x1 = tablePositions.getInt(globalID, "X1");
-//         int y1 = tablePositions.getInt(globalID, "Y1");
-//         //call streching somewhere here
-//         // setRobotArm() here
-//         if(globalID > 1){
-//         //float x, float y, float z, float gripperAngleD, int gripperRotation, int gripperWidth, int easingResolution, boolean sendData, int brightnessStrip, int r, int g,  int b, int led
-//           setRobotArm(x,y,z,gripperAngle,gripperRotation,gripperWidth,easing,true,brightn,r,g,b,2);
-//           println("[ " + x + "," + y + "," + z + "," + gripperAngle + "," + gripperRotation +  "," + gripperWidth + "," + easing + "," + brightn + "," + r + "," + g + "," + b + "," + x1 + "," + y1 + " ]");
-//         }
-
-//         newPosition = false;
-//       }
-//   }
 
 
 }
@@ -2692,7 +2619,7 @@ Table tableSpeech;
 boolean running;           // Is the thread running?  Yes or no?
 boolean nextTextToSpeech;
 int wait;
-public int waitForSpeechReturn;
+int waitForSpeechReturn;
 
 // ------------------------------------------------------------------------------------
 
@@ -2719,9 +2646,12 @@ public int waitForSpeechReturn;
     // sleep(2000);
     sleepTime(300);
     while (running) {
-      if(nextTextToSpeech){
-        nextStepInTables();
-      }
+      // if(nextTextToSpeech && robotAnimation.isNextStep ){
+      //   nextStepInTables();
+      // }
+       if(this.nextTextToSpeech && robotAnimation.isNextStep){
+          checkNextStepInTable();
+       }
     	if(newSay && globalID <= (tableSpeech.getRowCount() -1) && globalID >= 0){
     		String textString = tableSpeech.getString(globalID, "STRING");
         voice = tableSpeech.getInt(globalID, "VOICE");
@@ -2789,12 +2719,34 @@ public int waitForSpeechReturn;
 
 // ------------------------------------------------------------------------------------
 
-  public void nextStepInTables(){
-    while(nextTextToSpeech){
-      if(waitForSpeechReturn == 0){
-        newSay = true;
-        newPosition = true;
+  // void nextStepInTables(){
+  //   while(nextTextToSpeech){
+  //     if(waitForSpeechReturn == 0){
+  //       newSay = true;
+  //       newPosition = true;
+  //       robot.readNextRobotPosition();
+  //       if(stepForward){
+  //         // globalID ++;
+  //         stepForward = false;
+  //       }else if (stepBack){
+  //         // globalID--;
+  //         stepBack = false;
+  //       }  
+  //       nextTextToSpeech = false;
+  //       checkTableConstrains();
+  //     }
+  //   }
+  // }
+
+    public void checkNextStepInTable(){
+    if(this.waitForSpeechReturn == 0){
+      println("[ After speech return ]");
+      if(!robotAnimation.isInAnimation && robotAnimation.isNextStep){
+        println("[ After robot Is not in Animation ]");
         robot.readNextRobotPosition();
+        newSay = true;
+        robotAnimation.isNextStep = false;
+        isReadyForNewPosition = false;
         if(stepForward){
           // globalID ++;
           stepForward = false;
@@ -2802,8 +2754,12 @@ public int waitForSpeechReturn;
           // globalID--;
           stepBack = false;
         }  
-        nextTextToSpeech = false;
-        checkTableConstrains();
+        this.nextTextToSpeech = false;
+        isReadyForNewPosition = true;
+        this.checkTableConstrains();
+      }else if(robotAnimation.isInAnimation && robotAnimation.isNextStep){
+        println("[ In isInAnimation break ]");
+        robotAnimation.isInAnimation = false;
       }
     }
   }
@@ -2901,8 +2857,9 @@ String  id;                 // Thread name
  
   // Our method that quits the thread
   public void quit() {
-    System.out.println("Quitting."); 
+    System.out.println("Quitting.");
     running = false;  // Setting running to false ends the loop in run()
+    port.stop();
     // IUn case the thread is waiting. . .
     interrupt();
   }

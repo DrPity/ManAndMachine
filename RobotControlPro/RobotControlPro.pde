@@ -53,7 +53,7 @@ private boolean isPulseMeterPort          = false;
 private boolean isTableSpeechLoaded       = false;
 private boolean isReadyForButtonCommands  = false;
 private boolean newSay                    = false;
-private boolean newPosition               = false;
+private boolean isReadyForNewPosition     = true;
 private boolean stepForward               = false;
 private boolean stepBack                  = false;
 
@@ -242,10 +242,13 @@ void draw() {
   gridXisDrawn = false;
 
 
-  if(!textToSpeech.nextTextToSpeech && !robotAnimation.isAnimation && isRobotReadyToMove)
+  if(!textToSpeech.nextTextToSpeech && !robotAnimation.isInAnimation && isRobotReadyToMove)
     isReadyColor = 255;
+  else if(!textToSpeech.nextTextToSpeech && robotAnimation.isInAnimation)
+    isReadyColor = 180;
   else
     isReadyColor = 0;
+
 
 }
 
@@ -388,22 +391,26 @@ void controlEvent(ControlEvent theEvent) {
   }
 
   if(theEvent.getName().equals("Back")){
-    if(!textToSpeech.nextTextToSpeech && !stepBack && !robotAnimation.isNextStep){
-      globalID--;
-      textToSpeech.checkTableConstrains();
-      println("globalID: "+globalID);
-      stepBack = true;
-      helpers.setStep();
+    if(!textToSpeech.nextTextToSpeech && !stepBack){
+      if (!robotAnimation.isInAnimation || robotAnimation.isInAnimation){
+        globalID--;
+        textToSpeech.checkTableConstrains();
+        println("globalID: "+globalID);
+        stepBack = true;
+        helpers.setStep();
+      }
     }
   }
 
   if(theEvent.getName().equals("Forward")){
-    if(!textToSpeech.nextTextToSpeech && !stepForward && !robotAnimation.isNextStep){
-      globalID++;
-      textToSpeech.checkTableConstrains();
-      println("globalID: "+globalID);
-      stepForward = true;
-      helpers.setStep();
+    if(!textToSpeech.nextTextToSpeech && !stepForward){
+      if (!robotAnimation.isInAnimation || robotAnimation.isInAnimation){
+        globalID++;
+        textToSpeech.checkTableConstrains();
+        println("globalID: "+globalID);
+        stepForward = true;
+        helpers.setStep();
+      }
     }  
   }
  }

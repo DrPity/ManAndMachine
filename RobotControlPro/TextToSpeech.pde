@@ -39,7 +39,7 @@ Table tableSpeech;
 boolean running;           // Is the thread running?  Yes or no?
 boolean nextTextToSpeech;
 int wait;
-public int waitForSpeechReturn;
+int waitForSpeechReturn;
 
 // ------------------------------------------------------------------------------------
 
@@ -66,9 +66,12 @@ public int waitForSpeechReturn;
     // sleep(2000);
     sleepTime(300);
     while (running) {
-      if(nextTextToSpeech){
-        nextStepInTables();
-      }
+      // if(nextTextToSpeech && robotAnimation.isNextStep ){
+      //   nextStepInTables();
+      // }
+       if(this.nextTextToSpeech && robotAnimation.isNextStep){
+          checkNextStepInTable();
+       }
     	if(newSay && globalID <= (tableSpeech.getRowCount() -1) && globalID >= 0){
     		String textString = tableSpeech.getString(globalID, "STRING");
         voice = tableSpeech.getInt(globalID, "VOICE");
@@ -136,12 +139,34 @@ public int waitForSpeechReturn;
 
 // ------------------------------------------------------------------------------------
 
-  void nextStepInTables(){
-    while(nextTextToSpeech){
-      if(waitForSpeechReturn == 0){
-        newSay = true;
-        newPosition = true;
+  // void nextStepInTables(){
+  //   while(nextTextToSpeech){
+  //     if(waitForSpeechReturn == 0){
+  //       newSay = true;
+  //       newPosition = true;
+  //       robot.readNextRobotPosition();
+  //       if(stepForward){
+  //         // globalID ++;
+  //         stepForward = false;
+  //       }else if (stepBack){
+  //         // globalID--;
+  //         stepBack = false;
+  //       }  
+  //       nextTextToSpeech = false;
+  //       checkTableConstrains();
+  //     }
+  //   }
+  // }
+
+    void checkNextStepInTable(){
+    if(this.waitForSpeechReturn == 0){
+      println("[ After speech return ]");
+      if(!robotAnimation.isInAnimation && robotAnimation.isNextStep){
+        println("[ After robot Is not in Animation ]");
         robot.readNextRobotPosition();
+        newSay = true;
+        robotAnimation.isNextStep = false;
+        isReadyForNewPosition = false;
         if(stepForward){
           // globalID ++;
           stepForward = false;
@@ -149,8 +174,12 @@ public int waitForSpeechReturn;
           // globalID--;
           stepBack = false;
         }  
-        nextTextToSpeech = false;
-        checkTableConstrains();
+        this.nextTextToSpeech = false;
+        isReadyForNewPosition = true;
+        this.checkTableConstrains();
+      }else if(robotAnimation.isInAnimation && robotAnimation.isNextStep){
+        println("[ In isInAnimation break ]");
+        robotAnimation.isInAnimation = false;
       }
     }
   }
