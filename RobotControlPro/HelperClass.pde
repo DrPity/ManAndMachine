@@ -130,11 +130,12 @@ class HelperClass {
     {
       if (robotAnimation.isInAnimation)
       {
-        robotAnimation.isAnimation = false;
+        robotAnimation.isInAnimation = false;
       }
       else if (!robotAnimation.isInAnimation && robotAnimation.isOutOfLoop && !robotAnimation.isAnimation)
       {
         readyToExecuteNextStep = true;
+        textToSpeech.readText = true;
         checkIfReadyForNextStep = false;
         if(stepForward)
         {

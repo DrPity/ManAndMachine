@@ -55,7 +55,7 @@ private String  heartRateString     = "Na";
 private String  inCharA;
 private String  inCharM;
 private String  scaleMode;
-private String  arduinoPort               = "/dev/tty.usbmodem1d1141";
+private String  arduinoPort               = "/dev/tty.usbmodem1d11141";
 private String  melziPort                 = "/dev/tty.usbserial-AH01SIVE";
 private String  pulseMeterPort            = "/dev/tty.BerryMed-SerialPort";
 private float   angle                     = 0;
@@ -196,7 +196,10 @@ public void setup() {
   inCharA = null;
   inCharM = null;
   isReadyForButtonCommands = true;
-  // kinect = addControlFrame("extra", 320,240);
+
+  kinect = addControlFrame("extra", 320,240);
+
+  
     
 }
 
@@ -266,9 +269,9 @@ public void draw() {
   gridXisDrawn = false;
 
 
-  if(!textToSpeech.nextTextToSpeech && !robotAnimation.isInAnimation && isRobotReadyToMove)
+  if(!textToSpeech.speaking && !robotAnimation.isInAnimation && isRobotReadyToMove)
     isReadyColor = 255;
-  else if(!textToSpeech.nextTextToSpeech && robotAnimation.isInAnimation)
+  else if(!textToSpeech.speaking && robotAnimation.isInAnimation)
     isReadyColor = 180;
   else
     isReadyColor = 0;
@@ -320,14 +323,14 @@ public void serialEvent(Serial thisPort){
   }
 
   if (thisPort == wM.port && wM.deviceInstanciated && isMelziPort){
-    println("In melzi event");
+    // println("In melzi event");
     
     while (wM.port.available() > 0){
-      println("In melzi event > 0");
+      // println("In melzi event > 0");
       inCharM = wM.port.readStringUntil(end);
     }
     if (inCharM != null) {
-      println("In melzi event start manageSE");
+      // println("In melzi event start manageSE");
       manageSE.melzi(inCharM);
     }
   }
@@ -354,6 +357,8 @@ public void controlEvent(ControlEvent theEvent) {
         checkIfReadyForNextStep = true;
       }else if (list.length == 6){
         robot.setRobotArm( Integer.parseInt(list[0]), Integer.parseInt(list[1]), Integer.parseInt(list[2]), Integer.parseInt(list[3]), Integer.parseInt(list[4]), Integer.parseInt(list[5]), 200, true, 255, 255, 255, 255, 2); 
+      }else if (list.length == 4){
+        robot.sendTraversData(Integer.parseInt(list[0]), Integer.parseInt(list[1]), Integer.parseInt(list[2]), Integer.parseInt(list[3]));
       }
 
     }
@@ -422,7 +427,7 @@ public void controlEvent(ControlEvent theEvent) {
   }
 
   if(theEvent.getName().equals("Back")){
-    if(!stepBack && !textToSpeech.nextTextToSpeech && !checkIfReadyForNextStep){
+    if(!stepBack && !textToSpeech.speaking && !checkIfReadyForNextStep){
         globalID--;
         textToSpeech.checkTableConstrains();
         checkIfReadyForNextStep = true;
@@ -431,7 +436,7 @@ public void controlEvent(ControlEvent theEvent) {
   }
 
   if(theEvent.getName().equals("Forward")){
-    if(!stepForward && !textToSpeech.nextTextToSpeech && !checkIfReadyForNextStep){
+    if(!stepForward && !textToSpeech.speaking && !checkIfReadyForNextStep){
         globalID++;
         textToSpeech.checkTableConstrains();
         stepForward = true;
@@ -497,6 +502,7 @@ public Kinect addControlFrame(String theName, int theWidth, int theHeight) {
   f.setLocation(10, 240);
   f.setResizable(false);
   f.setVisible(true);
+  f.setAlwaysOnTop(true);
   return p;
 }
 
@@ -1325,11 +1331,12 @@ class HelperClass {
     {
       if (robotAnimation.isInAnimation)
       {
-        robotAnimation.isAnimation = false;
+        robotAnimation.isInAnimation = false;
       }
       else if (!robotAnimation.isInAnimation && robotAnimation.isOutOfLoop && !robotAnimation.isAnimation)
       {
         readyToExecuteNextStep = true;
+        textToSpeech.readText = true;
         checkIfReadyForNextStep = false;
         if(stepForward)
         {
@@ -1354,6 +1361,9 @@ public class Kinect extends PApplet{
 SimpleOpenNI  context;
 int w, h;
 int abc = 100;
+float zValueKinect = 0;
+float xValueKinect = 0;
+boolean kinectValueAvailable = false;
 
 // ------------------------------------------------------------------------------------
 
@@ -1365,7 +1375,6 @@ int abc = 100;
      if(context.isInit() == false)
     {
        println("Can't init SimpleOpenNI, maybe the camera is not connected!"); 
-       exit();
        return;  
     }
 
@@ -1427,7 +1436,7 @@ int abc = 100;
     context.getJointPositionSkeleton(userId,SimpleOpenNI.SKEL_HEAD,jointPos);
 
 
-    println("X: " + jointPos.x + " Y:" + jointPos.y + " Z: " + jointPos.z);
+    // println("X: " + jointPos.x + " Y:" + jointPos.y + " Z: " + jointPos.z);
 
    
     // convert real world point to projective space
@@ -1446,7 +1455,18 @@ int abc = 100;
     // draw the circle at the position of the head with the head size scaled by the distance scalar
     ellipse(jointPos_Proj.x/2,jointPos_Proj.y/2, distanceScalar*headsize,distanceScalar*headsize);
 
-    //println("X: " + jointPos_Proj.x + " Y: " + jointPos_Proj.y + " Z: " + jointPos_Proj.z);
+    println("X: " + jointPos_Proj.x + " Y: " + jointPos_Proj.y + " Z: " + jointPos_Proj.z);
+
+    if(jointPos_Proj.z > 848 && jointPos_Proj.z < 3300){
+      kinectValueAvailable = true;
+      zValueKinect = map(jointPos_Proj.z,848, 3300,-70, -340);
+    } 
+    if(jointPos_Proj.x > 0 && jointPos_Proj.x < 600){
+      kinectValueAvailable = true;
+      xValueKinect = map(jointPos_Proj.x,0, 600,0, 200);
+    }
+    else
+      kinectValueAvailable = false;
   }
 
 // ------------------------------------------------------------------------------------
@@ -1749,7 +1769,7 @@ private int[] bitArray = new int[8];
     }
 
     if(!wM.isFirstContact){
-      println("In first contact");
+      // println("In first contact");
       if (inChar.trim().equals("A")) {
         println("Connected");
         wM.heartBeat = millis();                   
@@ -1950,7 +1970,7 @@ class Robot{
 
   public int stretching(int percentage){
     
-    println("Percentage: " + percentage);
+    // println("Percentage: " + percentage);
     int strechedPosition = (int) map(percentage, 0, 100, 0, 349);
     // println("( Streched position in strechedPosition: )" + strechedPosition);
     // println("( Streched position in strechedPosition: )" + strechedPosition + " " + lastX + " " + lastY + " " + lastZ + " " + lastGripperAngle);
@@ -1958,18 +1978,18 @@ class Robot{
     if(!isStrRun){
       isStrRun = true;
       // printArray(strArray);
-      if(strechedPosition > lastY){
+      if(strechedPosition > lastX){
         int k = findUpperBound(strechedPosition);
         isStrRun = false;
         return k;
-      }else if(strechedPosition < lastY){
+      }else if(strechedPosition < lastX){
         int k = findLowerBound(strechedPosition);
         isStrRun = false;
         return k;
       }
     }
   isStrRun = false;  
-  return (int) lastY; 
+  return (int) lastX; 
   }
 
 // ------------------------------------------------------------------------------------
@@ -2020,7 +2040,7 @@ class Robot{
         println("[ Data not verified ]");
       }
 
-      println("[ " + x + "," + y + "," + z + "," + gripperAngleD + "," + gripperRotation +  "," + gripperWidth + "," + easingResolution + "," + brightnessStrip + "," + r + "," + g + "," + b + " ]");
+      // println("[ " + x + "," + y + "," + z + "," + gripperAngleD + "," + gripperRotation +  "," + gripperWidth + "," + easingResolution + "," + brightnessStrip + "," + r + "," + g + "," + b + " ]");
 
       currentBase = (int) map(baseAngleD, 180, 0, BASE_MIN, BASE_MAX);
       currentShoulder = (int) map(shoulderAngleD, 0, 180, SHOULDER_MIN, SHOULDER_MAX);
@@ -2071,8 +2091,19 @@ class Robot{
     if(wA.deviceInstanciated)
     wA.port.write(String.format("Rr%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d\n",currentBase, currentShoulder, currentElbow, currentWrist, currentGripperRotation, currentGripperWidth, currentEasing, currentBrightness, r, g, b, led));
     // wA.port.write(10);
-    println(String.format("(Rr%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d)",currentBase, currentShoulder, currentElbow, currentWrist, currentGripperRotation, currentGripperWidth, currentEasing, currentBrightness, r, g, b, led));
+    // println(String.format("(Rr%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d)",currentBase, currentShoulder, currentElbow, currentWrist, currentGripperRotation, currentGripperWidth, currentEasing, currentBrightness, r, g, b, led));
     isRobotReadyToMove = false;
+
+  }
+
+
+    public void sendTraversData(int x, int y, int z, int easing){
+
+    if(wA.deviceInstanciated)
+    wM.port.write(String.format("Rr%d,%d,%d,%d\n",x,y,z,easing));
+    // wA.port.write(10);
+    println(String.format("(Rr%d,%d,%d,%d)",x, y, z,easing));
+    isTraversReadyToMove = false;
 
   }
 
@@ -2081,8 +2112,8 @@ class Robot{
 
 
   public int findLowerBound(int strechedPosition){
-    for(int i = strechedPosition; i <= 349; i++){
-    setRobotArm(lastX, i, lastZ, lastGripperAngle, lastGripperRotation,  (int) lastGripperWidth, 1, false, 255, lastR, lastG, lastB, lastLed);
+    for(int i = strechedPosition; i <= -70; i++){
+    setRobotArm(i, lastY, lastZ, lastGripperAngle, lastGripperRotation,  (int) lastGripperWidth, 1, false, 255, lastR, lastG, lastB, lastLed);
       if(validStrPos){
         validStrPos = false;
         return i;
@@ -2096,8 +2127,8 @@ class Robot{
 
 
   public int findUpperBound(int strechedPosition){
-    for(int i = strechedPosition; i >= 0; i--){
-    setRobotArm(lastX, i, lastZ, lastGripperAngle, lastGripperRotation,(int) lastGripperWidth, 1, false, 255, lastR, lastG, lastB, lastLed); 
+    for(int i = strechedPosition; i >= -340; i--){
+    setRobotArm(i, lastY, lastZ, lastGripperAngle, lastGripperRotation,(int) lastGripperWidth, 1, false, 255, lastR, lastG, lastB, lastLed); 
       if(validStrPos){
         validStrPos = false;
         return i;
@@ -2246,12 +2277,13 @@ int       ledStartValue           = 2;
 public void checkAnimations(){
   isOutOfLoop = false;
   startPositionIsStored = false;
+  isInAnimation = true;
 
   // --- Number 1  WakeUP---
   if(movementID == 1){
     robot.sendRobotData(1475, 1500, 2300, 800, 1500, 1500, 200, 0, 0, 255, 0, 2);
     waitForRobot();
-    for(int i = 0; i <= 255; i++){
+    for(int i = 0; i <= 255 && isInAnimation; i++){
       robot.sendRobotData(1475, 1500, 2300, 800, 1500, 1500, 1, i, 0, 255, 0, 2);
       waitForRobot();
     }
@@ -2299,7 +2331,7 @@ public void checkAnimations(){
     waitForRobot();
   }
 
-
+  // --- Number 3  changing music---
   if(movementID == 3){
     robot.setRobotArm(-324,20,100,33,178,102,200,true,255,0,255,0,2);
     waitForRobot();
@@ -2315,32 +2347,28 @@ public void checkAnimations(){
     println(" In animation Nr 4 ");
     robot.setRobotArm(-4,184,184,42,126,90,200,true,255,0,255,0,2);
     sleepTime(100);
-    isInAnimation = true;
     while(isInAnimation){
       println("In while loop Nr 4");
-      standAnimation(15,10, true,false,false,false,true,false,0);
+      standAnimation(10,10, true,false,false,false,true,false,0);
     }
-    isInAnimation = false;
   }
 
   // --- Number 5 right to left---  
-
   if(movementID == 5){
     println(" In animation Nr 5 ");
-    robot.setRobotArm(88,28,216,1,186,90,400,true,255,0,255,0,2);
+    robot.setRobotArm(88,28,216,1,180,90,400,true,255,0,255,0,2);
     waitForRobot();
-    robot.setRobotArm(-124,100,208,17,186,90,100,true,255,0,255,0,2);
+    robot.setRobotArm(-124,100,208,17,180,90,100,true,255,0,255,0,2);
     waitForRobot();
-    robot.setRobotArm(88,28,216,1,186,90,100,true,255,0,255,0,2);
+    robot.setRobotArm(88,28,216,1,180,90,100,true,255,0,255,0,2);
     waitForRobot();
-    robot.setRobotArm(-124,100,208,17,186,90,400,true,255,0,255,0,2);
+    robot.setRobotArm(-124,100,208,17,180,90,400,true,255,0,255,0,2);
     waitForRobot();
-    robot.setRobotArm(88,28,216,1,186,90,100,true,255,0,255,0,2);
-
+    robot.setRobotArm(88,28,216,1,180,90,100,true,255,0,255,0,2);
     sleepTime(50);
-
   }
 
+  // --- Number 6 looking backwards---  
   if(movementID == 6){
     println(" In animation Nr 6 ");
     robot.sendRobotData(1475, 1500, 2300, 800, 1500, 1500, 200, 255, 0, 255, 0,2);
@@ -2351,6 +2379,7 @@ public void checkAnimations(){
     robot.sendRobotData(1475, 1500, 2300, 800, 1500, 1500, 200, 255, 255, 0, 0,2);
   }
 
+  // --- Number 7 sighing--- 
   if(movementID == 7){
     println(" In animation Nr 7 ");
     robot.setRobotArm(-7.75081f,32.0f,92.0f,70.0f,116,66,200,true,255,0,255,0,2);
@@ -2362,15 +2391,14 @@ public void checkAnimations(){
     standAnimation(5,10,true,false,false,false,false,false,1000);
   }
 
+  // --- Number 8 neutral right---  
   if(movementID == 8){
     println(" In animation Nr 8 ");
     robot.setRobotArm(-216,0,160,29,134,90,200,true,255,0,255,0,2);
     waitForRobot();
-    isInAnimation = true;
     while(isInAnimation){
       standAnimation(15,10, false,false,false,false,true,false,0);
     }
-    isInAnimation = false;  
   }
 
   // --- Number 9 dancing---  
@@ -2380,49 +2408,40 @@ public void checkAnimations(){
     waitForRobot();
     robot.setRobotArm(-8.261391f,184.0f,184.0f,42.0f,121,90,200,true,255,255,0,255,3);
     waitForRobot();
-    // standAnimation(10,10, false,true,true,false,true,false,10000);
-    // standAnimation(10,15, true,false,true,true,false,true,10000);
-    // robot.setRobotArm(-8.261391,184.0,184.0,42.0,121,90,300,true,255,255,0,255,2);
-    // waitForRobot();
-    // standAnimation(15,30, true,false,false,false,false,true,0);
-    isInAnimation = true;
     while(isInAnimation){
-      standAnimation(15,60, true,false,false,false,false,true,0);
+      standAnimation(10,60, true,false,false,false,false,true,0);
     }
-    isInAnimation = false;
+    robot.setRobotArm(lastX,lastY,lastZ,lastGripperAngle,lastGripperRotation,lastGripperWidth,1,true,255,255,0,255,4);
+    waitForRobot();
+    println("Animation 9 break");
   }  
 
   // --- Number 10 look and listen right---  
 
   if(movementID == 10){
-
     robot.setRobotArm(-96,100,208,17,46,90,250,true,255,0,255,0,2);
     waitForRobot();
     robot.setRobotArm(-148.0f,184.0f,312.0f,1.0f,46,90,200,true,255,0,255,0,2);
     waitForRobot();
-
   }
 
 
   // --- Number 11 agressive---  
 
   if(movementID == 11){
-
-  robot.setRobotArm(-12.0f,128.0f,-24.0f,105.0f,46,178,80,true,255,255,0,0,2);
-  waitForRobot();
-  for( int i = 0; i < 2; i++){
-    robot.setRobotArm(-12.0f,128.0f,-24.0f,105.0f,46,6,30,true,255,255,0,0,2);
+    robot.setRobotArm(-12.0f,128.0f,-24.0f,105.0f,46,178,80,true,255,255,0,0,2);
     waitForRobot();
-    robot.setRobotArm(-12.0f,128.0f,-24.0f,105.0f,46,178,30,true,255,255,0,0,2);
-    waitForRobot();
+    for( int i = 0; i < 2; i++){
+      robot.setRobotArm(-12.0f,128.0f,-24.0f,105.0f,46,6,30,true,255,255,0,0,2);
+      waitForRobot();
+      robot.setRobotArm(-12.0f,128.0f,-24.0f,105.0f,46,178,30,true,255,255,0,0,2);
+      waitForRobot();
     }
   }
 
   // --- Number 12 shaking head---  
 
-   if(movementID == 12){
-
-
+  if(movementID == 12){
     robot.setRobotArm(16.0f,264.0f,176.0f,25.0f,86,142,250,true,255,0,255,0,2);
     waitForRobot();
     for( int i = 0; i < 5; i++){
@@ -2432,20 +2451,19 @@ public void checkAnimations(){
       waitForRobot();
     }
     robot.setRobotArm(16.0f,264.0f,176.0f,25.0f,86,142,150,true,255,0,255,0,2);
-   }
+    waitForRobot();
+  }
 
 
     // --- Number 13 swichting off---  
 
-   if(movementID == 13){
+  if(movementID == 13){
     robot.sendRobotData(1475, 1500, 2300, 800, 1500, 1500, 100, 0, 0, 255, 0, 2);
     waitForRobot();
-   }
+  }
 
-    // --- Number 13 threatend---  
-
-   if(movementID == 14){
-
+  // --- Number 14 threatend---  
+  if(movementID == 14){
     robot.setRobotArm(-324.0f,104.0f,120.0f,29.0f,126,178,200,true,255,255,0,0,2 );
     waitForRobot();
     for( int i = 0; i < 2; i++){
@@ -2454,24 +2472,20 @@ public void checkAnimations(){
       robot.setRobotArm(-324.0f,104.0f,120.0f,29.0f,126,178,200,true,255,255,0,0,2);
       waitForRobot();
     }
+  }
 
-   }
-
-
-   if(movementID == 15){
-
-    robot.setRobotArm(8.0f,180.0f,120.0f,49.0f,182,86,300,true,255,0,255,0,2);
+  // --- Number 15 looking from top to bottom---  
+  if(movementID == 15){
+    robot.setRobotArm(8.0f,180.0f,120.0f,49.0f,180,86,300,true,255,0,255,0,2);
     waitForRobot();
-    robot.setRobotArm(8.0f,145.0f,279.0f,0.0f,182,90,400,true,255,0,255,0,2);
+    robot.setRobotArm(8.0f,145.0f,279.0f,0.0f,180,90,400,true,255,0,255,0,2);
     waitForRobot();
-    robot.setRobotArm(8.0f,180.0f,120.0f,49.0f,182,86,400,true,255,0,255,0,2);
+    robot.setRobotArm(8.0f,180.0f,120.0f,49.0f,180,86,400,true,255,0,255,0,2);
     waitForRobot();
+  }
 
-   }
-
+  // --- swaying --- 
   if(movementID == 16){
-
-    isInAnimation = true;
     while(isInAnimation){
       robot.setRobotArm(8.0f,140.0f,272.0f,17.0f,86,30,200,true,255,0,255,0,2);
       waitForRobot();
@@ -2484,14 +2498,10 @@ public void checkAnimations(){
       robot.setRobotArm(152.0f,140.0f,244.0f,17.0f,50,30,300,true,255,0,255,0,2);
       waitForRobot();
     }
-    isInAnimation = false;
    }
 
-    // --- Number 17 powerMove---  
-
+  // --- Number 17 powerMove---  
   if(movementID == 17){
-
-    isInAnimation = true;
     while(isInAnimation){
       robot.setRobotArm(-4.0f,136.0f,92.0f,29.0f,178,146,200,true,255,255,0,0,2);
       waitForRobot();
@@ -2503,13 +2513,12 @@ public void checkAnimations(){
       robot.setRobotArm(272.0f,10.0f,134.0f,23.0f,90,146,200,true,255,0,0,255,2);
       waitForRobot();
     }
-    isInAnimation = false;
   }
 
+  // --- Number 18 exhausted---
   if(movementID == 18){
     robot.setRobotArm(-4.0f,136.0f,92.0f,29.0f,178,146,200,true,33,255,0,0,2);
     waitForRobot();
-    isInAnimation = true;
     while(isInAnimation){
       robot.setRobotArm(-4.0f,162.0f,244.0f,29.0f,178,146,200,true,33,255,0,0,2);
       waitForRobot();
@@ -2518,33 +2527,43 @@ public void checkAnimations(){
       waitForRobot();
       sleepTime(800);
     }
-    isInAnimation = false;
   }
 
-
+  // --- Number 19 looking left to right---
   if(movementID == 19){
-
-    robot.setRobotArm(150.0f,110.0f,216.0f,1.0f,186,90,200,true,255,0,255,0,2);
+    robot.setRobotArm(150.0f,110.0f,216.0f,1.0f,180,90,200,true,255,0,255,0,2);
     waitForRobot();
-    robot.setRobotArm(-150.0f,110.0f,216.0f,1.0f,186,90,200,true,255,0,255,0,2);
+    robot.setRobotArm(-150.0f,110.0f,216.0f,1.0f,180,90,200,true,255,0,255,0,2);
     waitForRobot();
   }
 
-
+  // --- Number 20 looking left to right---
   if(movementID == 20){
-    robot.setRobotArm(-108.0f,30.0f,180.0f,11.0f,186,30,300,true,255,255,255,0,2);
-    isInAnimation = true;
+    robot.setRobotArm(-108.0f,30.0f,180.0f,11.0f,180,30,300,true,255,255,255,0,2);
     while(isInAnimation){
-      robot.setRobotArm(-108.0f,30.0f,180.0f,11.0f,186,30,600,true,255,255,255,0,2);
+      robot.setRobotArm(-108.0f,30.0f,180.0f,11.0f,180,30,600,true,255,255,255,0,2);
       waitForRobot();
       robot.setRobotArm(-158.0f,30.0f,180.0f,11.0f,44,180,600,true,255,255,255,0,2);
       waitForRobot();
     }
-    isInAnimation = false;
   }
 
+    if(movementID == 21){
+    robot.setRobotArm(-340.0f,20.0f,186.0f,11.0f,168,42,10,true,255,0,255,0,2);
+    while(isInAnimation){
+      if(kinect.kinectValueAvailable){
+       robot.setRobotArm(kinect.zValueKinect,kinect.xValueKinect,186.0f,11.0f,168,42,10,true,255,0,255,0,2);
+       // robot.sendTraversData((int)kinect.xValueKinect,(int)kinect.xValueKinect,(int)kinect.xValueKinect,100);
+       waitForRobot();
+       // waitForTravers();
+      }
+    }
+  }
+
+  isInAnimation = false;
   isAnimation = false;
   isOutOfLoop = true;
+  println(" Done with animation "+movementID);
 }
 // ------------------------------------------------------------------------------------
 
@@ -2625,6 +2644,12 @@ public void standAnimation(int runningDelay, float amp, boolean a, boolean b, bo
     }
   }
 
+   private void waitForTravers(){
+    while(!isTraversReadyToMove){
+      sleepTime(10);
+    }
+  }
+
 
 }
 class TextToSpeech extends Thread{
@@ -2666,7 +2691,7 @@ String[] voices = {
 
 Table tableSpeech;
 boolean running;           // Is the thread running?  Yes or no?
-boolean nextTextToSpeech;
+boolean readText;
 boolean speaking;
 int wait;
 int waitForSpeechReturn;
@@ -2683,7 +2708,7 @@ int waitForSpeechReturn;
 	public void start () {
     running = true;
     speaking = false;
-    nextTextToSpeech = false;
+    readText = false;
     waitForSpeechReturn = 0;
     println("Starting thread TextToSpeech (will execute every " + wait + " milliseconds.)");
     tableSpeech = loadTable("data/Strings.csv", "header");
@@ -2697,11 +2722,11 @@ int waitForSpeechReturn;
     // sleep(2000);
     sleepTime(300);
     while (running) {
-    	if(nextTextToSpeech && globalID <= (tableSpeech.getRowCount() -1) && globalID >= 0){
+    	if(readText && globalID <= (tableSpeech.getRowCount() -1) && globalID >= 0){
     		String textString = tableSpeech.getString(globalID, "STRING");
         voice = tableSpeech.getInt(globalID, "VOICE");
+        speaking = true;
     		say(textString,voice);
-        waitUntilTextIsSpoken();
         println("( IN VOICE )");
     	}
     	sleepTime(wait);   
@@ -2713,12 +2738,12 @@ int waitForSpeechReturn;
 // ------------------------------------------------------------------------------------
 
 	public void say(String s, int voice) {
-    waitForRobot();
-    speaking = true;
 	  try {
 	    Runtime rtime = Runtime.getRuntime();
 	    Process child = rtime.exec("/usr/bin/say -v " + (voices[voice]) + " " + s);
 	    waitForSpeechReturn = child.waitFor();
+      waitUntilTextIsSpoken();
+      readText = false;
 	  }
 	  catch (Exception e) {
 	    e.printStackTrace();

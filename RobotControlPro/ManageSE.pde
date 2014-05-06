@@ -149,7 +149,7 @@ private int[] bitArray = new int[8];
     }
 
     if(!wM.isFirstContact){
-      println("In first contact");
+      // println("In first contact");
       if (inChar.trim().equals("A")) {
         println("Connected");
         wM.heartBeat = millis();                   

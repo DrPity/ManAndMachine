@@ -8,6 +8,9 @@ public class Kinect extends PApplet{
 SimpleOpenNI  context;
 int w, h;
 int abc = 100;
+float zValueKinect = 0;
+float xValueKinect = 0;
+boolean kinectValueAvailable = false;
 
 // ------------------------------------------------------------------------------------
 
@@ -19,7 +22,6 @@ int abc = 100;
      if(context.isInit() == false)
     {
        println("Can't init SimpleOpenNI, maybe the camera is not connected!"); 
-       exit();
        return;  
     }
 
@@ -81,7 +83,7 @@ int abc = 100;
     context.getJointPositionSkeleton(userId,SimpleOpenNI.SKEL_HEAD,jointPos);
 
 
-    println("X: " + jointPos.x + " Y:" + jointPos.y + " Z: " + jointPos.z);
+    // println("X: " + jointPos.x + " Y:" + jointPos.y + " Z: " + jointPos.z);
 
    
     // convert real world point to projective space
@@ -100,7 +102,18 @@ int abc = 100;
     // draw the circle at the position of the head with the head size scaled by the distance scalar
     ellipse(jointPos_Proj.x/2,jointPos_Proj.y/2, distanceScalar*headsize,distanceScalar*headsize);
 
-    //println("X: " + jointPos_Proj.x + " Y: " + jointPos_Proj.y + " Z: " + jointPos_Proj.z);
+    println("X: " + jointPos_Proj.x + " Y: " + jointPos_Proj.y + " Z: " + jointPos_Proj.z);
+
+    if(jointPos_Proj.z > 848 && jointPos_Proj.z < 3300){
+      kinectValueAvailable = true;
+      zValueKinect = map(jointPos_Proj.z,848, 3300,-70, -340);
+    } 
+    if(jointPos_Proj.x > 0 && jointPos_Proj.x < 600){
+      kinectValueAvailable = true;
+      xValueKinect = map(jointPos_Proj.x,0, 600,0, 200);
+    }
+    else
+      kinectValueAvailable = false;
   }
 
 // ------------------------------------------------------------------------------------

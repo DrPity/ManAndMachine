@@ -31,7 +31,7 @@ private String  heartRateString     = "Na";
 private String  inCharA;
 private String  inCharM;
 private String  scaleMode;
-private String  arduinoPort               = "/dev/tty.usbmodem1d1141";
+private String  arduinoPort               = "/dev/tty.usbmodem1d11141";
 private String  melziPort                 = "/dev/tty.usbserial-AH01SIVE";
 private String  pulseMeterPort            = "/dev/tty.BerryMed-SerialPort";
 private float   angle                     = 0;
@@ -172,7 +172,10 @@ void setup() {
   inCharA = null;
   inCharM = null;
   isReadyForButtonCommands = true;
-  // kinect = addControlFrame("extra", 320,240);
+
+  kinect = addControlFrame("extra", 320,240);
+
+  
     
 }
 
@@ -242,9 +245,9 @@ void draw() {
   gridXisDrawn = false;
 
 
-  if(!textToSpeech.nextTextToSpeech && !robotAnimation.isInAnimation && isRobotReadyToMove)
+  if(!textToSpeech.speaking && !robotAnimation.isInAnimation && isRobotReadyToMove)
     isReadyColor = 255;
-  else if(!textToSpeech.nextTextToSpeech && robotAnimation.isInAnimation)
+  else if(!textToSpeech.speaking && robotAnimation.isInAnimation)
     isReadyColor = 180;
   else
     isReadyColor = 0;
@@ -296,14 +299,14 @@ void serialEvent(Serial thisPort){
   }
 
   if (thisPort == wM.port && wM.deviceInstanciated && isMelziPort){
-    println("In melzi event");
+    // println("In melzi event");
     
     while (wM.port.available() > 0){
-      println("In melzi event > 0");
+      // println("In melzi event > 0");
       inCharM = wM.port.readStringUntil(end);
     }
     if (inCharM != null) {
-      println("In melzi event start manageSE");
+      // println("In melzi event start manageSE");
       manageSE.melzi(inCharM);
     }
   }
@@ -330,6 +333,8 @@ void controlEvent(ControlEvent theEvent) {
         checkIfReadyForNextStep = true;
       }else if (list.length == 6){
         robot.setRobotArm( Integer.parseInt(list[0]), Integer.parseInt(list[1]), Integer.parseInt(list[2]), Integer.parseInt(list[3]), Integer.parseInt(list[4]), Integer.parseInt(list[5]), 200, true, 255, 255, 255, 255, 2); 
+      }else if (list.length == 4){
+        robot.sendTraversData(Integer.parseInt(list[0]), Integer.parseInt(list[1]), Integer.parseInt(list[2]), Integer.parseInt(list[3]));
       }
 
     }
@@ -398,7 +403,7 @@ void controlEvent(ControlEvent theEvent) {
   }
 
   if(theEvent.getName().equals("Back")){
-    if(!stepBack && !textToSpeech.nextTextToSpeech && !checkIfReadyForNextStep){
+    if(!stepBack && !textToSpeech.speaking && !checkIfReadyForNextStep){
         globalID--;
         textToSpeech.checkTableConstrains();
         checkIfReadyForNextStep = true;
@@ -407,7 +412,7 @@ void controlEvent(ControlEvent theEvent) {
   }
 
   if(theEvent.getName().equals("Forward")){
-    if(!stepForward && !textToSpeech.nextTextToSpeech && !checkIfReadyForNextStep){
+    if(!stepForward && !textToSpeech.speaking && !checkIfReadyForNextStep){
         globalID++;
         textToSpeech.checkTableConstrains();
         stepForward = true;
@@ -473,6 +478,7 @@ Kinect addControlFrame(String theName, int theWidth, int theHeight) {
   f.setLocation(10, 240);
   f.setResizable(false);
   f.setVisible(true);
+  f.setAlwaysOnTop(true);
   return p;
 }
 

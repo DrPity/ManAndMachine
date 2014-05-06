@@ -73,7 +73,7 @@ class Robot{
 
   int stretching(int percentage){
     
-    println("Percentage: " + percentage);
+    // println("Percentage: " + percentage);
     int strechedPosition = (int) map(percentage, 0, 100, 0, 349);
     // println("( Streched position in strechedPosition: )" + strechedPosition);
     // println("( Streched position in strechedPosition: )" + strechedPosition + " " + lastX + " " + lastY + " " + lastZ + " " + lastGripperAngle);
@@ -81,18 +81,18 @@ class Robot{
     if(!isStrRun){
       isStrRun = true;
       // printArray(strArray);
-      if(strechedPosition > lastY){
+      if(strechedPosition > lastX){
         int k = findUpperBound(strechedPosition);
         isStrRun = false;
         return k;
-      }else if(strechedPosition < lastY){
+      }else if(strechedPosition < lastX){
         int k = findLowerBound(strechedPosition);
         isStrRun = false;
         return k;
       }
     }
   isStrRun = false;  
-  return (int) lastY; 
+  return (int) lastX; 
   }
 
 // ------------------------------------------------------------------------------------
@@ -143,7 +143,7 @@ class Robot{
         println("[ Data not verified ]");
       }
 
-      println("[ " + x + "," + y + "," + z + "," + gripperAngleD + "," + gripperRotation +  "," + gripperWidth + "," + easingResolution + "," + brightnessStrip + "," + r + "," + g + "," + b + " ]");
+      // println("[ " + x + "," + y + "," + z + "," + gripperAngleD + "," + gripperRotation +  "," + gripperWidth + "," + easingResolution + "," + brightnessStrip + "," + r + "," + g + "," + b + " ]");
 
       currentBase = (int) map(baseAngleD, 180, 0, BASE_MIN, BASE_MAX);
       currentShoulder = (int) map(shoulderAngleD, 0, 180, SHOULDER_MIN, SHOULDER_MAX);
@@ -194,8 +194,19 @@ class Robot{
     if(wA.deviceInstanciated)
     wA.port.write(String.format("Rr%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d\n",currentBase, currentShoulder, currentElbow, currentWrist, currentGripperRotation, currentGripperWidth, currentEasing, currentBrightness, r, g, b, led));
     // wA.port.write(10);
-    println(String.format("(Rr%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d)",currentBase, currentShoulder, currentElbow, currentWrist, currentGripperRotation, currentGripperWidth, currentEasing, currentBrightness, r, g, b, led));
+    // println(String.format("(Rr%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d)",currentBase, currentShoulder, currentElbow, currentWrist, currentGripperRotation, currentGripperWidth, currentEasing, currentBrightness, r, g, b, led));
     isRobotReadyToMove = false;
+
+  }
+
+
+    void sendTraversData(int x, int y, int z, int easing){
+
+    if(wA.deviceInstanciated)
+    wM.port.write(String.format("Rr%d,%d,%d,%d\n",x,y,z,easing));
+    // wA.port.write(10);
+    println(String.format("(Rr%d,%d,%d,%d)",x, y, z,easing));
+    isTraversReadyToMove = false;
 
   }
 
@@ -204,8 +215,8 @@ class Robot{
 
 
   int findLowerBound(int strechedPosition){
-    for(int i = strechedPosition; i <= 349; i++){
-    setRobotArm(lastX, i, lastZ, lastGripperAngle, lastGripperRotation,  (int) lastGripperWidth, 1, false, 255, lastR, lastG, lastB, lastLed);
+    for(int i = strechedPosition; i <= -70; i++){
+    setRobotArm(i, lastY, lastZ, lastGripperAngle, lastGripperRotation,  (int) lastGripperWidth, 1, false, 255, lastR, lastG, lastB, lastLed);
       if(validStrPos){
         validStrPos = false;
         return i;
@@ -219,8 +230,8 @@ class Robot{
 
 
   int findUpperBound(int strechedPosition){
-    for(int i = strechedPosition; i >= 0; i--){
-    setRobotArm(lastX, i, lastZ, lastGripperAngle, lastGripperRotation,(int) lastGripperWidth, 1, false, 255, lastR, lastG, lastB, lastLed); 
+    for(int i = strechedPosition; i >= -340; i--){
+    setRobotArm(i, lastY, lastZ, lastGripperAngle, lastGripperRotation,(int) lastGripperWidth, 1, false, 255, lastR, lastG, lastB, lastLed); 
       if(validStrPos){
         validStrPos = false;
         return i;
