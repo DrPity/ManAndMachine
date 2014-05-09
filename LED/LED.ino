@@ -1,13 +1,28 @@
+
+
+
+///////REMEMBER TO SET THIS FUCKING VALUE
+
+#define ArduinoB
+
+#ifdef ArduinoB
 #define STRIP_PIN_CENTER 2
 #define STRIP_PIN_RF 3
 #define STRIP_PIN_LF 4
 #define STRIP_PIN_ROBOT 5
-// #define STRIP_PIN_LB 0
-// #define STRIP_PIN_RB 33
 #define NUMBEROFPIXELSCORNER 107
 #define NUMBEROFPIXELSROBOT 40
 #define NUMBEROFPIXELSCENTER 116
 #define NUMSTRIPS 4
+#else
+#define STRIP_PIN_LB 2
+#define STRIP_PIN_RB 3
+#define NUMBEROFPIXELSCORNER 107
+#define NUMBEROFPIXELSROBOT 40
+#define NUMBEROFPIXELSCENTER 116
+#define NUMSTRIPS 2
+#endif
+
 
 #include <Adafruit_NeoPixel.h>
 #include "wrapper_class.h"
@@ -37,6 +52,7 @@ int connectionTimeOut       =  10;
 bool ledsReady              = true;
 bool setStrip               = false;
 bool positionIsNotRequested = false;
+bool startRainbow           = false;
 int heartBeat           = 0;
 int fadeOutSpeed = 2;
 long heartRate          = 0;
@@ -49,6 +65,7 @@ int gt = 0;
 int bt = 0;
 int beat = 0;
 unsigned long beatTimeStamp;
+unsigned long loopTime;
 
 uint8_t fadeSpeed        = 4;
 
@@ -56,10 +73,16 @@ String inByte;
 
 Wrapper_class strips[] = {
 
+#ifdef ArduinoB
   Wrapper_class(NUMBEROFPIXELSCENTER, STRIP_PIN_CENTER),
   Wrapper_class(NUMBEROFPIXELSCORNER, STRIP_PIN_RF),
   Wrapper_class(NUMBEROFPIXELSCORNER, STRIP_PIN_LF),
   Wrapper_class(NUMBEROFPIXELSROBOT, STRIP_PIN_ROBOT),
+#else
+  Wrapper_class(NUMBEROFPIXELSCORNER, STRIP_PIN_RB),
+  Wrapper_class(NUMBEROFPIXELSCORNER, STRIP_PIN_LB),
+#endif
+
 
 };
 
@@ -95,7 +118,7 @@ void loop() {
 
     if(inByte.indexOf('C') == 0 && inByte.indexOf('c') == 1){
       // Serial.println("before split");
-      if(millis() - beatTimeStamp > 500){
+      if(true || millis() - beatTimeStamp > 500){
         beatTimeStamp = millis();
         setColor(inByte);
       }
@@ -130,7 +153,15 @@ void loop() {
     //Serial.println("TimeOut");
   }
 
-
+   if(startRainbow){
+    // Serial.println("In rainbow");
+    if(millis() - loopTime >= 60){
+      for (int i = 0; i < NUMSTRIPS; i++){
+        strips[i].rainbowCycle(20);
+      }
+      loopTime = millis();
+    }
+  }
 
 
   if(fadeSpeed > 0 && beat == 1){
@@ -194,8 +225,23 @@ int setColor(String inByte){
     for(int i = 0; i < NUMSTRIPS; i++){
      strips[i].setStripColor(rc,gc,bc);
     }
-  }else{
+  }
+
+  if(strip > 0 && strip < 9){
     strips[strip - 1].setStripColor(rc,gc,bc);
+  }
+
+  if(strip == 9){
+    // Serial.print("Rainbow set to true");
+    startRainbow = true;
+    loopTime = millis();
+  }
+
+  if(strip == 10){
+    startRainbow = false;
+     for(int i = 0; i < NUMSTRIPS; i++){
+     strips[i].setStripColor(rc,gc,bc);
+    }
   }
 
   setStrip = true;

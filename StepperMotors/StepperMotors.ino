@@ -125,7 +125,7 @@ void loop(){
     
     if(inByte.equals("B") == true){
     serialReady = true;
-    // initializeMovement();
+    initializeMovement();
     // testMovement();
     // testButton();
     }
@@ -266,9 +266,9 @@ for (int i = 0; i <= 3; i++){
     stepperMotors[i]->easing_resolution = easingRes;
   }
 
-  a = map(a,0,200,MIN_STEPS_AB,MAX_STEPS_AB);
-  b = map(b,0,200,MIN_STEPS_AB,MAX_STEPS_AB);
-  c = map(c,0,200,MIN_STEPS_C,MAX_STEPS_C);
+  a = map(a,0,2000,MIN_STEPS_AB,MAX_STEPS_AB);
+  b = map(b,0,2000,MIN_STEPS_AB,MAX_STEPS_AB);
+  c = map(c,0,2000,MIN_STEPS_C,MAX_STEPS_C);
   Serial.println("Splitted Strings");
   Serial.println(a);
   Serial.println(b);

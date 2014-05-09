@@ -70,6 +70,7 @@ private boolean laLedIsready              = false;
 private boolean isFirstContact            = false;
 private boolean isRobotStarted            = false;
 private boolean isRecording               = false;
+private boolean isMindWaveData            = false;
 private boolean isStoring                 = false;
 private boolean isEsenseEvent             = false;
 private boolean isReadyToRecord           = false;
@@ -394,19 +395,26 @@ public void controlEvent(ControlEvent theEvent) {
       
       //globalID = Integer.parseInt(theEvent.getStringValue());
       //helpers.setStep();
-
-      String[] list = split(theEvent.getStringValue(), ',');
-      if (list.length == 1){
-        println(list.length + "Arrrrrrrg");
-        globalID = Integer.parseInt(list[0]);
-        checkIfReadyForNextStep = true;
-      }else if (list.length == 6){
-        robot.setRobotArm( Integer.parseInt(list[0]), Integer.parseInt(list[1]), Integer.parseInt(list[2]), Integer.parseInt(list[3]), Integer.parseInt(list[4]), Integer.parseInt(list[5]), 200, true, 255, 255, 255, 255, 2); 
-      }else if (list.length == 4){
-        robot.sendTraversData(Integer.parseInt(list[0]), Integer.parseInt(list[1]), Integer.parseInt(list[2]), Integer.parseInt(list[3]));
-      }
-
+      try {
+        String[] list = split(theEvent.getStringValue(), ',');
+        if (list.length == 1){
+          println(list.length + "Arrrrrrrg");
+          globalID = Integer.parseInt(list[0]);
+          checkIfReadyForNextStep = true;
+        }else if (list.length == 6){
+          robot.setRobotArm( Integer.parseInt(list[0]), Integer.parseInt(list[1]), Integer.parseInt(list[2]), Integer.parseInt(list[3]), Integer.parseInt(list[4]), Integer.parseInt(list[5]), 200, true, 255, 255, 255, 255, 2); 
+        }else if (list.length == 4){
+          robot.sendTraversData(Integer.parseInt(list[0]), Integer.parseInt(list[1]), Integer.parseInt(list[2]), Integer.parseInt(list[3]));
+        }
+    
+      } catch (Exception e) {
+        println(e);
+  
     }
+
+   
+
+  }
 
   if(theEvent.getName().equals("Reset_Robot")){
     println("reset robot event ");
@@ -510,16 +518,20 @@ public void keyPressed(){
 
    if (key == CODED){
       if (keyCode == LEFT){
-        int yy = robot.stretching(20);
-        println("#streched Position in keyPressed Left: "  + yy);
-        robot.setRobotArm(0, yy, 80, 45, 90, 90, 200, true, 255,255,0,255,2);
-        println("+ IsStRun: +" + isStrRun); 
+        if(!stepBack && !textToSpeech.speaking && !checkIfReadyForNextStep){
+          globalID--;
+          textToSpeech.checkTableConstrains();
+          checkIfReadyForNextStep = true;
+          stepBack = true;
+        }
       }
       if (keyCode == RIGHT){
-        int yy = robot.stretching(50);
-        println("( streched Position in keyPressed Right: )"  + yy);
-        robot.setRobotArm(0, yy, 80, 45, 90, 90, 200, true, 255,255,0,255,2);
-        println("+ IsStRun: +" + isStrRun); 
+        if(!stepForward && !textToSpeech.speaking && !checkIfReadyForNextStep){
+          globalID++;
+          textToSpeech.checkTableConstrains();
+          stepForward = true;
+          checkIfReadyForNextStep = true;
+        }  
       }
       if (keyCode == UP){
          robot.setRobotArm(0,debugVariable,200,45,90,90,200,true,255,0,255,0,2);
@@ -1418,9 +1430,15 @@ public class Kinect extends PApplet{
 SimpleOpenNI  context;
 int w, h;
 int abc = 100;
-float zValueKinect = 0;
-float xValueKinect = 0;
+float zValueKinectR = 0;
+float xValueKinectR = 0;
+float zValueKinectT = 0;
+float xValueKinectT = 0;
+float oldXValueKinectT = 0;
+float oldZValueKinectT = 0;
 boolean kinectValueAvailable = false;
+boolean zPositionUpdatedT = false;
+boolean xPositionUpdatedT = false;
 
 // ------------------------------------------------------------------------------------
 
@@ -1516,11 +1534,21 @@ boolean kinectValueAvailable = false;
 
     if(jointPos_Proj.z > 848 && jointPos_Proj.z < 3300){
       kinectValueAvailable = true;
-      zValueKinect = map(jointPos_Proj.z,848, 3300,-70, -340);
+      zValueKinectR = map(jointPos_Proj.z,848, 3300,-70, -340);
+      oldZValueKinectT = zValueKinectT;
+      if(abs(oldZValueKinectT - map(jointPos_Proj.z,848, 3300,0, 2000)) > 100){
+        zValueKinectT = map(jointPos_Proj.z,848, 3300,0, 2000);
+        zPositionUpdatedT = true;
+      }
     } 
     if(jointPos_Proj.x > 0 && jointPos_Proj.x < 600){
       kinectValueAvailable = true;
-      xValueKinect = map(jointPos_Proj.x,0, 600,0, 200);
+      xValueKinectR = map(jointPos_Proj.x,0, 600,0, 200);
+      oldXValueKinectT = xValueKinectT;
+      if(abs(oldXValueKinectT - map(jointPos_Proj.x,0, 600,0, 2000)) > 10){
+        xValueKinectT = map(jointPos_Proj.x,0, 600,0, 2000);
+        xPositionUpdatedT = true;
+      }
     }
     else
       kinectValueAvailable = false;
@@ -1626,6 +1654,8 @@ class ManageCLE {
           	channelsMindwave[2].addDataPoint(Integer.parseInt(esense.getString("meditation")));
           	// print(channelsMindwave[1].getLatestPoint().value);
           	isEsenseEvent = true;
+            if(!isMindWaveData)
+              isMindWaveData = true;
         }
         
         org.json.JSONObject eegPower = json.getJSONObject("eegPower");
@@ -1680,6 +1710,7 @@ class ManageSE {
 private boolean isHashtrue = false;
 private boolean isIncreasingP = false;
 private boolean isFallingP = false;
+private long beatTime = 0;
 private int heartRate = 0;
 private int plethRate = 0;
 private int oldPlethRate = 0;
@@ -1767,9 +1798,15 @@ private int[] bitArray = new int[8];
         if(isFallingP && isIncreasingP && oldPulseBeep == 1){
           isFallingP = false;
           isIncreasingP = false;
-          println("Beat");
-          robot.sendBeat(wLA.port,0,250,100,0);
-          robot.sendBeat(wLB.port,0,250,100,0);
+          println("plethRate: "+plethRate);
+          if(plethRate >= 55){
+            if(millis() - beatTime >= 500){
+              println("Beat");
+              robot.sendBeat(wLA.port,0,250,100,0);
+              robot.sendBeat(wLB.port,0,250,100,0);
+              beatTime = millis();
+            }
+          }
         }
 
         oldPulseBeep = pulseBeep;
@@ -1898,7 +1935,7 @@ private int[] bitArray = new int[8];
         wLA.port.write(10);
         wLA.isFirstContact = true;
         laLedIsready = true; 
-        robot.setColor(wLA.port,0,127,127,127);
+        robot.setColor(wLA.port,0,0,0,0);
         robot.setTargetColor(wLA.port,0,127,127,127);        
       }  
     }
@@ -1933,7 +1970,7 @@ private int[] bitArray = new int[8];
         wLB.port.write("B");
         wLB.port.write(10);
         wLB.isFirstContact = true;
-        robot.setColor(wLB.port,0,127,127,127);
+        robot.setColor(wLB.port,0,0,0,0);
         robot.setTargetColor(wLB.port,0,127,127,127);  
         // isTraversReadyToMove = true;       
       }  
@@ -2189,17 +2226,17 @@ class Robot{
         && isInRange(baseAngleD, 0, 180) && isInRange(shoulderAngleD, 0, 180)
         && isInRange(elbowAngleD, 0, 180) && isInRange(wristAngleD, 0, 180) && isInRange(gripperAngleD, 0, 180) && isInRange(gripperWidth, 0, 180) && isInRange(gripperRotation, 0, 180)){
         isDataVerified = true;
-        // println("( Data verfied )");
+        println("( Data verfied )");
         if (!sendData){
           validStrPos = true;
         }
 
       }else{
         isDataVerified = false;
-        // println("[ Data not verified ]");
+        println("[ Data not verified ]");
       }
 
-      // println("[ " + x + "," + y + "," + z + "," + gripperAngleD + "," + gripperRotation +  "," + gripperWidth + "," + easingResolution + "," + brightnessStrip + "," + r + "," + g + "," + b + " ]");
+      println("[ " + x + "," + y + "," + z + "," + gripperAngleD + "," + gripperRotation +  "," + gripperWidth + "," + easingResolution + "," + brightnessStrip + "," + r + "," + g + "," + b + " ]");
 
       currentBase = (int) map(baseAngleD, 180, 0, BASE_MIN, BASE_MAX);
       currentShoulder = (int) map(shoulderAngleD, 0, 180, SHOULDER_MIN, SHOULDER_MAX);
@@ -2257,7 +2294,6 @@ class Robot{
 
 
   public void sendTraversData(int x, int y, int z, int easing){
-
     if(wM.deviceInstanciated){
       wM.port.write(String.format("Rr%d,%d,%d,%d\n",x,y,z,easing));
       // wA.port.write(10);
@@ -2416,6 +2452,7 @@ boolean isInAnimation;
 long frameTime;
 int movementID = 0;
 int wait;
+int oldMovementID = 0;
 boolean startPositionIsStored;
 
 float     xStartValue             = 0;
@@ -2599,6 +2636,8 @@ public void checkAnimations(){
   // --- Number 9 dancing---  
   if(movementID == 9){
 
+    robot.setColor(wLA.port,9,0,0,0);
+    robot.setColor(wLB.port,9,0,0,0);
     robot.setRobotArm(-4,184,184,42,126,90,250,true,255,0,255,0,2);
     waitForRobot();
     robot.setRobotArm(-8.261391f,184.0f,184.0f,42.0f,121,90,200,true,255,255,0,255,3);
@@ -2606,8 +2645,14 @@ public void checkAnimations(){
     while(isInAnimation){
       standAnimation(10,60, true,false,false,false,false,true,0);
     }
+    robot.setColor(wLA.port,10,127,127,127);
+    robot.setColor(wLB.port,10,127,127,127);
     robot.setRobotArm(lastX,lastY,lastZ,lastGripperAngle,lastGripperRotation,lastGripperWidth,1,true,255,255,0,255,4);
     waitForRobot();
+    // delay(100);
+    // robot.setColor(wLA.port,0,127,127,127);
+    // robot.setColor(wLB.port,0,127,127,127);
+
     // println("Animation 9 break");
   }  
 
@@ -2743,11 +2788,18 @@ public void checkAnimations(){
     }
   }
 
+  // --- Number 21 kinect---
   if(movementID == 21){
-    robot.setRobotArm(-340.0f,20.0f,186.0f,11.0f,168,42,10,true,255,0,255,0,2);
+    if(oldMovementID == 21){
+      robot.setRobotArm(lastX,lastY,lastZ,lastGripperAngle,lastGripperRotation,lastGripperWidth,100,true,255,255,0,255,4);
+      waitForRobot();
+    }else{
+      robot.setRobotArm(-340.0f,20.0f,186.0f,11.0f,168,42,100,true,255,0,255,0,2);
+      waitForRobot();
+    }
     while(isInAnimation){
       if(kinect.kinectValueAvailable){
-       robot.setRobotArm(kinect.zValueKinect,kinect.xValueKinect,186.0f,11.0f,168,42,10,true,255,0,255,0,2);
+       robot.setRobotArm(kinect.zValueKinectR,kinect.xValueKinectR,186.0f,11.0f,168,42,10,true,255,0,255,0,2);
        // robot.sendTraversData((int)kinect.xValueKinect,(int)kinect.xValueKinect,(int)kinect.xValueKinect,100);
        waitForRobot();
        // waitForTravers();
@@ -2755,15 +2807,76 @@ public void checkAnimations(){
     }
   }
 
+  // --- Number 22 MindWave ---
   if(movementID == 22){
-    robot.setRobotArm(-340.0f,20.0f,186.0f,11.0f,168,42,10,true,255,0,255,0,2);
-    // listenForBeat = true;
+    robot.setRobotArm(-198.0f,20.0f,122.0f,25.0f,178,102,200,true,255,0,255,0,2);
+    waitForRobot();
     while(isInAnimation){
-      if(kinect.kinectValueAvailable){
-       robot.setRobotArm(kinect.zValueKinect,kinect.xValueKinect,186.0f,11.0f,168,42,10,true,255,0,255,0,2);
-       // robot.sendTraversData((int)kinect.xValueKinect,(int)kinect.xValueKinect,(int)kinect.xValueKinect,100);
-       waitForRobot();
-       // waitForTravers();
+      if(isMindWaveData){
+        if(channelsMindwave[1].getLatestPoint().value != 0 && channelsMindwave[2].getLatestPoint().value != 0){
+        int attention = channelsMindwave[1].getLatestPoint().value;
+        int meditation = channelsMindwave[2].getLatestPoint().value;
+          // robot.setRobotArm(-198.0,20.0,122.0,25.0,178,102,200,true,255,0,255,0,2);
+          // standAnimation(10,20, true,false,false,false,true,false,0);
+          if(meditation > 62 && attention < 62){
+           robot.setRobotArm(-198.0f,18.0f,262.0f,25.0f,132,82,200,true,255,255,255,255,2);
+           waitForRobot();
+           standAnimation(10,30, true,false,false,false,true,false,1500);
+           // waitForTravers();
+          }else if(meditation < 62 && attention < 62){
+            robot.setRobotArm(-198.0f,18.0f,0.0f,67.0f,132,176,200,true,255,255,0,0,2);
+            waitForRobot();
+            standAnimation(10,30, true,false,false,false,true,false,1500);
+          }else if(meditation < 62 && attention > 62){
+            robot.setRobotArm(-198.0f,20.0f,122.0f,25.0f,178,102,200,true,255,0,255,0,2);
+            waitForRobot();
+            standAnimation(10,30, true,false,false,false,true,false,1500);    
+          }else if(meditation > 62 && attention > 62){
+            robot.setRobotArm(-198.0f,18.0f,262.0f,25.0f,132,82,200,true,255,255,255,255,2);
+            waitForRobot();
+            standAnimation(10,30, true,false,false,false,true,false,1500);
+          }
+        }  
+      }
+    }
+  }
+
+
+  // --- Number 22 MindWave ---
+  if(movementID == 23){
+    robot.setRobotArm(-198.0f,20.0f,122.0f,25.0f,178,102,200,true,255,0,255,0,2);
+    waitForRobot();
+    while(isInAnimation){
+      if(isMindWaveData){
+        if(channelsMindwave[1].getLatestPoint().value != 0 && channelsMindwave[2].getLatestPoint().value != 0){
+        int attention = channelsMindwave[1].getLatestPoint().value;
+        int meditation = channelsMindwave[2].getLatestPoint().value;
+          // robot.setRobotArm(-198.0,20.0,122.0,25.0,178,102,200,true,255,0,255,0,2);
+          // standAnimation(10,20, true,false,false,false,true,false,0);
+          if(true || meditation > 62 && attention < 62){
+           robot.setRobotArm(-198.0f,18.0f,262.0f,25.0f,132,82,200,true,255,255,255,255,2);
+            if(kinect.zPositionUpdatedT || kinect.xPositionUpdatedT){
+              robot.sendTraversData((int)kinect.zValueKinectT,(int)kinect.zValueKinectT,(int)kinect.xValueKinectT,(int)kinect.zValueKinectT*10);
+              kinect.zPositionUpdatedT = false;
+              kinect.xPositionUpdatedT = false;
+            }  
+            waitForRobot();
+            standAnimation(10,30, true,false,false,false,true,false,1500);
+           // waitForTravers();
+          }else if(meditation < 62 && attention < 62){
+            robot.setRobotArm(-198.0f,18.0f,0.0f,67.0f,132,176,200,true,255,255,0,0,2);
+            waitForRobot();
+            standAnimation(10,30, true,false,false,false,true,false,1500);
+          }else if(meditation < 62 && attention > 62){
+            robot.setRobotArm(-198.0f,20.0f,122.0f,25.0f,178,102,200,true,255,0,255,0,2);
+            waitForRobot();
+            standAnimation(10,30, true,false,false,false,true,false,1500);    
+          }else if(meditation > 62 && attention > 62){
+            robot.setRobotArm(-198.0f,18.0f,262.0f,25.0f,132,82,200,true,255,255,255,255,2);
+            waitForRobot();
+            standAnimation(10,30, true,false,false,false,true,false,1500);
+          }
+        }  
       }
     }
   }
@@ -2771,14 +2884,16 @@ public void checkAnimations(){
   isInAnimation = false;
   isAnimation = false;
   isOutOfLoop = true;
+  oldMovementID = movementID;
   // println(" Done with animation "+movementID);
 }
 // ------------------------------------------------------------------------------------
 
-public void standAnimation(int runningDelay, float amp, boolean a, boolean b, boolean c, boolean d, boolean e, boolean f, int runningTime){
+public void standAnimation(int runningDelay, float amp, boolean a, boolean b, boolean c, boolean d, boolean e, boolean f, long runningTime){
   frameTime = millis();
   int colorValues = 0;
   while(millis() - frameTime <= runningTime){
+    println("In standAnimation");
 
     float amplitude = amp;
     float k = amplitude * cos(angle);
@@ -2824,6 +2939,7 @@ public void standAnimation(int runningDelay, float amp, boolean a, boolean b, bo
     sleepTime(runningDelay);
 
   }
+  startPositionIsStored = false;
 }
 
 // ------------------------------------------------------------------------------------

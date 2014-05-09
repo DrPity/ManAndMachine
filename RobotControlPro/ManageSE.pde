@@ -3,6 +3,7 @@ class ManageSE {
 private boolean isHashtrue = false;
 private boolean isIncreasingP = false;
 private boolean isFallingP = false;
+private long beatTime = 0;
 private int heartRate = 0;
 private int plethRate = 0;
 private int oldPlethRate = 0;
@@ -90,9 +91,15 @@ private int[] bitArray = new int[8];
         if(isFallingP && isIncreasingP && oldPulseBeep == 1){
           isFallingP = false;
           isIncreasingP = false;
-          println("Beat");
-          robot.sendBeat(wLA.port,0,250,100,0);
-          robot.sendBeat(wLB.port,0,250,100,0);
+          println("plethRate: "+plethRate);
+          if(plethRate >= 55){
+            if(millis() - beatTime >= 500){
+              println("Beat");
+              robot.sendBeat(wLA.port,0,250,100,0);
+              robot.sendBeat(wLB.port,0,250,100,0);
+              beatTime = millis();
+            }
+          }
         }
 
         oldPulseBeep = pulseBeep;
@@ -221,7 +228,7 @@ private int[] bitArray = new int[8];
         wLA.port.write(10);
         wLA.isFirstContact = true;
         laLedIsready = true; 
-        robot.setColor(wLA.port,0,127,127,127);
+        robot.setColor(wLA.port,0,0,0,0);
         robot.setTargetColor(wLA.port,0,127,127,127);        
       }  
     }
@@ -256,7 +263,7 @@ private int[] bitArray = new int[8];
         wLB.port.write("B");
         wLB.port.write(10);
         wLB.isFirstContact = true;
-        robot.setColor(wLB.port,0,127,127,127);
+        robot.setColor(wLB.port,0,0,0,0);
         robot.setTargetColor(wLB.port,0,127,127,127);  
         // isTraversReadyToMove = true;       
       }  

@@ -46,6 +46,7 @@ private boolean laLedIsready              = false;
 private boolean isFirstContact            = false;
 private boolean isRobotStarted            = false;
 private boolean isRecording               = false;
+private boolean isMindWaveData            = false;
 private boolean isStoring                 = false;
 private boolean isEsenseEvent             = false;
 private boolean isReadyToRecord           = false;
@@ -188,7 +189,7 @@ void setup() {
   inCharLB = null;
   isReadyForButtonCommands = true;
 
-  // kinect = addControlFrame("extra", 320,240);
+  kinect = addControlFrame("extra", 320,240);
 
     
 }
@@ -370,19 +371,26 @@ void controlEvent(ControlEvent theEvent) {
       
       //globalID = Integer.parseInt(theEvent.getStringValue());
       //helpers.setStep();
-
-      String[] list = split(theEvent.getStringValue(), ',');
-      if (list.length == 1){
-        println(list.length + "Arrrrrrrg");
-        globalID = Integer.parseInt(list[0]);
-        checkIfReadyForNextStep = true;
-      }else if (list.length == 6){
-        robot.setRobotArm( Integer.parseInt(list[0]), Integer.parseInt(list[1]), Integer.parseInt(list[2]), Integer.parseInt(list[3]), Integer.parseInt(list[4]), Integer.parseInt(list[5]), 200, true, 255, 255, 255, 255, 2); 
-      }else if (list.length == 4){
-        robot.sendTraversData(Integer.parseInt(list[0]), Integer.parseInt(list[1]), Integer.parseInt(list[2]), Integer.parseInt(list[3]));
-      }
-
+      try {
+        String[] list = split(theEvent.getStringValue(), ',');
+        if (list.length == 1){
+          println(list.length + "Arrrrrrrg");
+          globalID = Integer.parseInt(list[0]);
+          checkIfReadyForNextStep = true;
+        }else if (list.length == 6){
+          robot.setRobotArm( Integer.parseInt(list[0]), Integer.parseInt(list[1]), Integer.parseInt(list[2]), Integer.parseInt(list[3]), Integer.parseInt(list[4]), Integer.parseInt(list[5]), 200, true, 255, 255, 255, 255, 2); 
+        }else if (list.length == 4){
+          robot.sendTraversData(Integer.parseInt(list[0]), Integer.parseInt(list[1]), Integer.parseInt(list[2]), Integer.parseInt(list[3]));
+        }
+    
+      } catch (Exception e) {
+        println(e);
+  
     }
+
+   
+
+  }
 
   if(theEvent.getName().equals("Reset_Robot")){
     println("reset robot event ");
@@ -486,16 +494,20 @@ void keyPressed(){
 
    if (key == CODED){
       if (keyCode == LEFT){
-        int yy = robot.stretching(20);
-        println("#streched Position in keyPressed Left: "  + yy);
-        robot.setRobotArm(0, yy, 80, 45, 90, 90, 200, true, 255,255,0,255,2);
-        println("+ IsStRun: +" + isStrRun); 
+        if(!stepBack && !textToSpeech.speaking && !checkIfReadyForNextStep){
+          globalID--;
+          textToSpeech.checkTableConstrains();
+          checkIfReadyForNextStep = true;
+          stepBack = true;
+        }
       }
       if (keyCode == RIGHT){
-        int yy = robot.stretching(50);
-        println("( streched Position in keyPressed Right: )"  + yy);
-        robot.setRobotArm(0, yy, 80, 45, 90, 90, 200, true, 255,255,0,255,2);
-        println("+ IsStRun: +" + isStrRun); 
+        if(!stepForward && !textToSpeech.speaking && !checkIfReadyForNextStep){
+          globalID++;
+          textToSpeech.checkTableConstrains();
+          stepForward = true;
+          checkIfReadyForNextStep = true;
+        }  
       }
       if (keyCode == UP){
          robot.setRobotArm(0,debugVariable,200,45,90,90,200,true,255,0,255,0,2);

@@ -133,17 +133,17 @@ class Robot{
         && isInRange(baseAngleD, 0, 180) && isInRange(shoulderAngleD, 0, 180)
         && isInRange(elbowAngleD, 0, 180) && isInRange(wristAngleD, 0, 180) && isInRange(gripperAngleD, 0, 180) && isInRange(gripperWidth, 0, 180) && isInRange(gripperRotation, 0, 180)){
         isDataVerified = true;
-        // println("( Data verfied )");
+        println("( Data verfied )");
         if (!sendData){
           validStrPos = true;
         }
 
       }else{
         isDataVerified = false;
-        // println("[ Data not verified ]");
+        println("[ Data not verified ]");
       }
 
-      // println("[ " + x + "," + y + "," + z + "," + gripperAngleD + "," + gripperRotation +  "," + gripperWidth + "," + easingResolution + "," + brightnessStrip + "," + r + "," + g + "," + b + " ]");
+      println("[ " + x + "," + y + "," + z + "," + gripperAngleD + "," + gripperRotation +  "," + gripperWidth + "," + easingResolution + "," + brightnessStrip + "," + r + "," + g + "," + b + " ]");
 
       currentBase = (int) map(baseAngleD, 180, 0, BASE_MIN, BASE_MAX);
       currentShoulder = (int) map(shoulderAngleD, 0, 180, SHOULDER_MIN, SHOULDER_MAX);
@@ -201,7 +201,6 @@ class Robot{
 
 
   void sendTraversData(int x, int y, int z, int easing){
-
     if(wM.deviceInstanciated){
       wM.port.write(String.format("Rr%d,%d,%d,%d\n",x,y,z,easing));
       // wA.port.write(10);

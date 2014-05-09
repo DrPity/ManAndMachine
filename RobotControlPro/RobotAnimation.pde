@@ -9,6 +9,7 @@ boolean isInAnimation;
 long frameTime;
 int movementID = 0;
 int wait;
+int oldMovementID = 0;
 boolean startPositionIsStored;
 
 float     xStartValue             = 0;
@@ -192,6 +193,8 @@ void checkAnimations(){
   // --- Number 9 dancing---  
   if(movementID == 9){
 
+    robot.setColor(wLA.port,9,0,0,0);
+    robot.setColor(wLB.port,9,0,0,0);
     robot.setRobotArm(-4,184,184,42,126,90,250,true,255,0,255,0,2);
     waitForRobot();
     robot.setRobotArm(-8.261391,184.0,184.0,42.0,121,90,200,true,255,255,0,255,3);
@@ -199,8 +202,14 @@ void checkAnimations(){
     while(isInAnimation){
       standAnimation(10,60, true,false,false,false,false,true,0);
     }
+    robot.setColor(wLA.port,10,127,127,127);
+    robot.setColor(wLB.port,10,127,127,127);
     robot.setRobotArm(lastX,lastY,lastZ,lastGripperAngle,lastGripperRotation,lastGripperWidth,1,true,255,255,0,255,4);
     waitForRobot();
+    // delay(100);
+    // robot.setColor(wLA.port,0,127,127,127);
+    // robot.setColor(wLB.port,0,127,127,127);
+
     // println("Animation 9 break");
   }  
 
@@ -336,11 +345,18 @@ void checkAnimations(){
     }
   }
 
+  // --- Number 21 kinect---
   if(movementID == 21){
-    robot.setRobotArm(-340.0,20.0,186.0,11.0,168,42,10,true,255,0,255,0,2);
+    if(oldMovementID == 21){
+      robot.setRobotArm(lastX,lastY,lastZ,lastGripperAngle,lastGripperRotation,lastGripperWidth,100,true,255,255,0,255,4);
+      waitForRobot();
+    }else{
+      robot.setRobotArm(-340.0,20.0,186.0,11.0,168,42,100,true,255,0,255,0,2);
+      waitForRobot();
+    }
     while(isInAnimation){
       if(kinect.kinectValueAvailable){
-       robot.setRobotArm(kinect.zValueKinect,kinect.xValueKinect,186.0,11.0,168,42,10,true,255,0,255,0,2);
+       robot.setRobotArm(kinect.zValueKinectR,kinect.xValueKinectR,186.0,11.0,168,42,10,true,255,0,255,0,2);
        // robot.sendTraversData((int)kinect.xValueKinect,(int)kinect.xValueKinect,(int)kinect.xValueKinect,100);
        waitForRobot();
        // waitForTravers();
@@ -348,15 +364,76 @@ void checkAnimations(){
     }
   }
 
+  // --- Number 22 MindWave ---
   if(movementID == 22){
-    robot.setRobotArm(-340.0,20.0,186.0,11.0,168,42,10,true,255,0,255,0,2);
-    // listenForBeat = true;
+    robot.setRobotArm(-198.0,20.0,122.0,25.0,178,102,200,true,255,0,255,0,2);
+    waitForRobot();
     while(isInAnimation){
-      if(kinect.kinectValueAvailable){
-       robot.setRobotArm(kinect.zValueKinect,kinect.xValueKinect,186.0,11.0,168,42,10,true,255,0,255,0,2);
-       // robot.sendTraversData((int)kinect.xValueKinect,(int)kinect.xValueKinect,(int)kinect.xValueKinect,100);
-       waitForRobot();
-       // waitForTravers();
+      if(isMindWaveData){
+        if(channelsMindwave[1].getLatestPoint().value != 0 && channelsMindwave[2].getLatestPoint().value != 0){
+        int attention = channelsMindwave[1].getLatestPoint().value;
+        int meditation = channelsMindwave[2].getLatestPoint().value;
+          // robot.setRobotArm(-198.0,20.0,122.0,25.0,178,102,200,true,255,0,255,0,2);
+          // standAnimation(10,20, true,false,false,false,true,false,0);
+          if(meditation > 62 && attention < 62){
+           robot.setRobotArm(-198.0,18.0,262.0,25.0,132,82,200,true,255,255,255,255,2);
+           waitForRobot();
+           standAnimation(10,30, true,false,false,false,true,false,1500);
+           // waitForTravers();
+          }else if(meditation < 62 && attention < 62){
+            robot.setRobotArm(-198.0,18.0,0.0,67.0,132,176,200,true,255,255,0,0,2);
+            waitForRobot();
+            standAnimation(10,30, true,false,false,false,true,false,1500);
+          }else if(meditation < 62 && attention > 62){
+            robot.setRobotArm(-198.0,20.0,122.0,25.0,178,102,200,true,255,0,255,0,2);
+            waitForRobot();
+            standAnimation(10,30, true,false,false,false,true,false,1500);    
+          }else if(meditation > 62 && attention > 62){
+            robot.setRobotArm(-198.0,18.0,262.0,25.0,132,82,200,true,255,255,255,255,2);
+            waitForRobot();
+            standAnimation(10,30, true,false,false,false,true,false,1500);
+          }
+        }  
+      }
+    }
+  }
+
+
+  // --- Number 22 MindWave ---
+  if(movementID == 23){
+    robot.setRobotArm(-198.0,20.0,122.0,25.0,178,102,200,true,255,0,255,0,2);
+    waitForRobot();
+    while(isInAnimation){
+      if(isMindWaveData){
+        if(channelsMindwave[1].getLatestPoint().value != 0 && channelsMindwave[2].getLatestPoint().value != 0){
+        int attention = channelsMindwave[1].getLatestPoint().value;
+        int meditation = channelsMindwave[2].getLatestPoint().value;
+          // robot.setRobotArm(-198.0,20.0,122.0,25.0,178,102,200,true,255,0,255,0,2);
+          // standAnimation(10,20, true,false,false,false,true,false,0);
+          if(true || meditation > 62 && attention < 62){
+           robot.setRobotArm(-198.0,18.0,262.0,25.0,132,82,200,true,255,255,255,255,2);
+            if(kinect.zPositionUpdatedT || kinect.xPositionUpdatedT){
+              robot.sendTraversData((int)kinect.zValueKinectT,(int)kinect.zValueKinectT,(int)kinect.xValueKinectT,(int)kinect.zValueKinectT*10);
+              kinect.zPositionUpdatedT = false;
+              kinect.xPositionUpdatedT = false;
+            }  
+            waitForRobot();
+            standAnimation(10,30, true,false,false,false,true,false,1500);
+           // waitForTravers();
+          }else if(meditation < 62 && attention < 62){
+            robot.setRobotArm(-198.0,18.0,0.0,67.0,132,176,200,true,255,255,0,0,2);
+            waitForRobot();
+            standAnimation(10,30, true,false,false,false,true,false,1500);
+          }else if(meditation < 62 && attention > 62){
+            robot.setRobotArm(-198.0,20.0,122.0,25.0,178,102,200,true,255,0,255,0,2);
+            waitForRobot();
+            standAnimation(10,30, true,false,false,false,true,false,1500);    
+          }else if(meditation > 62 && attention > 62){
+            robot.setRobotArm(-198.0,18.0,262.0,25.0,132,82,200,true,255,255,255,255,2);
+            waitForRobot();
+            standAnimation(10,30, true,false,false,false,true,false,1500);
+          }
+        }  
       }
     }
   }
@@ -364,14 +441,16 @@ void checkAnimations(){
   isInAnimation = false;
   isAnimation = false;
   isOutOfLoop = true;
+  oldMovementID = movementID;
   // println(" Done with animation "+movementID);
 }
 // ------------------------------------------------------------------------------------
 
-void standAnimation(int runningDelay, float amp, boolean a, boolean b, boolean c, boolean d, boolean e, boolean f, int runningTime){
+void standAnimation(int runningDelay, float amp, boolean a, boolean b, boolean c, boolean d, boolean e, boolean f, long runningTime){
   frameTime = millis();
   int colorValues = 0;
   while(millis() - frameTime <= runningTime){
+    println("In standAnimation");
 
     float amplitude = amp;
     float k = amplitude * cos(angle);
@@ -417,6 +496,7 @@ void standAnimation(int runningDelay, float amp, boolean a, boolean b, boolean c
     sleepTime(runningDelay);
 
   }
+  startPositionIsStored = false;
 }
 
 // ------------------------------------------------------------------------------------

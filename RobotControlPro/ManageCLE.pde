@@ -56,6 +56,8 @@ class ManageCLE {
           	channelsMindwave[2].addDataPoint(Integer.parseInt(esense.getString("meditation")));
           	// print(channelsMindwave[1].getLatestPoint().value);
           	isEsenseEvent = true;
+            if(!isMindWaveData)
+              isMindWaveData = true;
         }
         
         org.json.JSONObject eegPower = json.getJSONObject("eegPower");

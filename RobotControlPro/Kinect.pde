@@ -8,9 +8,15 @@ public class Kinect extends PApplet{
 SimpleOpenNI  context;
 int w, h;
 int abc = 100;
-float zValueKinect = 0;
-float xValueKinect = 0;
+float zValueKinectR = 0;
+float xValueKinectR = 0;
+float zValueKinectT = 0;
+float xValueKinectT = 0;
+float oldXValueKinectT = 0;
+float oldZValueKinectT = 0;
 boolean kinectValueAvailable = false;
+boolean zPositionUpdatedT = false;
+boolean xPositionUpdatedT = false;
 
 // ------------------------------------------------------------------------------------
 
@@ -106,11 +112,21 @@ boolean kinectValueAvailable = false;
 
     if(jointPos_Proj.z > 848 && jointPos_Proj.z < 3300){
       kinectValueAvailable = true;
-      zValueKinect = map(jointPos_Proj.z,848, 3300,-70, -340);
+      zValueKinectR = map(jointPos_Proj.z,848, 3300,-70, -340);
+      oldZValueKinectT = zValueKinectT;
+      if(abs(oldZValueKinectT - map(jointPos_Proj.z,848, 3300,0, 2000)) > 100){
+        zValueKinectT = map(jointPos_Proj.z,848, 3300,0, 2000);
+        zPositionUpdatedT = true;
+      }
     } 
     if(jointPos_Proj.x > 0 && jointPos_Proj.x < 600){
       kinectValueAvailable = true;
-      xValueKinect = map(jointPos_Proj.x,0, 600,0, 200);
+      xValueKinectR = map(jointPos_Proj.x,0, 600,0, 200);
+      oldXValueKinectT = xValueKinectT;
+      if(abs(oldXValueKinectT - map(jointPos_Proj.x,0, 600,0, 2000)) > 10){
+        xValueKinectT = map(jointPos_Proj.x,0, 600,0, 2000);
+        xPositionUpdatedT = true;
+      }
     }
     else
       kinectValueAvailable = false;
