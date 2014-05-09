@@ -132,18 +132,18 @@ void checkAnimations(){
 
   // --- Number 4  Neutral forward---
   if(movementID == 4){
-    println(" In animation Nr 4 ");
+    // println(" In animation Nr 4 ");
     robot.setRobotArm(-4,184,184,42,126,90,200,true,255,0,255,0,2);
     sleepTime(100);
     while(isInAnimation){
-      println("In while loop Nr 4");
+      // println("In while loop Nr 4");
       standAnimation(10,10, true,false,false,false,true,false,0);
     }
   }
 
   // --- Number 5 right to left---  
   if(movementID == 5){
-    println(" In animation Nr 5 ");
+    // println(" In animation Nr 5 ");
     robot.setRobotArm(88,28,216,1,180,90,400,true,255,0,255,0,2);
     waitForRobot();
     robot.setRobotArm(-124,100,208,17,180,90,100,true,255,0,255,0,2);
@@ -158,7 +158,7 @@ void checkAnimations(){
 
   // --- Number 6 looking backwards---  
   if(movementID == 6){
-    println(" In animation Nr 6 ");
+    // println(" In animation Nr 6 ");
     robot.sendRobotData(1475, 1500, 2300, 800, 1500, 1500, 200, 255, 0, 255, 0,2);
     waitForRobot();
     robot.setRobotArm(-4,184,184,42,126,90,200,true,255,0,255,0,2);
@@ -169,7 +169,7 @@ void checkAnimations(){
 
   // --- Number 7 sighing--- 
   if(movementID == 7){
-    println(" In animation Nr 7 ");
+    // println(" In animation Nr 7 ");
     robot.setRobotArm(-7.75081,32.0,92.0,70.0,116,66,200,true,255,0,255,0,2);
     waitForRobot();
     sleepTime(500);
@@ -181,7 +181,7 @@ void checkAnimations(){
 
   // --- Number 8 neutral right---  
   if(movementID == 8){
-    println(" In animation Nr 8 ");
+    // println(" In animation Nr 8 ");
     robot.setRobotArm(-216,0,160,29,134,90,200,true,255,0,255,0,2);
     waitForRobot();
     while(isInAnimation){
@@ -201,7 +201,7 @@ void checkAnimations(){
     }
     robot.setRobotArm(lastX,lastY,lastZ,lastGripperAngle,lastGripperRotation,lastGripperWidth,1,true,255,255,0,255,4);
     waitForRobot();
-    println("Animation 9 break");
+    // println("Animation 9 break");
   }  
 
   // --- Number 10 look and listen right---  
@@ -336,8 +336,21 @@ void checkAnimations(){
     }
   }
 
-    if(movementID == 21){
+  if(movementID == 21){
     robot.setRobotArm(-340.0,20.0,186.0,11.0,168,42,10,true,255,0,255,0,2);
+    while(isInAnimation){
+      if(kinect.kinectValueAvailable){
+       robot.setRobotArm(kinect.zValueKinect,kinect.xValueKinect,186.0,11.0,168,42,10,true,255,0,255,0,2);
+       // robot.sendTraversData((int)kinect.xValueKinect,(int)kinect.xValueKinect,(int)kinect.xValueKinect,100);
+       waitForRobot();
+       // waitForTravers();
+      }
+    }
+  }
+
+  if(movementID == 22){
+    robot.setRobotArm(-340.0,20.0,186.0,11.0,168,42,10,true,255,0,255,0,2);
+    // listenForBeat = true;
     while(isInAnimation){
       if(kinect.kinectValueAvailable){
        robot.setRobotArm(kinect.zValueKinect,kinect.xValueKinect,186.0,11.0,168,42,10,true,255,0,255,0,2);
@@ -351,7 +364,7 @@ void checkAnimations(){
   isInAnimation = false;
   isAnimation = false;
   isOutOfLoop = true;
-  println(" Done with animation "+movementID);
+  // println(" Done with animation "+movementID);
 }
 // ------------------------------------------------------------------------------------
 
@@ -428,13 +441,13 @@ void standAnimation(int runningDelay, float amp, boolean a, boolean b, boolean c
 
   private void waitForRobot(){
     while(!isRobotReadyToMove){
-      sleepTime(10);
+      sleepTime(2);
     }
   }
 
    private void waitForTravers(){
     while(!isTraversReadyToMove){
-      sleepTime(10);
+      sleepTime(2);
     }
   }
 

@@ -20,8 +20,8 @@ long currentPositionC = 0;
 long currentStepsAB;
 long currentStepsC;
 
-long MAX_STEPS_AB = 0;
-long MAX_STEPS_C = 0;
+long MAX_STEPS_AB = 20000;
+long MAX_STEPS_C = 20000;
 
 long MIN_STEPS_AB = 0;
 long MIN_STEPS_C = 0;
@@ -58,9 +58,9 @@ bool cVerified      = false;
 long watchdog;
 
 int connectionTimeOut = 10;
-long x               = 1500;
-long y               = 1500;
-long z               = 1500;
+long a               = 1500;
+long b               = 1500;
+long c               = 1500;
 char end            = '\n';
 
 String inByte;
@@ -165,15 +165,15 @@ void loop(){
 
 
    if(!stepperMotors[0]->reachedTarget){
-    moveX(stepperMotors[0]->direction, stepperMotors[0]->nextEasedStep());
+    moveA(stepperMotors[0]->direction, stepperMotors[0]->nextEasedStep());
   }
 
   if(!stepperMotors[1]->reachedTarget){
-    moveY(stepperMotors[1]->direction, stepperMotors[1]->nextEasedStep());
+    moveB(stepperMotors[1]->direction, stepperMotors[1]->nextEasedStep());
   }
   
   if(!stepperMotors[2]->reachedTarget){
-    moveZ(stepperMotors[2]->direction, stepperMotors[2]->nextEasedStep());
+    moveC(stepperMotors[2]->direction, stepperMotors[2]->nextEasedStep());
   }
   
   if(aVerified || cVerified)
@@ -192,19 +192,19 @@ void loop(){
     }
   }
 
-  // if(digitalRead(C_MIN_PIN) == HIGH){
-  //   digitalWrite(C_ENABLE_PIN, HIGH);
-  // }else{
-  //   digitalWrite(C_ENABLE_PIN, LOW);
-  // }
+  if(digitalRead(C_MIN_PIN) == LOW){
+    digitalWrite(C_ENABLE_PIN, HIGH);
+  }else{
+    digitalWrite(C_ENABLE_PIN, LOW);
+  }
 
-  // if(digitalRead(A_MIN_PIN) == HIGH){
-  //   digitalWrite(A_ENABLE_PIN, HIGH);
-  //   digitalWrite(B_ENABLE_PIN, HIGH);
-  // }else{
-  //   digitalWrite(A_ENABLE_PIN, LOW);
-  //   digitalWrite(B_ENABLE_PIN, LOW);
-  // }
+  if(digitalRead(A_MIN_PIN) == LOW){
+    digitalWrite(A_ENABLE_PIN, HIGH);
+    digitalWrite(B_ENABLE_PIN, HIGH);
+  }else{
+    digitalWrite(A_ENABLE_PIN, LOW);
+    digitalWrite(B_ENABLE_PIN, LOW);
+  }
 
 
 }
@@ -255,9 +255,9 @@ for (int i = 0; i <= 3; i++){
   }
 }
   
-  x             = parameterArray[0];
-  y             = parameterArray[1];
-  z             = parameterArray[2];
+  a             = parameterArray[0];
+  b             = parameterArray[1];
+  c             = parameterArray[2];
   easingRes     = parameterArray[3];
 
 
@@ -265,14 +265,18 @@ for (int i = 0; i <= 3; i++){
   {
     stepperMotors[i]->easing_resolution = easingRes;
   }
+
+  a = map(a,0,200,MIN_STEPS_AB,MAX_STEPS_AB);
+  b = map(b,0,200,MIN_STEPS_AB,MAX_STEPS_AB);
+  c = map(c,0,200,MIN_STEPS_C,MAX_STEPS_C);
   Serial.println("Splitted Strings");
-  Serial.println(x);
-  Serial.println(y);
-  Serial.println(z);
+  Serial.println(a);
+  Serial.println(b);
+  Serial.println(c);
   Serial.println(easingRes);;
-  stepperMotors[0]->setPosition(x);
-  stepperMotors[1]->setPosition(y);
-  stepperMotors[2]->setPosition(z);
+  stepperMotors[0]->setPosition(a);
+  stepperMotors[1]->setPosition(b);
+  stepperMotors[2]->setPosition(c);
 
   counter = 1;
 
@@ -313,7 +317,7 @@ void establishContact() {
 
 // ------------------------------------------------------------------------------------
 
-void moveX(int direction, long nextPositionA){
+void moveA(int direction, long nextPositionA){
   if (stepperMotors[0]->direction == 1){
     digitalWrite(A_DIR_PIN, 1);    
   }else{
@@ -327,7 +331,7 @@ void moveX(int direction, long nextPositionA){
 }
 // ------------------------------------------------------------------------------------
 
-void moveY(int direction, long nextPositionB){
+void moveB(int direction, long nextPositionB){
  if (direction == 1){
   digitalWrite(B_DIR_PIN, 1);    
   }else{
@@ -342,7 +346,7 @@ void moveY(int direction, long nextPositionB){
 
 // ------------------------------------------------------------------------------------
 
-void moveZ(int direction, long nextPositionC){
+void moveC(int direction, long nextPositionC){
   if (direction == 1){
     digitalWrite(C_DIR_PIN, 1);    
   }else{
@@ -369,19 +373,32 @@ void initializeMovement()
   digitalWrite(B_DIR_PIN, 1);
   digitalWrite(C_DIR_PIN, 1);
   bool done = false;
+
   while(!done)
   {
-    if(digitalRead(A_MIN_PIN) == LOW)
+    if(digitalRead(A_MIN_PIN) == HIGH && AB)
     {
       AB = true;
-    }else AB = false;
-    if(digitalRead(C_MIN_PIN) == LOW)
+    }else if(AB){
+      AB = false;
+      digitalWrite(A_ENABLE_PIN, HIGH);
+      digitalWrite(B_ENABLE_PIN, HIGH);
+      Serial.println("Button Pressed X");
+    }
+
+    if(digitalRead(C_MIN_PIN) == HIGH && C)
     {
       C = true;
-    }else C = false;
+    }else if(C){
+      C = false;
+      digitalWrite(C_ENABLE_PIN, HIGH);
+      Serial.println("Button Pressed Y");
+    }
     
-    if(digitalRead(A_MIN_PIN) == HIGH && digitalRead(C_MIN_PIN) == HIGH){
+    if(!AB && !C){
+        delay(500);
         done = true;
+        Serial.println("both buttons reached");
     }
     sendStep();   
   }
@@ -390,41 +407,59 @@ void initializeMovement()
   digitalWrite(B_DIR_PIN, 0);
   digitalWrite(C_DIR_PIN, 0);
 
-  while(digitalRead(A_MIN_PIN) == HIGH)
-  {
+  digitalWrite(A_ENABLE_PIN, LOW);
+  digitalWrite(B_ENABLE_PIN, LOW);
+  digitalWrite(C_ENABLE_PIN, LOW);
+
+  for(int i = 0; i<800; i++){
     sendStep();
   }
 
-  while(digitalRead(C_MIN_PIN) == HIGH)
-  {
-    sendStep();
-  }
+  // while(digitalRead(A_MIN_PIN) == LOW)
+  // {
+  //   Serial.println("moving away from button X");
+  //   sendStep();
+  // }
+
+  // while(digitalRead(C_MIN_PIN) == LOW)
+  // {
+  //   Serial.println("moving away from button Y");
+  //   sendStep();
+  // }
   
   // move forwards until touch button, then we know how many steps is the max
   done = false;
-  AB = false;
-  C = false;
+  AB = true;
+  C = true;
 
 
   while(!done)
   {
-    if(digitalRead(A_MIN_PIN) == LOW)
+    if(digitalRead(A_MIN_PIN) == HIGH && AB)
     {
       AB = true;
       currentStepsAB += 1;
-    }else C = false;
-    if(digitalRead(C_MIN_PIN) == LOW)
+    }else if(AB){
+      AB = false;
+      Serial.println("Buttun Pressed X Second time");
+      digitalWrite(A_ENABLE_PIN, HIGH);
+      digitalWrite(B_ENABLE_PIN, HIGH);
+    }
+
+
+    if(digitalRead(C_MIN_PIN) == HIGH && C)
     {
       C = true;
       currentStepsC += 1;
-    }else C = false;
-    
-    
-    
-    if(digitalRead(A_MIN_PIN) == HIGH){ //&& digitalRead(C_MIN_PIN) == HIGH)
-      done = true;
-      AB = false;
+    }else if(C){
       C = false;
+      Serial.println("Buttun Pressed Y Second time");
+      digitalWrite(C_ENABLE_PIN, HIGH);
+    } 
+    
+    if(!AB && !C){
+      delay(500);
+      done = true;
     }
     sendStep();  
   }
@@ -447,7 +482,7 @@ void testButton(){
     Serial.println("xz:");
     Serial.println(digitalRead(A_MIN_PIN));
     Serial.println("y");
-    Serial.println(digitalRead(B_MIN_PIN));
+    Serial.println(digitalRead(C_MIN_PIN));
     delay(300);
   } 
 
@@ -467,7 +502,7 @@ void sendStep(){
     digitalWrite(C_STEP_PIN, HIGH);
     digitalWrite(C_STEP_PIN, LOW);
   }
-  delayMicroseconds(400);
+  delayMicroseconds(350);
 }
 
 void sendMovement(int numberOfStepsA, int numberOfStepsB, int numberOfStepsC){

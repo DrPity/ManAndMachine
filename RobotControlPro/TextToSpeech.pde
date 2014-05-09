@@ -85,6 +85,7 @@ int waitForSpeechReturn;
 
 	void say(String s, int voice) {
 	  try {
+      waitForRobot();
 	    Runtime rtime = Runtime.getRuntime();
 	    Process child = rtime.exec("/usr/bin/say -v " + (voices[voice]) + " " + s);
 	    waitForSpeechReturn = child.waitFor();

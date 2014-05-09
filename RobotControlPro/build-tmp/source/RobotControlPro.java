@@ -54,14 +54,19 @@ private byte    caReturn            = 13;
 private String  heartRateString     = "Na";
 private String  inCharA;
 private String  inCharM;
+private String  inCharLA;
+private String  inCharLB;
 private String  scaleMode;
-private String  arduinoPort               = "/dev/tty.usbmodem1d11141";
+private String  arduinoPort               = "/dev/tty.usbmodem1d11441";
 private String  melziPort                 = "/dev/tty.usbserial-AH01SIVE";
 private String  pulseMeterPort            = "/dev/tty.BerryMed-SerialPort";
+private String  ledPortA                  = "/dev/tty.usbmodem1d1131";
+private String  ledPortB                  = "/dev/tty.usbmodem1d1121";
 private float   angle                     = 0;
 private float   aVelocity                 = 0.05f;
 private boolean isRobotReadyToMove        = false;
 private boolean isTraversReadyToMove      = false;
+private boolean laLedIsready              = false;
 private boolean isFirstContact            = false;
 private boolean isRobotStarted            = false;
 private boolean isRecording               = false;
@@ -73,6 +78,8 @@ private boolean gridYisDrawn              = false;
 private boolean gridXisDrawn              = false;
 private boolean isArduinoPort             = false;
 private boolean isMelziPort               = false;
+private boolean isLedPortA                = false;
+private boolean isLedPortB                = false;
 private boolean isPulseMeterPort          = false;
 private boolean isTableSpeechLoaded       = false;
 private boolean isReadyForButtonCommands  = false;
@@ -85,7 +92,7 @@ private boolean stepBack                  = false;
 
 PImage bg;
 Table table, tableRm, tablePositions;
-WatchDog wPm, wA, wM;
+WatchDog wPm, wA, wM, wLA, wLB;
 ControlFont font;
 Client myClient;
 Drawings drawings;
@@ -101,7 +108,7 @@ Channel[] channelsMindwave = new Channel[11];
 Channel[] channelPleth = new Channel[1];
 Graph mindWave, emg, ecg, pleth;
 Textlabel lableID, textID, fRate, headlineText_1, headlineText_2, textMindwave, attentionLevel, attentionValue, meditationLevel, meditationValue, blinkStrength, blinkValue, textPulseMeter, pulseLevel, pulseValue;
-ConnectionLight connectionLight, bluetoothConnection, robotConnection, traversConnection;
+ConnectionLight connectionLight, bluetoothConnection, robotConnection, traversConnection, ledAConnection, ledBConnection;
 
 // ------------------------------------------------------------------------------------
 
@@ -122,12 +129,16 @@ public void setup() {
 // ----------------------------------------
 
   // WachtDog: SleepTime Thread, NameDevice, Port, Buffering, initOK?, BautRate, isTypArduino, PApplet 
-  wPm = new WatchDog(1,"PulseMeter", pulseMeterPort, false, isPulseMeterPort, 115200, false, this);
+  wPm = new WatchDog(1,"PulseMeter", pulseMeterPort, false, isPulseMeterPort, 115200, false, false, this);
   wPm.start();
-  wA = new WatchDog(1,"Arduino", arduinoPort, true, isArduinoPort, 115200, true, this);
+  wA = new WatchDog(1,"Arduino", arduinoPort, true, isArduinoPort, 115200, true, false, this);
   wA.start();
-  wM = new WatchDog(1,"Melzi", melziPort, true, isMelziPort, 115200, true, this);
+  wM = new WatchDog(1,"Melzi", melziPort, true, isMelziPort, 115200, true, false, this);
   wM.start();
+  wLA = new WatchDog(1,"LED A", ledPortA, true, isLedPortA, 115200, true, false, this);
+  wLA.start();
+  wLB = new WatchDog(1,"LED B", ledPortB, true, isLedPortB, 115200, true, false,this);
+  wLB.start();
   //activate textToSpeech thread
   textToSpeech = new TextToSpeech(1);
   textToSpeech.start();
@@ -189,17 +200,20 @@ public void setup() {
   bluetoothConnection = new ConnectionLight(width - 98, 30, 10);
   robotConnection     = new ConnectionLight(width - 98, 50, 10);
   traversConnection   = new ConnectionLight(width - 98, 70, 10);
+  ledAConnection      = new ConnectionLight(width - 98, 90, 10);
+  ledBConnection      = new ConnectionLight(width - 98, 110, 10);
   
 
 	globalMax = 0;
   isReadyToRecord = true;
   inCharA = null;
   inCharM = null;
+  inCharLA = null;
+  inCharLB = null;
   isReadyForButtonCommands = true;
 
-  kinect = addControlFrame("extra", 320,240);
+  // kinect = addControlFrame("extra", 320,240);
 
-  
     
 }
 
@@ -243,7 +257,12 @@ public void draw() {
   traversConnection.update(wM.conValue);
   traversConnection.draw();
   traversConnection.travers.draw();
-
+  ledAConnection.update(wLA.conValue);
+  ledAConnection.draw();
+  ledAConnection.led_A.draw();
+  ledBConnection.update(wLB.conValue);
+  ledBConnection.draw();
+  ledBConnection.led_B.draw();
 
   if (isRobotStarted){
 
@@ -332,6 +351,32 @@ public void serialEvent(Serial thisPort){
     if (inCharM != null) {
       // println("In melzi event start manageSE");
       manageSE.melzi(inCharM);
+    }
+  }
+
+  if (thisPort == wLA.port && wLA.deviceInstanciated && isLedPortA){
+    // println("In melzi event");
+    
+    while (wLA.port.available() > 0){
+      // println("In melzi event > 0");
+      inCharLA = wLA.port.readStringUntil(end);
+    }
+    if (inCharLA != null) {
+      // println("inCharLA: "+inCharLA);
+      manageSE.lA(inCharLA);
+    }
+  }
+
+  if (thisPort == wLB.port && wLB.deviceInstanciated && isLedPortB){
+    // println("inCharLB: "+inCharLB);
+    
+    while (wLB.port.available() > 0){
+      // println("In melzi event > 0");
+      inCharLB = wLB.port.readStringUntil(end);
+    }
+    if (inCharLB != null) {
+      // println("In melzi event start manageSE");
+      manageSE.lB(inCharLB);
     }
   }
 }
@@ -580,6 +625,8 @@ class ConnectionLight {
 	Textlabel pulseMeter;
 	Textlabel robot;
 	Textlabel travers;
+	Textlabel led_A;
+	Textlabel led_B;
 	PShape circle;
 	
 // ------------------------------------------------------------------------------------
@@ -602,6 +649,12 @@ class ConnectionLight {
 		travers = new Textlabel(controlP5,"Travers", x + 16, y + 4);
 		travers.setFont(createFont("Helvetica", 10));
 		travers.setColorValue(255);
+		led_A = new Textlabel(controlP5,"led_A", x + 16, y + 4);
+		led_A.setFont(createFont("Helvetica", 10));
+		led_A.setColorValue(255);
+		led_B = new Textlabel(controlP5,"led_B", x + 16, y + 4);
+		led_B.setFont(createFont("Helvetica", 10));
+		led_B.setColorValue(255);
 	}
 	
 // ------------------------------------------------------------------------------------	
@@ -1317,6 +1370,10 @@ class HelperClass {
         isArduinoPort = true;
        }else if (Serial.list()[i].equals(melziPort)){
         isMelziPort = true;
+       }else if (Serial.list()[i].equals(ledPortA)){
+        isLedPortA = true;
+       }else if (Serial.list()[i].equals(ledPortB)){
+        isLedPortB = true;
        }
     }
   }
@@ -1455,7 +1512,7 @@ boolean kinectValueAvailable = false;
     // draw the circle at the position of the head with the head size scaled by the distance scalar
     ellipse(jointPos_Proj.x/2,jointPos_Proj.y/2, distanceScalar*headsize,distanceScalar*headsize);
 
-    println("X: " + jointPos_Proj.x + " Y: " + jointPos_Proj.y + " Z: " + jointPos_Proj.z);
+    // println("X: " + jointPos_Proj.x + " Y: " + jointPos_Proj.y + " Z: " + jointPos_Proj.z);
 
     if(jointPos_Proj.z > 848 && jointPos_Proj.z < 3300){
       kinectValueAvailable = true;
@@ -1621,12 +1678,16 @@ class ManageCLE {
 class ManageSE {
 
 private boolean isHashtrue = false;
+private boolean isIncreasingP = false;
+private boolean isFallingP = false;
 private int heartRate = 0;
 private int plethRate = 0;
 private int oldPlethRate = 0;
 private String  pulseString  = "";
 private String  plethString  = "";
 private int lastPulseBit  = 0;
+private int pulseBeep = 0;
+private int oldPulseBeep = 0;
 private int counter = 0;
 private int[] bitArray = new int[8];
 
@@ -1650,7 +1711,7 @@ private int[] bitArray = new int[8];
       wA.heartBeat = millis();
       wA.port.write("W");
       wA.port.write(10);
-      // println("+ Heartbeat +");
+      print("+ Robot +");
       if(wA.conValue != 00){
         wA.conValue = 00;
       }
@@ -1670,7 +1731,7 @@ private int[] bitArray = new int[8];
         wA.port.write("B");
         wA.port.write(10);
         wA.isFirstContact = true;
-        isRobotReadyToMove = true;       
+        isRobotReadyToMove = true;     
       }  
     } 
     else if(inChar.trim().equals("#")){
@@ -1683,7 +1744,6 @@ private int[] bitArray = new int[8];
 
   public void newPulse(){
 
-     counter++;  
      
      while (wPm.port.available() > 0) {
       // Expand array size to the number of bytes you expect:
@@ -1694,6 +1754,30 @@ private int[] bitArray = new int[8];
       }
     }
 
+        // Check for pleth byte
+      if (counter == 0){
+        pulseBeep = bitArray[6];
+
+        if(oldPulseBeep == 0 && pulseBeep == 1)
+          isIncreasingP = true;
+
+        if(oldPulseBeep == 1 && pulseBeep == 0)
+          isFallingP = true;
+
+        if(isFallingP && isIncreasingP && oldPulseBeep == 1){
+          isFallingP = false;
+          isIncreasingP = false;
+          println("Beat");
+          robot.sendBeat(wLA.port,0,250,100,0);
+          robot.sendBeat(wLB.port,0,250,100,0);
+        }
+
+        oldPulseBeep = pulseBeep;
+  
+      }  
+
+      counter++;  
+
       // Check for pleth byte
       if (counter == 1){
         for(int i = 6; i >= 0; i--){
@@ -1701,10 +1785,12 @@ private int[] bitArray = new int[8];
         }
         plethRate = unbinary(plethString);
         plethRate = (int)(plethRate*0.2f + (oldPlethRate*0.8f));
+        // println("plethRate: "+plethRate);;
         plethString = "";
         channelPleth[0].addDataPoint(plethRate);
         // println(channelPleth[0].getLatestPoint().value);
-        channelPleth[0].graphMe = true; 
+        channelPleth[0].graphMe = true;
+
         oldPlethRate = plethRate;
         pleth.isDataToGraph = true;
       }  
@@ -1756,7 +1842,7 @@ private int[] bitArray = new int[8];
       wM.heartBeat = millis();
       wM.port.write("W");
       wM.port.write(10);
-      println("+ Heartbeat +");
+      print("+ Melzi +");
       if(wM.conValue != 00){
         wM.conValue = 00;
       }
@@ -1777,6 +1863,79 @@ private int[] bitArray = new int[8];
         wM.port.write(10);
         wM.isFirstContact = true;
         isTraversReadyToMove = true;       
+      }  
+    }
+  
+  }
+
+   public void lA(String inChar) {
+
+   // println("In after Null");
+    // println(inChar);
+
+    if (inChar.trim().equals("W")){
+      wLA.heartBeat = millis();
+      wLA.port.write("W");
+      wLA.port.write(10);
+      print("+ LA +");
+      if(wLA.conValue != 00){
+        wLA.conValue = 00;
+      }
+      // serialConnection = "Connected";
+    }
+
+    if(inChar.trim().equals("N")){
+      laLedIsready = true;
+     // println("Robot Ready for Next Position");
+    }
+
+    if(!wLA.isFirstContact){
+      // println("In first contact");
+      if (inChar.trim().equals("A")) {
+        println("Connected LA");
+        wLA.heartBeat = millis();                   
+        wLA.port.write("B");
+        wLA.port.write(10);
+        wLA.isFirstContact = true;
+        laLedIsready = true; 
+        robot.setColor(wLA.port,0,127,127,127);
+        robot.setTargetColor(wLA.port,0,127,127,127);        
+      }  
+    }
+  
+  }
+
+   public void lB(String inChar) {
+
+    // println(inChar);
+
+    if (inChar.trim().equals("W")){
+      wLB.heartBeat = millis();
+      wLB.port.write("W");
+      wLB.port.write(10);
+      println("+ LB +");
+      if(wLB.conValue != 00){
+        wLB.conValue = 00;
+      }
+      // serialConnection = "Connected";
+    }
+
+    if(inChar.trim().equals("N")){
+      // isTraversReadyToMove = true;
+     // println("Robot Ready for Next Position");
+    }
+
+    if(!wLB.isFirstContact){
+      // println("In first contact");
+      if (inChar.trim().equals("A")) {
+        println("Connected LB");
+        wLB.heartBeat = millis();                   
+        wLB.port.write("B");
+        wLB.port.write(10);
+        wLB.isFirstContact = true;
+        robot.setColor(wLB.port,0,127,127,127);
+        robot.setTargetColor(wLB.port,0,127,127,127);  
+        // isTraversReadyToMove = true;       
       }  
     }
   
@@ -2030,14 +2189,14 @@ class Robot{
         && isInRange(baseAngleD, 0, 180) && isInRange(shoulderAngleD, 0, 180)
         && isInRange(elbowAngleD, 0, 180) && isInRange(wristAngleD, 0, 180) && isInRange(gripperAngleD, 0, 180) && isInRange(gripperWidth, 0, 180) && isInRange(gripperRotation, 0, 180)){
         isDataVerified = true;
-        println("( Data verfied )");
+        // println("( Data verfied )");
         if (!sendData){
           validStrPos = true;
         }
 
       }else{
         isDataVerified = false;
-        println("[ Data not verified ]");
+        // println("[ Data not verified ]");
       }
 
       // println("[ " + x + "," + y + "," + z + "," + gripperAngleD + "," + gripperRotation +  "," + gripperWidth + "," + easingResolution + "," + brightnessStrip + "," + r + "," + g + "," + b + " ]");
@@ -2097,16 +2256,52 @@ class Robot{
   }
 
 
-    public void sendTraversData(int x, int y, int z, int easing){
+  public void sendTraversData(int x, int y, int z, int easing){
 
-    if(wA.deviceInstanciated)
-    wM.port.write(String.format("Rr%d,%d,%d,%d\n",x,y,z,easing));
-    // wA.port.write(10);
-    println(String.format("(Rr%d,%d,%d,%d)",x, y, z,easing));
-    isTraversReadyToMove = false;
+    if(wM.deviceInstanciated){
+      wM.port.write(String.format("Rr%d,%d,%d,%d\n",x,y,z,easing));
+      // wA.port.write(10);
+      println(String.format("(Rr%d,%d,%d,%d)",x, y, z,easing));
+      isTraversReadyToMove = false;
+    }
+  }
+
+
+
+   public void sendBeat(Serial port, int strip, int r, int g, int b){
+    // println("laLedIsready: "+laLedIsready);
+
+    if(wLA.deviceInstanciated || wLB.deviceInstanciated){
+      // println("( In send beat )");
+      port.write(String.format("Cc%d,%d,%d,%d,%d\n",strip,r,g,b,1));
+      println(String.format("(Rr%d,%d,%d,%d)",strip, r, g,b));
+      // wA.port.write(10);
+      laLedIsready = false;
+    }
 
   }
 
+
+  public void setTargetColor(Serial port, int strip, int r, int g, int b){
+
+    if(wLA.deviceInstanciated || wLB.deviceInstanciated){
+      port.write(String.format("Tt%d,%d,%d,%d\n",strip,r,g,b));
+      // wA.port.write(10);
+      laLedIsready = false;
+    }
+
+  }
+
+   public void setColor(Serial port, int strip, int r, int g, int b){
+
+    if(wLA.deviceInstanciated || wLB.deviceInstanciated){
+      port.write(String.format("Cc%d,%d,%d,%d\n",strip,r,g,b,0));
+      // wA.port.write(10);
+      println(String.format("(Rr%d,%d,%d,%d)",strip, r, g,b));
+      laLedIsready = false;
+    }
+
+  }
 
 // ------------------------------------------------------------------------------------
 
@@ -2344,18 +2539,18 @@ public void checkAnimations(){
 
   // --- Number 4  Neutral forward---
   if(movementID == 4){
-    println(" In animation Nr 4 ");
+    // println(" In animation Nr 4 ");
     robot.setRobotArm(-4,184,184,42,126,90,200,true,255,0,255,0,2);
     sleepTime(100);
     while(isInAnimation){
-      println("In while loop Nr 4");
+      // println("In while loop Nr 4");
       standAnimation(10,10, true,false,false,false,true,false,0);
     }
   }
 
   // --- Number 5 right to left---  
   if(movementID == 5){
-    println(" In animation Nr 5 ");
+    // println(" In animation Nr 5 ");
     robot.setRobotArm(88,28,216,1,180,90,400,true,255,0,255,0,2);
     waitForRobot();
     robot.setRobotArm(-124,100,208,17,180,90,100,true,255,0,255,0,2);
@@ -2370,7 +2565,7 @@ public void checkAnimations(){
 
   // --- Number 6 looking backwards---  
   if(movementID == 6){
-    println(" In animation Nr 6 ");
+    // println(" In animation Nr 6 ");
     robot.sendRobotData(1475, 1500, 2300, 800, 1500, 1500, 200, 255, 0, 255, 0,2);
     waitForRobot();
     robot.setRobotArm(-4,184,184,42,126,90,200,true,255,0,255,0,2);
@@ -2381,7 +2576,7 @@ public void checkAnimations(){
 
   // --- Number 7 sighing--- 
   if(movementID == 7){
-    println(" In animation Nr 7 ");
+    // println(" In animation Nr 7 ");
     robot.setRobotArm(-7.75081f,32.0f,92.0f,70.0f,116,66,200,true,255,0,255,0,2);
     waitForRobot();
     sleepTime(500);
@@ -2393,7 +2588,7 @@ public void checkAnimations(){
 
   // --- Number 8 neutral right---  
   if(movementID == 8){
-    println(" In animation Nr 8 ");
+    // println(" In animation Nr 8 ");
     robot.setRobotArm(-216,0,160,29,134,90,200,true,255,0,255,0,2);
     waitForRobot();
     while(isInAnimation){
@@ -2413,7 +2608,7 @@ public void checkAnimations(){
     }
     robot.setRobotArm(lastX,lastY,lastZ,lastGripperAngle,lastGripperRotation,lastGripperWidth,1,true,255,255,0,255,4);
     waitForRobot();
-    println("Animation 9 break");
+    // println("Animation 9 break");
   }  
 
   // --- Number 10 look and listen right---  
@@ -2548,8 +2743,21 @@ public void checkAnimations(){
     }
   }
 
-    if(movementID == 21){
+  if(movementID == 21){
     robot.setRobotArm(-340.0f,20.0f,186.0f,11.0f,168,42,10,true,255,0,255,0,2);
+    while(isInAnimation){
+      if(kinect.kinectValueAvailable){
+       robot.setRobotArm(kinect.zValueKinect,kinect.xValueKinect,186.0f,11.0f,168,42,10,true,255,0,255,0,2);
+       // robot.sendTraversData((int)kinect.xValueKinect,(int)kinect.xValueKinect,(int)kinect.xValueKinect,100);
+       waitForRobot();
+       // waitForTravers();
+      }
+    }
+  }
+
+  if(movementID == 22){
+    robot.setRobotArm(-340.0f,20.0f,186.0f,11.0f,168,42,10,true,255,0,255,0,2);
+    // listenForBeat = true;
     while(isInAnimation){
       if(kinect.kinectValueAvailable){
        robot.setRobotArm(kinect.zValueKinect,kinect.xValueKinect,186.0f,11.0f,168,42,10,true,255,0,255,0,2);
@@ -2563,7 +2771,7 @@ public void checkAnimations(){
   isInAnimation = false;
   isAnimation = false;
   isOutOfLoop = true;
-  println(" Done with animation "+movementID);
+  // println(" Done with animation "+movementID);
 }
 // ------------------------------------------------------------------------------------
 
@@ -2640,13 +2848,13 @@ public void standAnimation(int runningDelay, float amp, boolean a, boolean b, bo
 
   private void waitForRobot(){
     while(!isRobotReadyToMove){
-      sleepTime(10);
+      sleepTime(2);
     }
   }
 
    private void waitForTravers(){
     while(!isTraversReadyToMove){
-      sleepTime(10);
+      sleepTime(2);
     }
   }
 
@@ -2739,6 +2947,7 @@ int waitForSpeechReturn;
 
 	public void say(String s, int voice) {
 	  try {
+      waitForRobot();
 	    Runtime rtime = Runtime.getRuntime();
 	    Process child = rtime.exec("/usr/bin/say -v " + (voices[voice]) + " " + s);
 	    waitForSpeechReturn = child.waitFor();
@@ -2818,6 +3027,7 @@ boolean buffer;
 boolean isPort;
 boolean isFirstContact;
 boolean isArduino;
+boolean testingLeonardo;
 long    heartBeat;
 int     bautRate;
 int     conValue;
@@ -2830,7 +3040,7 @@ String  id;                 // Thread name
 
   // Constructor, create the thread
   // It is not running by default
-  WatchDog (int _wait, String _id, String _devicePort, boolean _buffer, boolean _isPort, int _bautRate, boolean _isArduino, PApplet _p) {
+  WatchDog (int _wait, String _id, String _devicePort, boolean _buffer, boolean _isPort, int _bautRate, boolean _isArduino, boolean _testingLeonardo, PApplet _p) {
     wait = _wait;
     p = _p;
     running = false;
@@ -2841,6 +3051,7 @@ String  id;                 // Thread name
     isPort = _isPort;
     bautRate = _bautRate;
     isArduino =_isArduino;
+    testingLeonardo = _testingLeonardo;
     id = _id;
     conValue = 255;
   }
@@ -2878,12 +3089,13 @@ String  id;                 // Thread name
     if (!deviceInstanciated){
       sleep(3000);
       deviceInit();
-      println("deviceInstanciated not true: " + id);
+      // println("deviceInstanciated not true: " + id);
     }else if(deviceInstanciated && deviceLost){
       sleep(3000);
       port.stop();
+      // checkIfLeonardo();
       deviceInit();
-      println("deviceLost and new Init: " + id);
+      // println("deviceLost and new Init: " + id);
     }
 
   }
@@ -2913,15 +3125,16 @@ String  id;                 // Thread name
 
   public void checkHeartBeat(){
   if(id.equals("PulseMeter")){
-    if(millis() -  heartBeat >= 5000 && deviceInstanciated){
+    if(millis() -  heartBeat >= 6000 && deviceInstanciated){
       println(id + " heartBeat lost");
       deviceLost = true;
     }
   }else if (isArduino){
     if (isFirstContact){
-        if (millis() -  heartBeat >= 5000 && deviceInstanciated){
+        if (millis() -  heartBeat >= 6000 && deviceInstanciated){
             isFirstContact = false;
             deviceLost = true;
+            // testingLeonardo = true;
             println(id + " heartBeat lost");
             conValue = 100;
         }
@@ -2932,9 +3145,9 @@ String  id;                 // Thread name
 // ------------------------------------------------------------------------------------  
 
   public void deviceInit() {
-println("In Init: " + id);
+  // println("In Init: " + id);
     if(isPort){ 
-      println("In is Port: " + id );
+      // println("In is Port: " + id );
       try {
         port = new Serial(p, devicePort, bautRate);
         port.clear();
@@ -2943,7 +3156,8 @@ println("In Init: " + id);
         }
         deviceInstanciated = true;
         deviceLost = false;
-        println("In try"); 
+        // testingLeonardo = false;
+        // println("In try"); 
         if(isArduino){
          // println("In first Contact"); 
         isFirstContact = false;
@@ -2957,6 +3171,20 @@ println("In Init: " + id);
       }
     } 
   }
+
+  // void checkIfLeonardo(){
+  //   try {
+  //     if(testingLeonardo){
+  //       port = new Serial(p, devicePort, 1200);
+  //       port.clear();
+  //       port.stop();
+  //       testingLeonardo = false;
+  //     }
+  //   } catch (Exception e) {
+  //     println(" " + id + " " + e);
+  //   }
+    
+  // }
 
 }
   static public void main(String[] passedArgs) {

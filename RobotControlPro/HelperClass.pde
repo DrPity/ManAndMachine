@@ -116,6 +116,10 @@ class HelperClass {
         isArduinoPort = true;
        }else if (Serial.list()[i].equals(melziPort)){
         isMelziPort = true;
+       }else if (Serial.list()[i].equals(ledPortA)){
+        isLedPortA = true;
+       }else if (Serial.list()[i].equals(ledPortB)){
+        isLedPortB = true;
        }
     }
   }

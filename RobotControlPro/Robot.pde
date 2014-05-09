@@ -133,14 +133,14 @@ class Robot{
         && isInRange(baseAngleD, 0, 180) && isInRange(shoulderAngleD, 0, 180)
         && isInRange(elbowAngleD, 0, 180) && isInRange(wristAngleD, 0, 180) && isInRange(gripperAngleD, 0, 180) && isInRange(gripperWidth, 0, 180) && isInRange(gripperRotation, 0, 180)){
         isDataVerified = true;
-        println("( Data verfied )");
+        // println("( Data verfied )");
         if (!sendData){
           validStrPos = true;
         }
 
       }else{
         isDataVerified = false;
-        println("[ Data not verified ]");
+        // println("[ Data not verified ]");
       }
 
       // println("[ " + x + "," + y + "," + z + "," + gripperAngleD + "," + gripperRotation +  "," + gripperWidth + "," + easingResolution + "," + brightnessStrip + "," + r + "," + g + "," + b + " ]");
@@ -200,16 +200,52 @@ class Robot{
   }
 
 
-    void sendTraversData(int x, int y, int z, int easing){
+  void sendTraversData(int x, int y, int z, int easing){
 
-    if(wA.deviceInstanciated)
-    wM.port.write(String.format("Rr%d,%d,%d,%d\n",x,y,z,easing));
-    // wA.port.write(10);
-    println(String.format("(Rr%d,%d,%d,%d)",x, y, z,easing));
-    isTraversReadyToMove = false;
+    if(wM.deviceInstanciated){
+      wM.port.write(String.format("Rr%d,%d,%d,%d\n",x,y,z,easing));
+      // wA.port.write(10);
+      println(String.format("(Rr%d,%d,%d,%d)",x, y, z,easing));
+      isTraversReadyToMove = false;
+    }
+  }
+
+
+
+   void sendBeat(Serial port, int strip, int r, int g, int b){
+    // println("laLedIsready: "+laLedIsready);
+
+    if(wLA.deviceInstanciated || wLB.deviceInstanciated){
+      // println("( In send beat )");
+      port.write(String.format("Cc%d,%d,%d,%d,%d\n",strip,r,g,b,1));
+      println(String.format("(Rr%d,%d,%d,%d)",strip, r, g,b));
+      // wA.port.write(10);
+      laLedIsready = false;
+    }
 
   }
 
+
+  void setTargetColor(Serial port, int strip, int r, int g, int b){
+
+    if(wLA.deviceInstanciated || wLB.deviceInstanciated){
+      port.write(String.format("Tt%d,%d,%d,%d\n",strip,r,g,b));
+      // wA.port.write(10);
+      laLedIsready = false;
+    }
+
+  }
+
+   void setColor(Serial port, int strip, int r, int g, int b){
+
+    if(wLA.deviceInstanciated || wLB.deviceInstanciated){
+      port.write(String.format("Cc%d,%d,%d,%d\n",strip,r,g,b,0));
+      // wA.port.write(10);
+      println(String.format("(Rr%d,%d,%d,%d)",strip, r, g,b));
+      laLedIsready = false;
+    }
+
+  }
 
 // ------------------------------------------------------------------------------------
 

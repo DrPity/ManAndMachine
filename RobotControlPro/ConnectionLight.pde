@@ -10,6 +10,8 @@ class ConnectionLight {
 	Textlabel pulseMeter;
 	Textlabel robot;
 	Textlabel travers;
+	Textlabel led_A;
+	Textlabel led_B;
 	PShape circle;
 	
 // ------------------------------------------------------------------------------------
@@ -32,6 +34,12 @@ class ConnectionLight {
 		travers = new Textlabel(controlP5,"Travers", x + 16, y + 4);
 		travers.setFont(createFont("Helvetica", 10));
 		travers.setColorValue(255);
+		led_A = new Textlabel(controlP5,"led_A", x + 16, y + 4);
+		led_A.setFont(createFont("Helvetica", 10));
+		led_A.setColorValue(255);
+		led_B = new Textlabel(controlP5,"led_B", x + 16, y + 4);
+		led_B.setFont(createFont("Helvetica", 10));
+		led_B.setColorValue(255);
 	}
 	
 // ------------------------------------------------------------------------------------	

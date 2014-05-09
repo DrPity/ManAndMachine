@@ -8,6 +8,7 @@ boolean buffer;
 boolean isPort;
 boolean isFirstContact;
 boolean isArduino;
+boolean testingLeonardo;
 long    heartBeat;
 int     bautRate;
 int     conValue;
@@ -20,7 +21,7 @@ String  id;                 // Thread name
 
   // Constructor, create the thread
   // It is not running by default
-  WatchDog (int _wait, String _id, String _devicePort, boolean _buffer, boolean _isPort, int _bautRate, boolean _isArduino, PApplet _p) {
+  WatchDog (int _wait, String _id, String _devicePort, boolean _buffer, boolean _isPort, int _bautRate, boolean _isArduino, boolean _testingLeonardo, PApplet _p) {
     wait = _wait;
     p = _p;
     running = false;
@@ -31,6 +32,7 @@ String  id;                 // Thread name
     isPort = _isPort;
     bautRate = _bautRate;
     isArduino =_isArduino;
+    testingLeonardo = _testingLeonardo;
     id = _id;
     conValue = 255;
   }
@@ -68,12 +70,13 @@ String  id;                 // Thread name
     if (!deviceInstanciated){
       sleep(3000);
       deviceInit();
-      println("deviceInstanciated not true: " + id);
+      // println("deviceInstanciated not true: " + id);
     }else if(deviceInstanciated && deviceLost){
       sleep(3000);
       port.stop();
+      // checkIfLeonardo();
       deviceInit();
-      println("deviceLost and new Init: " + id);
+      // println("deviceLost and new Init: " + id);
     }
 
   }
@@ -103,15 +106,16 @@ String  id;                 // Thread name
 
   void checkHeartBeat(){
   if(id.equals("PulseMeter")){
-    if(millis() -  heartBeat >= 5000 && deviceInstanciated){
+    if(millis() -  heartBeat >= 6000 && deviceInstanciated){
       println(id + " heartBeat lost");
       deviceLost = true;
     }
   }else if (isArduino){
     if (isFirstContact){
-        if (millis() -  heartBeat >= 5000 && deviceInstanciated){
+        if (millis() -  heartBeat >= 6000 && deviceInstanciated){
             isFirstContact = false;
             deviceLost = true;
+            // testingLeonardo = true;
             println(id + " heartBeat lost");
             conValue = 100;
         }
@@ -122,9 +126,9 @@ String  id;                 // Thread name
 // ------------------------------------------------------------------------------------  
 
   void deviceInit() {
-println("In Init: " + id);
+  // println("In Init: " + id);
     if(isPort){ 
-      println("In is Port: " + id );
+      // println("In is Port: " + id );
       try {
         port = new Serial(p, devicePort, bautRate);
         port.clear();
@@ -133,7 +137,8 @@ println("In Init: " + id);
         }
         deviceInstanciated = true;
         deviceLost = false;
-        println("In try"); 
+        // testingLeonardo = false;
+        // println("In try"); 
         if(isArduino){
          // println("In first Contact"); 
         isFirstContact = false;
@@ -147,5 +152,19 @@ println("In Init: " + id);
       }
     } 
   }
+
+  // void checkIfLeonardo(){
+  //   try {
+  //     if(testingLeonardo){
+  //       port = new Serial(p, devicePort, 1200);
+  //       port.clear();
+  //       port.stop();
+  //       testingLeonardo = false;
+  //     }
+  //   } catch (Exception e) {
+  //     println(" " + id + " " + e);
+  //   }
+    
+  // }
 
 }

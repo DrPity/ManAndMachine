@@ -102,7 +102,7 @@ boolean kinectValueAvailable = false;
     // draw the circle at the position of the head with the head size scaled by the distance scalar
     ellipse(jointPos_Proj.x/2,jointPos_Proj.y/2, distanceScalar*headsize,distanceScalar*headsize);
 
-    println("X: " + jointPos_Proj.x + " Y: " + jointPos_Proj.y + " Z: " + jointPos_Proj.z);
+    // println("X: " + jointPos_Proj.x + " Y: " + jointPos_Proj.y + " Z: " + jointPos_Proj.z);
 
     if(jointPos_Proj.z > 848 && jointPos_Proj.z < 3300){
       kinectValueAvailable = true;

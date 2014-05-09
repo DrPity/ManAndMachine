@@ -1,12 +1,16 @@
 class ManageSE {
 
 private boolean isHashtrue = false;
+private boolean isIncreasingP = false;
+private boolean isFallingP = false;
 private int heartRate = 0;
 private int plethRate = 0;
 private int oldPlethRate = 0;
 private String  pulseString  = "";
 private String  plethString  = "";
 private int lastPulseBit  = 0;
+private int pulseBeep = 0;
+private int oldPulseBeep = 0;
 private int counter = 0;
 private int[] bitArray = new int[8];
 
@@ -30,7 +34,7 @@ private int[] bitArray = new int[8];
       wA.heartBeat = millis();
       wA.port.write("W");
       wA.port.write(10);
-      // println("+ Heartbeat +");
+      print("+ Robot +");
       if(wA.conValue != 00){
         wA.conValue = 00;
       }
@@ -50,7 +54,7 @@ private int[] bitArray = new int[8];
         wA.port.write("B");
         wA.port.write(10);
         wA.isFirstContact = true;
-        isRobotReadyToMove = true;       
+        isRobotReadyToMove = true;     
       }  
     } 
     else if(inChar.trim().equals("#")){
@@ -63,7 +67,6 @@ private int[] bitArray = new int[8];
 
   void newPulse(){
 
-     counter++;  
      
      while (wPm.port.available() > 0) {
       // Expand array size to the number of bytes you expect:
@@ -74,6 +77,30 @@ private int[] bitArray = new int[8];
       }
     }
 
+        // Check for pleth byte
+      if (counter == 0){
+        pulseBeep = bitArray[6];
+
+        if(oldPulseBeep == 0 && pulseBeep == 1)
+          isIncreasingP = true;
+
+        if(oldPulseBeep == 1 && pulseBeep == 0)
+          isFallingP = true;
+
+        if(isFallingP && isIncreasingP && oldPulseBeep == 1){
+          isFallingP = false;
+          isIncreasingP = false;
+          println("Beat");
+          robot.sendBeat(wLA.port,0,250,100,0);
+          robot.sendBeat(wLB.port,0,250,100,0);
+        }
+
+        oldPulseBeep = pulseBeep;
+  
+      }  
+
+      counter++;  
+
       // Check for pleth byte
       if (counter == 1){
         for(int i = 6; i >= 0; i--){
@@ -81,10 +108,12 @@ private int[] bitArray = new int[8];
         }
         plethRate = unbinary(plethString);
         plethRate = (int)(plethRate*0.2 + (oldPlethRate*0.8));
+        // println("plethRate: "+plethRate);;
         plethString = "";
         channelPleth[0].addDataPoint(plethRate);
         // println(channelPleth[0].getLatestPoint().value);
-        channelPleth[0].graphMe = true; 
+        channelPleth[0].graphMe = true;
+
         oldPlethRate = plethRate;
         pleth.isDataToGraph = true;
       }  
@@ -136,7 +165,7 @@ private int[] bitArray = new int[8];
       wM.heartBeat = millis();
       wM.port.write("W");
       wM.port.write(10);
-      println("+ Heartbeat +");
+      print("+ Melzi +");
       if(wM.conValue != 00){
         wM.conValue = 00;
       }
@@ -157,6 +186,79 @@ private int[] bitArray = new int[8];
         wM.port.write(10);
         wM.isFirstContact = true;
         isTraversReadyToMove = true;       
+      }  
+    }
+  
+  }
+
+   void lA(String inChar) {
+
+   // println("In after Null");
+    // println(inChar);
+
+    if (inChar.trim().equals("W")){
+      wLA.heartBeat = millis();
+      wLA.port.write("W");
+      wLA.port.write(10);
+      print("+ LA +");
+      if(wLA.conValue != 00){
+        wLA.conValue = 00;
+      }
+      // serialConnection = "Connected";
+    }
+
+    if(inChar.trim().equals("N")){
+      laLedIsready = true;
+     // println("Robot Ready for Next Position");
+    }
+
+    if(!wLA.isFirstContact){
+      // println("In first contact");
+      if (inChar.trim().equals("A")) {
+        println("Connected LA");
+        wLA.heartBeat = millis();                   
+        wLA.port.write("B");
+        wLA.port.write(10);
+        wLA.isFirstContact = true;
+        laLedIsready = true; 
+        robot.setColor(wLA.port,0,127,127,127);
+        robot.setTargetColor(wLA.port,0,127,127,127);        
+      }  
+    }
+  
+  }
+
+   void lB(String inChar) {
+
+    // println(inChar);
+
+    if (inChar.trim().equals("W")){
+      wLB.heartBeat = millis();
+      wLB.port.write("W");
+      wLB.port.write(10);
+      println("+ LB +");
+      if(wLB.conValue != 00){
+        wLB.conValue = 00;
+      }
+      // serialConnection = "Connected";
+    }
+
+    if(inChar.trim().equals("N")){
+      // isTraversReadyToMove = true;
+     // println("Robot Ready for Next Position");
+    }
+
+    if(!wLB.isFirstContact){
+      // println("In first contact");
+      if (inChar.trim().equals("A")) {
+        println("Connected LB");
+        wLB.heartBeat = millis();                   
+        wLB.port.write("B");
+        wLB.port.write(10);
+        wLB.isFirstContact = true;
+        robot.setColor(wLB.port,0,127,127,127);
+        robot.setTargetColor(wLB.port,0,127,127,127);  
+        // isTraversReadyToMove = true;       
       }  
     }
   

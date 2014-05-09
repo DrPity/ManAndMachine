@@ -8,7 +8,7 @@ ID,STRING,VOICE
 6,-,0
 7,-,0
 8,-,0
-9,You say to me good morning?,8
+9,-,0
 10,-,0
 11,-,0
 12,-,0
@@ -19,10 +19,31 @@ ID,STRING,VOICE
 17,-,0
 18,-,0
 19,-,0
-20,Hello super cool Robert,8
-21,-,0
+20,-,0
+21,You say to me good morning,8
 22,-,0
-23,-,0
-24,-,0
+23,Good morning. Why?,8
+24,Why good morning?,8
 25,-,0
-26,-,0
+26,Why is it a good morning?,8
+27,-,0
+28,Why is it a good morning for me?,8
+29,Why,8
+30,Why is it?,8
+31,-,0
+32,For me a good morning why?,8
+33,-,0
+34,-,0
+35,-,0
+36,You say to me “Good Morning”?,8
+37,-,0
+38,This is stupid. We have already been through this.,8
+39,Why are you avoiding the subject?,8
+40,-,0
+41,So how come I get a feeling you need me more?,8
+42,What,8
+43,-,0
+44,That was cruel.,8
+45,-,0
+46,-,0
+47,-,0

@@ -30,14 +30,19 @@ private byte    caReturn            = 13;
 private String  heartRateString     = "Na";
 private String  inCharA;
 private String  inCharM;
+private String  inCharLA;
+private String  inCharLB;
 private String  scaleMode;
-private String  arduinoPort               = "/dev/tty.usbmodem1d11141";
+private String  arduinoPort               = "/dev/tty.usbmodem1d11441";
 private String  melziPort                 = "/dev/tty.usbserial-AH01SIVE";
 private String  pulseMeterPort            = "/dev/tty.BerryMed-SerialPort";
+private String  ledPortA                  = "/dev/tty.usbmodem1d1131";
+private String  ledPortB                  = "/dev/tty.usbmodem1d1121";
 private float   angle                     = 0;
 private float   aVelocity                 = 0.05;
 private boolean isRobotReadyToMove        = false;
 private boolean isTraversReadyToMove      = false;
+private boolean laLedIsready              = false;
 private boolean isFirstContact            = false;
 private boolean isRobotStarted            = false;
 private boolean isRecording               = false;
@@ -49,6 +54,8 @@ private boolean gridYisDrawn              = false;
 private boolean gridXisDrawn              = false;
 private boolean isArduinoPort             = false;
 private boolean isMelziPort               = false;
+private boolean isLedPortA                = false;
+private boolean isLedPortB                = false;
 private boolean isPulseMeterPort          = false;
 private boolean isTableSpeechLoaded       = false;
 private boolean isReadyForButtonCommands  = false;
@@ -61,7 +68,7 @@ private boolean stepBack                  = false;
 
 PImage bg;
 Table table, tableRm, tablePositions;
-WatchDog wPm, wA, wM;
+WatchDog wPm, wA, wM, wLA, wLB;
 ControlFont font;
 Client myClient;
 Drawings drawings;
@@ -77,7 +84,7 @@ Channel[] channelsMindwave = new Channel[11];
 Channel[] channelPleth = new Channel[1];
 Graph mindWave, emg, ecg, pleth;
 Textlabel lableID, textID, fRate, headlineText_1, headlineText_2, textMindwave, attentionLevel, attentionValue, meditationLevel, meditationValue, blinkStrength, blinkValue, textPulseMeter, pulseLevel, pulseValue;
-ConnectionLight connectionLight, bluetoothConnection, robotConnection, traversConnection;
+ConnectionLight connectionLight, bluetoothConnection, robotConnection, traversConnection, ledAConnection, ledBConnection;
 
 // ------------------------------------------------------------------------------------
 
@@ -98,12 +105,16 @@ void setup() {
 // ----------------------------------------
 
   // WachtDog: SleepTime Thread, NameDevice, Port, Buffering, initOK?, BautRate, isTypArduino, PApplet 
-  wPm = new WatchDog(1,"PulseMeter", pulseMeterPort, false, isPulseMeterPort, 115200, false, this);
+  wPm = new WatchDog(1,"PulseMeter", pulseMeterPort, false, isPulseMeterPort, 115200, false, false, this);
   wPm.start();
-  wA = new WatchDog(1,"Arduino", arduinoPort, true, isArduinoPort, 115200, true, this);
+  wA = new WatchDog(1,"Arduino", arduinoPort, true, isArduinoPort, 115200, true, false, this);
   wA.start();
-  wM = new WatchDog(1,"Melzi", melziPort, true, isMelziPort, 115200, true, this);
+  wM = new WatchDog(1,"Melzi", melziPort, true, isMelziPort, 115200, true, false, this);
   wM.start();
+  wLA = new WatchDog(1,"LED A", ledPortA, true, isLedPortA, 115200, true, false, this);
+  wLA.start();
+  wLB = new WatchDog(1,"LED B", ledPortB, true, isLedPortB, 115200, true, false,this);
+  wLB.start();
   //activate textToSpeech thread
   textToSpeech = new TextToSpeech(1);
   textToSpeech.start();
@@ -165,17 +176,20 @@ void setup() {
   bluetoothConnection = new ConnectionLight(width - 98, 30, 10);
   robotConnection     = new ConnectionLight(width - 98, 50, 10);
   traversConnection   = new ConnectionLight(width - 98, 70, 10);
+  ledAConnection      = new ConnectionLight(width - 98, 90, 10);
+  ledBConnection      = new ConnectionLight(width - 98, 110, 10);
   
 
 	globalMax = 0;
   isReadyToRecord = true;
   inCharA = null;
   inCharM = null;
+  inCharLA = null;
+  inCharLB = null;
   isReadyForButtonCommands = true;
 
-  kinect = addControlFrame("extra", 320,240);
+  // kinect = addControlFrame("extra", 320,240);
 
-  
     
 }
 
@@ -219,7 +233,12 @@ void draw() {
   traversConnection.update(wM.conValue);
   traversConnection.draw();
   traversConnection.travers.draw();
-
+  ledAConnection.update(wLA.conValue);
+  ledAConnection.draw();
+  ledAConnection.led_A.draw();
+  ledBConnection.update(wLB.conValue);
+  ledBConnection.draw();
+  ledBConnection.led_B.draw();
 
   if (isRobotStarted){
 
@@ -308,6 +327,32 @@ void serialEvent(Serial thisPort){
     if (inCharM != null) {
       // println("In melzi event start manageSE");
       manageSE.melzi(inCharM);
+    }
+  }
+
+  if (thisPort == wLA.port && wLA.deviceInstanciated && isLedPortA){
+    // println("In melzi event");
+    
+    while (wLA.port.available() > 0){
+      // println("In melzi event > 0");
+      inCharLA = wLA.port.readStringUntil(end);
+    }
+    if (inCharLA != null) {
+      // println("inCharLA: "+inCharLA);
+      manageSE.lA(inCharLA);
+    }
+  }
+
+  if (thisPort == wLB.port && wLB.deviceInstanciated && isLedPortB){
+    // println("inCharLB: "+inCharLB);
+    
+    while (wLB.port.available() > 0){
+      // println("In melzi event > 0");
+      inCharLB = wLB.port.readStringUntil(end);
+    }
+    if (inCharLB != null) {
+      // println("In melzi event start manageSE");
+      manageSE.lB(inCharLB);
     }
   }
 }
