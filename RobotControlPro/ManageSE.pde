@@ -35,7 +35,7 @@ private int[] bitArray = new int[8];
       wA.heartBeat = millis();
       wA.port.write("W");
       wA.port.write(10);
-      print("+ Robot +");
+      println("+ Robot +");
       if(wA.conValue != 00){
         wA.conValue = 00;
       }
@@ -91,10 +91,12 @@ private int[] bitArray = new int[8];
         if(isFallingP && isIncreasingP && oldPulseBeep == 1){
           isFallingP = false;
           isIncreasingP = false;
-          println("plethRate: "+plethRate);
+          // println("plethRate: "+plethRate);
           if(plethRate >= 55){
-            if(millis() - beatTime >= 500){
-              println("Beat");
+            if(millis() - beatTime >= 450){
+              robot.setTargetColor(wLB.port,0,127,127,127);
+              robot.setTargetColor(wLA.port,0,127,127,127);
+              // println("Beat");
               robot.sendBeat(wLA.port,0,250,100,0);
               robot.sendBeat(wLB.port,0,250,100,0);
               beatTime = millis();
@@ -141,7 +143,7 @@ private int[] bitArray = new int[8];
         // println("\nPulse String" + pulseString + "\n");
         // println("Pulse: ");
         heartRate = unbinary(pulseString);
-        // println(heartRate);
+        robotAnimation.heartRateForCalculation = heartRate;
         heartRateString = String.valueOf(heartRate);
         pulseString = "";
         bitArray[7] = 0;
@@ -172,7 +174,7 @@ private int[] bitArray = new int[8];
       wM.heartBeat = millis();
       wM.port.write("W");
       wM.port.write(10);
-      print("+ Melzi +");
+      println("+ Melzi +");
       if(wM.conValue != 00){
         wM.conValue = 00;
       }
@@ -207,7 +209,7 @@ private int[] bitArray = new int[8];
       wLA.heartBeat = millis();
       wLA.port.write("W");
       wLA.port.write(10);
-      print("+ LA +");
+      println("+ LA +");
       if(wLA.conValue != 00){
         wLA.conValue = 00;
       }

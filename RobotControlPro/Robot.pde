@@ -46,6 +46,10 @@ public int       lastB             = 0;
 public int       lastBrightness    = 0;
 public int       lastLed           = 2;
 
+public int     lastXt             = 0;
+public int     lastYt             = 0;
+public int     lastZt             = 0;
+
 private boolean     sendData        = false;
 private boolean     isDataVerified  = false;
 private boolean     isStrRun        = false;
@@ -133,14 +137,14 @@ class Robot{
         && isInRange(baseAngleD, 0, 180) && isInRange(shoulderAngleD, 0, 180)
         && isInRange(elbowAngleD, 0, 180) && isInRange(wristAngleD, 0, 180) && isInRange(gripperAngleD, 0, 180) && isInRange(gripperWidth, 0, 180) && isInRange(gripperRotation, 0, 180)){
         isDataVerified = true;
-        println("( Data verfied )");
+        // println("( Data verfied )");
         if (!sendData){
           validStrPos = true;
         }
 
       }else{
         isDataVerified = false;
-        println("[ Data not verified ]");
+        // println("[ Data not verified ]");
       }
 
       println("[ " + x + "," + y + "," + z + "," + gripperAngleD + "," + gripperRotation +  "," + gripperWidth + "," + easingResolution + "," + brightnessStrip + "," + r + "," + g + "," + b + " ]");
@@ -204,8 +208,11 @@ class Robot{
     if(wM.deviceInstanciated){
       wM.port.write(String.format("Rr%d,%d,%d,%d\n",x,y,z,easing));
       // wA.port.write(10);
-      println(String.format("(Rr%d,%d,%d,%d)",x, y, z,easing));
+      println(String.format("(Travers data send: Rr%d,%d,%d,%d)",x, y, z,easing));
       isTraversReadyToMove = false;
+      lastXt = x;
+      lastYt = y;
+      lastZt = z;
     }
   }
 
@@ -217,7 +224,7 @@ class Robot{
     if(wLA.deviceInstanciated || wLB.deviceInstanciated){
       // println("( In send beat )");
       port.write(String.format("Cc%d,%d,%d,%d,%d\n",strip,r,g,b,1));
-      println(String.format("(Rr%d,%d,%d,%d)",strip, r, g,b));
+      // println(String.format("(Rr%d,%d,%d,%d)",strip, r, g,b));
       // wA.port.write(10);
       laLedIsready = false;
     }
@@ -307,14 +314,17 @@ class Robot{
         // setRobotArm() here
         if(animation == 0){
         robotAnimation.isAnimation = false;
+        traversAnimation.isAnimationT = false;
         //float x, float y, float z, float gripperAngleD, int gripperRotation, int gripperWidth, int easingResolution, boolean sendData, int brightnessStrip, int r, int g,  int b, int led
           setRobotArm(x,y,z,gripperAngle,gripperRotation,gripperWidth,easing,true,brightn,r,g,b,2);
-          println("RobotTable");
-          println("[ " + x + "," + y + "," + z + "," + gripperAngle + "," + gripperRotation +  "," + gripperWidth + "," + easing + "," + brightn + "," + r + "," + g + "," + b + "," + x1 + "," + y1 + " ]");
+          sendTraversData(x1,x1,y1,5000);
+          // println("RobotTable");
+          // println("[ " + x + "," + y + "," + z + "," + gripperAngle + "," + gripperRotation +  "," + gripperWidth + "," + easing + "," + brightn + "," + r + "," + g + "," + b + "," + x1 + "," + y1 + " ]");
         }else{
           robotAnimation.movementID = animation;
+          traversAnimation.movementIDt = animation;
           robotAnimation.isAnimation = true;
-          println("robotAnimation.isAnimation: "+robotAnimation.isAnimation);
+          traversAnimation.isAnimationT = true;
         }
 
       }

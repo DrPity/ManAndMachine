@@ -36,9 +36,9 @@ void ChangePosition_Class::setPosition(long nextPosition){
 
 
   if (_startPosition < _targetPosition){
-    direction = 1;
+    direction = 1; // towards robert // away from audience
   }else{
-    direction = -1;
+    direction = -1; // away from robert // towards audience
   }
 
   _totalChangeInPosition = (abs(_startPosition - _targetPosition));
@@ -47,7 +47,7 @@ void ChangePosition_Class::setPosition(long nextPosition){
 }
 
 
-int ChangePosition_Class::nextEasedStep(){
+long ChangePosition_Class::nextEasedStep(){
       // this value must macht the resolution in e.g. a 'for' loop
   _easedPosition = _cubic.easeInOut(_easingValue);
   if(_easingValue < easing_resolution){

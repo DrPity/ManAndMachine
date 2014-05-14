@@ -85,7 +85,9 @@ int waitForSpeechReturn;
 
 	void say(String s, int voice) {
 	  try {
+      sleepTime(200);
       waitForRobot();
+      waitForTravers();
 	    Runtime rtime = Runtime.getRuntime();
 	    Process child = rtime.exec("/usr/bin/say -v " + (voices[voice]) + " " + s);
 	    waitForSpeechReturn = child.waitFor();
@@ -149,6 +151,13 @@ int waitForSpeechReturn;
   private void waitForRobot(){
     while(!isRobotReadyToMove){
       sleepTime(10);
+    }
+  }
+
+
+  private void waitForTravers(){
+    while(!isTraversReadyToMove){
+      sleepTime(2);
     }
   }
 

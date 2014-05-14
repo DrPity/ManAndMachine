@@ -11,21 +11,21 @@ class ChangePosition_Class {
 
 		ChangePosition_Class(int minMillisCC, int maxMillisCW);
 		void setPosition(long nextPosition);
-		int nextEasedStep();
+		long nextEasedStep();
 		int easing_resolution;
 		int direction;
 		bool reachedTarget;
+		long _currentPosition;
 
 	private:
 		long _totalChangeInPosition;
-		long _currentPosition;
 		long _targetPosition;
 		double _easedPosition;
 
-		int _easingValue;
-		int _minMillisCC;
-		int _maxMillisCW;
-		int _startPosition;
+		long _easingValue;
+		long _minMillisCC;
+		long _maxMillisCW;
+		long _startPosition;
 
 
 		CubicEase _cubic;

@@ -33,13 +33,11 @@ private String  inCharM;
 private String  inCharLA;
 private String  inCharLB;
 private String  scaleMode;
-private String  arduinoPort               = "/dev/tty.usbmodem1d11441";
+private String  arduinoPort               = "/dev/tty.usbmodem1d1141";
 private String  melziPort                 = "/dev/tty.usbserial-AH01SIVE";
 private String  pulseMeterPort            = "/dev/tty.BerryMed-SerialPort";
 private String  ledPortA                  = "/dev/tty.usbmodem1d1131";
 private String  ledPortB                  = "/dev/tty.usbmodem1d1121";
-private float   angle                     = 0;
-private float   aVelocity                 = 0.05;
 private boolean isRobotReadyToMove        = false;
 private boolean isTraversReadyToMove      = false;
 private boolean laLedIsready              = false;
@@ -80,6 +78,7 @@ ManageCLE mindWaveCLE;
 ManageSE manageSE;
 TextToSpeech textToSpeech;
 RobotAnimation robotAnimation;
+TraversAnimation traversAnimation;
 Robot robot;
 Channel[] channelsMindwave = new Channel[11];
 Channel[] channelPleth = new Channel[1];
@@ -91,8 +90,8 @@ ConnectionLight connectionLight, bluetoothConnection, robotConnection, traversCo
 
 void setup() {
   frameRate(120);
-	size(displayWidth, displayHeight,P2D);
-  // size(1280,720,P2D);
+	// size(displayWidth, displayHeight,P2D);
+  size(1280,720,P2D);
   noSmooth();
   hint(ENABLE_RETINA_PIXELS);
   smooth(4);
@@ -122,6 +121,9 @@ void setup() {
   //activate robotAnimation thread
   robotAnimation = new RobotAnimation(1);
   robotAnimation.start();
+  traversAnimation = new TraversAnimation(1);
+  traversAnimation.start();
+  delay(100);
 
 // ----------------------------------------
 
@@ -189,7 +191,7 @@ void setup() {
   inCharLB = null;
   isReadyForButtonCommands = true;
 
-  kinect = addControlFrame("extra", 320,240);
+  // kinect = addControlFrame("extra", 320,240);
 
     
 }
@@ -220,7 +222,7 @@ void draw() {
   noStroke();
   // drawings.drawRectangle(10,10,195,300,0,0,255,150);
   drawings.drawRectangle(round(width*0.008), round(height * 0.408) ,400,300,0,0,255,255,255,150);  
-  drawings.drawRectangle(0, 0, 88, 78, width - 98, 10, 255,255,255, 150);
+  drawings.drawRectangle(0, 0, 88, 118, width - 98, 10, 255,255,255, 150);
   drawings.drawRectangle(round(width*0.13), round(height * 0.49),40,20, 60,0, 255-isReadyColor ,isReadyColor - 50,0, 220);
 	connectionLight.update(channelsMindwave[0].getLatestPoint().value);
 	connectionLight.draw();
@@ -241,25 +243,25 @@ void draw() {
   ledBConnection.draw();
   ledBConnection.led_B.draw();
 
-  if (isRobotStarted){
+  // if (isRobotStarted){
 
-    if((frameCount%5)==0){
+  //   if((frameCount%5)==0){
 
-      float amplitude = 120;
-      float x = amplitude * cos(angle);
-      angle += aVelocity;
-      calculateBioInput();
+  //     float amplitude = 120;
+  //     float x = amplitude * cos(angle);
+  //     angle += aVelocity;
+  //     calculateBioInput();
 
-      gAngle = (int) map(x, 0, 100, 90, 00);
-      z = (int) map (x,0, 100, 120, 250);
-      z = (int) map (x,0, 100, 120, 250);
-      gGripperWidth = (int) map(x, 0, 100, 0, 180);
-      led = (int) map(x, 0, 100, 0, 255);
+  //     gAngle = (int) map(x, 0, 100, 90, 00);
+  //     z = (int) map (x,0, 100, 120, 250);
+  //     z = (int) map (x,0, 100, 120, 250);
+  //     gGripperWidth = (int) map(x, 0, 100, 0, 180);
+  //     led = (int) map(x, 0, 100, 0, 255);
     
-      robot.setRobotArm(x, 130, z, gAngle, gAngle, gGripperWidth, 1, true, 255, led, 255, led, 2);
-      println("Robot Movement");
-    }
-  }
+  //     robot.setRobotArm(x, 130, z, gAngle, gAngle, gGripperWidth, 1, true, 255, led, 255, led, 2);
+  //     println("Robot Movement");
+  //   }
+  // }
 
   gridYisDrawn = false;
   gridXisDrawn = false;
@@ -551,5 +553,5 @@ void calculateBioInput(){
 // ------------------------------------------------------------------------------------
 
 boolean sketchFullScreen() {
-return true;
+return false;
 }

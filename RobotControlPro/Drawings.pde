@@ -40,7 +40,7 @@ class Drawings  {
     PFont fontHeadline = createFont("ProximaNova-Thin",20);
     PFont fontHeadline_2 = createFont("ProximaNova-Bold",20);
     PFont fontHeadline_3 = createFont("ProximaNova-Light",20);
-    PFont fontHeadLableBig = createFont("ProximaNova-Thin",100);
+    PFont fontHeadLableBig = createFont("ProximaNova-Thin",80);
 
   // fontHeadline
 

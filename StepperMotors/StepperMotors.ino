@@ -13,21 +13,18 @@
 const int led = 27;
 
 
-long currentPositionA = 0;
-long currentPositionB = 0;
-long currentPositionC = 0;
+unsigned long currentPositionA = 0;
+unsigned long currentPositionB = 0;
+unsigned long currentPositionC = 0;
 
 long currentStepsAB;
 long currentStepsC;
 
-long MAX_STEPS_AB = 20000;
-long MAX_STEPS_C = 20000;
+unsigned long MAX_STEPS_AB = 33000;
+unsigned long MAX_STEPS_C = 33000;
 
-long MIN_STEPS_AB = 0;
-long MIN_STEPS_C = 0;
-
-long X_MAX_STEPS = 0;
-long Y_MAX_STEPS = 0;
+unsigned long MIN_STEPS_AB = 0;
+unsigned long MIN_STEPS_C = 0;
 
 int parameterArray[3];
 int splitArray[3]; 
@@ -58,9 +55,9 @@ bool cVerified      = false;
 long watchdog;
 
 int connectionTimeOut = 10;
-long a               = 1500;
-long b               = 1500;
-long c               = 1500;
+unsigned long a               = 1500;
+unsigned long b               = 1500;
+unsigned long c               = 1500;
 char end            = '\n';
 
 String inByte;
@@ -125,7 +122,6 @@ void loop(){
     
     if(inByte.equals("B") == true){
     serialReady = true;
-    initializeMovement();
     // testMovement();
     // testButton();
     }
@@ -139,6 +135,14 @@ void loop(){
     if(inByte.indexOf('R') == 0 && inByte.indexOf('r') == 1){
 
     splitString(inByte);
+    // sendConfirmationData(1, x, y, z, wrist, gripperAngle, gripper, light);
+    // Serial.println("New Position");
+       
+    }
+
+
+    if(inByte.indexOf('C') == 0 && inByte.indexOf('c') == 1){
+    initializeMovement();
     // sendConfirmationData(1, x, y, z, wrist, gripperAngle, gripper, light);
     // Serial.println("New Position");
        
@@ -180,7 +184,7 @@ void loop(){
     sendMovement(numberOfStepsA,numberOfStepsB,numberOfStepsC);
 
 
-  for (int i = 0; i < 3; ++i){
+   for (int i = 0; i < 3; ++i){
     if(stepperMotors[i]->reachedTarget == false){
       traversReadyToMove = false;
       break;
@@ -192,19 +196,85 @@ void loop(){
     }
   }
 
+
   if(digitalRead(C_MIN_PIN) == LOW){
-    digitalWrite(C_ENABLE_PIN, HIGH);
-  }else{
-    digitalWrite(C_ENABLE_PIN, LOW);
+    // Serial.println("currentPositionC");
+    // Serial.println(stepperMotors[2]->_currentPosition);
+    // digitalWrite(C_ENABLE_PIN, HIGH);
+    if(stepperMotors[2]->direction == 1){
+      digitalWrite(C_DIR_PIN, 0);
+      stepperMotors[2]->_currentPosition = MAX_STEPS_C;
+      currentPositionC = MAX_STEPS_C;
+    }else{
+      digitalWrite(C_DIR_PIN, 1);
+      stepperMotors[2]->_currentPosition = MIN_STEPS_C;
+      currentPositionC = MIN_STEPS_C;
+    }
+    C = true;
+    for(int i = 0; i < 400; i ++){
+      sendStep();
+    }
+    // Serial.println("currentPositionC");
+    // Serial.println(stepperMotors[2]->_currentPosition);
+
+    stepperMotors[2]->reachedTarget = true;
+    C = false;
+    cVerified = true;
+    numberOfStepsC = 0;
   }
 
   if(digitalRead(A_MIN_PIN) == LOW){
-    digitalWrite(A_ENABLE_PIN, HIGH);
-    digitalWrite(B_ENABLE_PIN, HIGH);
-  }else{
-    digitalWrite(A_ENABLE_PIN, LOW);
-    digitalWrite(B_ENABLE_PIN, LOW);
+    // Serial.println("currentPositionAB");
+    // Serial.println(stepperMotors[0]->_currentPosition);
+    // Serial.println(stepperMotors[1]->_currentPosition);
+    // digitalWrite(C_ENABLE_PIN, HIGH);
+    if(stepperMotors[0]->direction == 1){
+      digitalWrite(A_DIR_PIN, 0);
+      digitalWrite(B_DIR_PIN, 0);
+      stepperMotors[0]->_currentPosition = MAX_STEPS_AB;
+      stepperMotors[1]->_currentPosition = MAX_STEPS_AB;
+      currentPositionA = MAX_STEPS_AB;
+      currentPositionB = MAX_STEPS_AB;
+    }else{
+      digitalWrite(A_DIR_PIN, 1);
+      digitalWrite(B_DIR_PIN, 1);
+      stepperMotors[0]->_currentPosition = MIN_STEPS_AB;
+      stepperMotors[1]->_currentPosition = MIN_STEPS_AB;
+      currentPositionA = MIN_STEPS_AB;
+      currentPositionB = MIN_STEPS_AB;
+    }
+
+    // Serial.println("currentPositionAB");
+    // Serial.println(stepperMotors[0]->_currentPosition);
+    // Serial.println(stepperMotors[1]->_currentPosition);
+    AB = true;
+    
+    for(int i = 0; i < 400; i ++){
+      sendStep();
+    }
+    Serial.println("Touch button AB");
+    stepperMotors[0]->reachedTarget = true;
+    stepperMotors[1]->reachedTarget = true;
+    // Serial.println("number of steps A: ");
+    // Serial.println(numberOfStepsA);
+    // Serial.println(stepperMotors[0]->reachedTarget);
+    // Serial.println(stepperMotors[1]->reachedTarget);
+    AB = false;
+    aVerified = true;
+    numberOfStepsA = 0;
+    numberOfStepsB = 0;
   }
+
+
+   
+
+  // if(digitalRead(A_MIN_PIN) == LOW){
+  //   digitalWrite(A_ENABLE_PIN, HIGH);
+  //   digitalWrite(B_ENABLE_PIN, HIGH);
+  // }else{
+  //   digitalWrite(A_ENABLE_PIN, LOW);
+  //   digitalWrite(B_ENABLE_PIN, LOW);
+  // }
 
 
 }
@@ -260,25 +330,32 @@ for (int i = 0; i <= 3; i++){
   c             = parameterArray[2];
   easingRes     = parameterArray[3];
 
+  // Serial.println("Before Mapping: ");
+  // Serial.println(a);
+  // Serial.println(b);
+  // Serial.println(c);
 
     for (int i = 0; i < 3; ++i)
   {
     stepperMotors[i]->easing_resolution = easingRes;
   }
 
-  a = map(a,0,2000,MIN_STEPS_AB,MAX_STEPS_AB);
-  b = map(b,0,2000,MIN_STEPS_AB,MAX_STEPS_AB);
-  c = map(c,0,2000,MIN_STEPS_C,MAX_STEPS_C);
-  Serial.println("Splitted Strings");
-  Serial.println(a);
-  Serial.println(b);
-  Serial.println(c);
-  Serial.println(easingRes);;
+  a = map(a,0,2000,MIN_STEPS_AB ,MAX_STEPS_AB); // Wokaround -> make fx with button instead
+  b = map(b,0,2000,MIN_STEPS_AB ,MAX_STEPS_AB);
+  c = map(c,0,2000,MIN_STEPS_C ,MAX_STEPS_C);
+  // Serial.println("After Mapping: ");
+  // Serial.println(a);
+  // Serial.println(b);
+  // Serial.println(c);
+  // Serial.println(easingRes);;
   stepperMotors[0]->setPosition(a);
   stepperMotors[1]->setPosition(b);
   stepperMotors[2]->setPosition(c);
 
   counter = 1;
+
+  // Serial.println("number of steps A in splitString: ");
+  // Serial.println(numberOfStepsA);
 
 }
 
@@ -318,16 +395,17 @@ void establishContact() {
 // ------------------------------------------------------------------------------------
 
 void moveA(int direction, long nextPositionA){
-  if (stepperMotors[0]->direction == 1){
+  if (direction == 1){
     digitalWrite(A_DIR_PIN, 1);    
   }else{
     digitalWrite(A_DIR_PIN, 0);
   }
   if(nextPositionA != currentPositionA){
-    numberOfStepsA = abs(nextPositionA - currentPositionA);
+    numberOfStepsA = nextPositionA - currentPositionA;
+    numberOfStepsA = abs(numberOfStepsA);
     aVerified = true;
   }
-    currentPositionA = nextPositionA;
+  currentPositionA = nextPositionA;
 }
 // ------------------------------------------------------------------------------------
 
@@ -338,7 +416,8 @@ void moveB(int direction, long nextPositionB){
   digitalWrite(B_DIR_PIN, 0);
   }
  if(nextPositionB != currentPositionB){ 
-    numberOfStepsB = abs(nextPositionB - currentPositionB);
+    numberOfStepsB = nextPositionB - currentPositionB;
+    numberOfStepsB = abs(numberOfStepsB);
     bVerified = true; 
   } 
   currentPositionB = nextPositionB;
@@ -353,9 +432,9 @@ void moveC(int direction, long nextPositionC){
     digitalWrite(C_DIR_PIN, 0);
   }
   if(nextPositionC != currentPositionC){ 
-
     //Optional smoothing with Minimun array possible
-    numberOfStepsC = abs(nextPositionC - currentPositionC);
+    numberOfStepsC = nextPositionC - currentPositionC;
+    numberOfStepsC = abs(numberOfStepsC);
     cVerified = true;
   } 
   currentPositionC = nextPositionC;
@@ -403,6 +482,10 @@ void initializeMovement()
     sendStep();   
   }
 
+  done = false;
+  AB = true;
+  C = true;
+
   digitalWrite(A_DIR_PIN, 0);
   digitalWrite(B_DIR_PIN, 0);
   digitalWrite(C_DIR_PIN, 0);
@@ -427,10 +510,7 @@ void initializeMovement()
   //   sendStep();
   // }
   
-  // move forwards until touch button, then we know how many steps is the max
-  done = false;
-  AB = true;
-  C = true;
+  // move forwards until touch button, then we know how many steps is the ma
 
 
   while(!done)
@@ -464,9 +544,23 @@ void initializeMovement()
     sendStep();  
   }
 
+  digitalWrite(A_ENABLE_PIN, LOW);
+  digitalWrite(B_ENABLE_PIN, LOW);
+  digitalWrite(C_ENABLE_PIN, LOW);
+
   MAX_STEPS_AB = currentStepsAB;
   MAX_STEPS_C = currentStepsC;
-  
+  currentPositionA = MIN_STEPS_AB;
+  currentPositionB = MIN_STEPS_AB;
+  currentPositionC = MIN_STEPS_C;
+  stepperMotors[0]->reachedTarget = true;
+  stepperMotors[1]->reachedTarget = true;
+  stepperMotors[2]->reachedTarget = true;
+  stepperMotors[0]->_currentPosition = MIN_STEPS_AB;
+  stepperMotors[1]->_currentPosition = MIN_STEPS_AB;
+  stepperMotors[2]->_currentPosition = MIN_STEPS_C;
+  aVerified = true;
+  cVerified = true;
   Serial.println("Done with initializing");
   Serial.print("max x:");
   Serial.println(MAX_STEPS_AB);
@@ -507,22 +601,29 @@ void sendStep(){
 
 void sendMovement(int numberOfStepsA, int numberOfStepsB, int numberOfStepsC){
 bool done = false;
+// Serial.println("number of steps A in sendMovement: ");
+// Serial.println(numberOfStepsA);
   while(!done){
-    if(numberOfStepsA >= 1){
+    // Serial.println("In while loop");
+    if(numberOfStepsA >= 1 && aVerified){
       digitalWrite(A_STEP_PIN, HIGH);
       digitalWrite(A_STEP_PIN, LOW);
       digitalWrite(B_STEP_PIN, HIGH);
       digitalWrite(B_STEP_PIN, LOW);
+      
     }
-    if(numberOfStepsC >= 1){
+    if(numberOfStepsC >= 1 && cVerified){
       digitalWrite(C_STEP_PIN, HIGH);
       digitalWrite(C_STEP_PIN, LOW);
+      
     }
-  numberOfStepsA --;
-  numberOfStepsB --;  
-  numberOfStepsC --;
+  
     if (numberOfStepsA <= 0 && numberOfStepsB <=0 && numberOfStepsC <=0)
       done = true;
+  
+  numberOfStepsA --;
+  numberOfStepsB --;
+  numberOfStepsC --;
 
   delayMicroseconds(100);  
   }
