@@ -24,7 +24,7 @@ private int     globalMax;
 private int     tableIndex          = 0;
 private int     tableIndexStoring   = 0;
 private int     receivedHeartRate   = 0;
-private int     voice               = 0;
+// private int     voice               = 0;
 private int     isReadyColor        = 255;
 private byte    caReturn            = 13;
 private String  heartRateString     = "Na";
@@ -33,11 +33,11 @@ private String  inCharM;
 private String  inCharLA;
 private String  inCharLB;
 private String  scaleMode;
-private String  arduinoPort               = "/dev/tty.usbmodem1d1141";
+private String  arduinoPort               = "/dev/tty.usbmodem1d11341";
 private String  melziPort                 = "/dev/tty.usbserial-AH01SIVE";
 private String  pulseMeterPort            = "/dev/tty.BerryMed-SerialPort";
-private String  ledPortA                  = "/dev/tty.usbmodem1d1131";
-private String  ledPortB                  = "/dev/tty.usbmodem1d1121";
+private String  ledPortA                  = "/dev/tty.usbmodem1d1111";
+private String  ledPortB                  = "/dev/tty.usbmodem1d1141";
 private boolean isRobotReadyToMove        = false;
 private boolean isTraversReadyToMove      = false;
 private boolean laLedIsready              = false;
@@ -137,7 +137,11 @@ void setup() {
   // mindWaveCLE.thingearInit();
 
 	font = new ControlFont(createFont("DIN-MediumAlternate", 12), 12);
-  mindWaveCLE.connectToMindWave(this);
+  try {
+   mindWaveCLE.connectToMindWave(this); 
+  } catch (Exception e) {
+    println("Mindwave: " + e);    
+  }
 
   // ----------------------------------------
        
@@ -170,10 +174,10 @@ void setup() {
 // ----------------------------------------
 
 	// Set up the graph
-	mindWave = new Graph(0, 0, width, round(height * 0.10), channelsMindwave, 1000, "Lines");
-  pleth = new Graph(0, round(height * 0.10), width, round(height * 0.10), channelPleth, 200, "Lines");
-  ecg = new Graph(0, round(height * 0.30), width, round(height * 0.10), channelPleth, 200, "Lines");
-  emg = new Graph(0, round(height * 0.20), width, round(height * 0.10), channelPleth, 200, "Lines");
+	mindWave = new Graph(0, 0, width, round(height / 2), channelsMindwave, 1000, "Lines");
+  pleth = new Graph(0, round(height / 2), width, round(height / 2), channelPleth, 200, "Lines");
+  // ecg = new Graph(0, round(height * 0.30), width, round(height * 0.10), channelPleth, 200, "Lines");
+  // emg = new Graph(0, round(height * 0.20), width, round(height * 0.10), channelPleth, 200, "Lines");
 	
 	connectionLight     = new ConnectionLight(width - 98, 10, 10);
   bluetoothConnection = new ConnectionLight(width - 98, 30, 10);
@@ -206,7 +210,7 @@ void draw() {
   attentionValue.setValue(String.valueOf(channelsMindwave[1].getLatestPoint().value));
   meditationValue.setValue(String.valueOf(channelsMindwave[2].getLatestPoint().value));
   lableID.setValue(String.valueOf(globalID));
-  drawings.drawRectangle(0,0,width,round(height*0.40),0,0,255,255,255,150);
+  drawings.drawRectangle(0,0,width,height,0,0,255,255,255,150);
   
 
   mindWave.draw();
@@ -214,10 +218,10 @@ void draw() {
   // emg.draw();
   // ecg.draw();
   pleth.draw();
-  drawings.drawLine(0,round(mindWave.y + (height * 0.10)), width, round(mindWave.y + (height * 0.10)),2);
-  drawings.drawLine(0,round(emg.y + (height * 0.10)), width, round(emg.y + (height * 0.10)),2);
-  drawings.drawLine(0,round(ecg.y + (height * 0.10)), width, round(ecg.y + (height * 0.10)),2);
-  drawings.drawLine(0,round(pleth.y + (height * 0.10)), width, round(pleth.y + (height * 0.10)),2);
+  drawings.drawLine(0,height / 2, width, height/2,2);
+  // drawings.drawLine(0,round(emg.y + (height * 0.10)), width, round(emg.y + (height * 0.10)),2);
+  // drawings.drawLine(0,round(ecg.y + (height * 0.10)), width, round(ecg.y + (height * 0.10)),2);
+  drawings.drawLine(0, height, width, height,2);
   drawings.drawLine(20,round(height * 0.44), 210, round(height * 0.44),1);
   noStroke();
   // drawings.drawRectangle(10,10,195,300,0,0,255,150);

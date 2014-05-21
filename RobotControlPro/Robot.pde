@@ -8,8 +8,8 @@ private static final Float  GRIPLENGTH   = 155.0;   //lengh-of-grip
 private static final Float  WRIST_OFFSET = 28.0;    //offset wrist-gripper
 
 /* Constrains of servo motors in milliseconds */
-private static final Integer  BASE_MAX            = 2150;//2300;
-private static final Integer  BASE_MIN            = 800;//720;
+private static final Integer  BASE_MAX            = 2300;
+private static final Integer  BASE_MIN            = 720;
 private static final Integer  SHOULDER_MAX        = 2350; 
 private static final Integer  SHOULDER_MIN        = 720; 
 private static final Integer  ELBOW_MAX           = 2370; 
@@ -147,7 +147,7 @@ class Robot{
         // println("[ Data not verified ]");
       }
 
-      println("[ " + x + "," + y + "," + z + "," + gripperAngleD + "," + gripperRotation +  "," + gripperWidth + "," + easingResolution + "," + brightnessStrip + "," + r + "," + g + "," + b + " ]");
+      // println("[ " + x + "," + y + "," + z + "," + gripperAngleD + "," + gripperRotation +  "," + gripperWidth + "," + easingResolution + "," + brightnessStrip + "," + r + "," + g + "," + b + " ]");
 
       currentBase = (int) map(baseAngleD, 180, 0, BASE_MIN, BASE_MAX);
       currentShoulder = (int) map(shoulderAngleD, 0, 180, SHOULDER_MIN, SHOULDER_MAX);
@@ -208,7 +208,7 @@ class Robot{
     if(wM.deviceInstanciated){
       wM.port.write(String.format("Rr%d,%d,%d,%d\n",x,y,z,easing));
       // wA.port.write(10);
-      println(String.format("(Travers data send: Rr%d,%d,%d,%d)",x, y, z,easing));
+      // println(String.format("(Travers data send: Rr%d,%d,%d,%d)",x, y, z,easing));
       isTraversReadyToMove = false;
       lastXt = x;
       lastYt = y;

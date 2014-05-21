@@ -48,7 +48,7 @@ private int     globalMax;
 private int     tableIndex          = 0;
 private int     tableIndexStoring   = 0;
 private int     receivedHeartRate   = 0;
-private int     voice               = 0;
+// private int     voice               = 0;
 private int     isReadyColor        = 255;
 private byte    caReturn            = 13;
 private String  heartRateString     = "Na";
@@ -57,11 +57,11 @@ private String  inCharM;
 private String  inCharLA;
 private String  inCharLB;
 private String  scaleMode;
-private String  arduinoPort               = "/dev/tty.usbmodem1d1141";
+private String  arduinoPort               = "/dev/tty.usbmodem1d11341";
 private String  melziPort                 = "/dev/tty.usbserial-AH01SIVE";
 private String  pulseMeterPort            = "/dev/tty.BerryMed-SerialPort";
-private String  ledPortA                  = "/dev/tty.usbmodem1d1131";
-private String  ledPortB                  = "/dev/tty.usbmodem1d1121";
+private String  ledPortA                  = "/dev/tty.usbmodem1d1111";
+private String  ledPortB                  = "/dev/tty.usbmodem1d1141";
 private boolean isRobotReadyToMove        = false;
 private boolean isTraversReadyToMove      = false;
 private boolean laLedIsready              = false;
@@ -161,7 +161,11 @@ public void setup() {
   // mindWaveCLE.thingearInit();
 
 	font = new ControlFont(createFont("DIN-MediumAlternate", 12), 12);
-  mindWaveCLE.connectToMindWave(this);
+  try {
+   mindWaveCLE.connectToMindWave(this); 
+  } catch (Exception e) {
+    println("Mindwave: " + e);    
+  }
 
   // ----------------------------------------
        
@@ -194,10 +198,10 @@ public void setup() {
 // ----------------------------------------
 
 	// Set up the graph
-	mindWave = new Graph(0, 0, width, round(height * 0.10f), channelsMindwave, 1000, "Lines");
-  pleth = new Graph(0, round(height * 0.10f), width, round(height * 0.10f), channelPleth, 200, "Lines");
-  ecg = new Graph(0, round(height * 0.30f), width, round(height * 0.10f), channelPleth, 200, "Lines");
-  emg = new Graph(0, round(height * 0.20f), width, round(height * 0.10f), channelPleth, 200, "Lines");
+	mindWave = new Graph(0, 0, width, round(height / 2), channelsMindwave, 1000, "Lines");
+  pleth = new Graph(0, round(height / 2), width, round(height / 2), channelPleth, 200, "Lines");
+  // ecg = new Graph(0, round(height * 0.30), width, round(height * 0.10), channelPleth, 200, "Lines");
+  // emg = new Graph(0, round(height * 0.20), width, round(height * 0.10), channelPleth, 200, "Lines");
 	
 	connectionLight     = new ConnectionLight(width - 98, 10, 10);
   bluetoothConnection = new ConnectionLight(width - 98, 30, 10);
@@ -230,7 +234,7 @@ public void draw() {
   attentionValue.setValue(String.valueOf(channelsMindwave[1].getLatestPoint().value));
   meditationValue.setValue(String.valueOf(channelsMindwave[2].getLatestPoint().value));
   lableID.setValue(String.valueOf(globalID));
-  drawings.drawRectangle(0,0,width,round(height*0.40f),0,0,255,255,255,150);
+  drawings.drawRectangle(0,0,width,height,0,0,255,255,255,150);
   
 
   mindWave.draw();
@@ -238,10 +242,10 @@ public void draw() {
   // emg.draw();
   // ecg.draw();
   pleth.draw();
-  drawings.drawLine(0,round(mindWave.y + (height * 0.10f)), width, round(mindWave.y + (height * 0.10f)),2);
-  drawings.drawLine(0,round(emg.y + (height * 0.10f)), width, round(emg.y + (height * 0.10f)),2);
-  drawings.drawLine(0,round(ecg.y + (height * 0.10f)), width, round(ecg.y + (height * 0.10f)),2);
-  drawings.drawLine(0,round(pleth.y + (height * 0.10f)), width, round(pleth.y + (height * 0.10f)),2);
+  drawings.drawLine(0,height / 2, width, height/2,2);
+  // drawings.drawLine(0,round(emg.y + (height * 0.10)), width, round(emg.y + (height * 0.10)),2);
+  // drawings.drawLine(0,round(ecg.y + (height * 0.10)), width, round(ecg.y + (height * 0.10)),2);
+  drawings.drawLine(0, height, width, height,2);
   drawings.drawLine(20,round(height * 0.44f), 210, round(height * 0.44f),1);
   noStroke();
   // drawings.drawRectangle(10,10,195,300,0,0,255,150);
@@ -1242,7 +1246,7 @@ class Graph {
 			// println("Drawing GridX");
 			while (gridTime >= leftTime) {
 				int gridX = (int)helpers.mapLong(gridTime, leftTime, rightTime, 0L, (long)w);
-				line(gridX, 0, gridX, round(height * 0.40f));
+				line(gridX, 0, gridX, height);
 				gridTime -= (long)(1000 * gridSeconds);
 			}
 		gridXisDrawn = true;
@@ -1253,7 +1257,7 @@ class Graph {
 		//Draw square horizontal grid for now
 		if(!gridYisDrawn){
 			// println("Drawing GridY");
-			int gridY = round(height * 0.40f);
+			int gridY = height;
 			while (gridY >= 0) {
 				gridY -= pixelsPerSecond * gridSeconds; 
 				line(0, gridY, w, gridY);
@@ -1537,22 +1541,24 @@ boolean xPositionUpdatedT = false;
 
     // println("X: " + jointPos_Proj.x + " Y: " + jointPos_Proj.y + " Z: " + jointPos_Proj.z);
 
-    if(jointPos_Proj.z > 848 && jointPos_Proj.z < 3300){
+    if(jointPos_Proj.z > 848 && jointPos_Proj.z < 3300 && context != null){
       kinectValueAvailable = true;
-      zValueKinectR = map(jointPos_Proj.z,848, 3300,-70, -340);
+      zValueKinectR = map(jointPos_Proj.z,848, 3300, -2, 166);
       oldZValueKinectT = zValueKinectT;
-      if(abs(oldZValueKinectT - map(jointPos_Proj.z,848, 3300,0, 2000)) > 100){
+      if(abs(oldZValueKinectT - map(jointPos_Proj.z,848, 3300,0, 2000)) > 50){
         zValueKinectT = map(jointPos_Proj.z,848, 3300,0, 2000);
         zPositionUpdatedT = true;
+        // println("zValueKinectT: "+zValueKinectT);
       }
     } 
-    if(jointPos_Proj.x > 0 && jointPos_Proj.x < 600){
+    if(jointPos_Proj.x > 100 && jointPos_Proj.x < 500 && context != null){
       kinectValueAvailable = true;
-      xValueKinectR = map(jointPos_Proj.x,0, 600,0, 200);
+      xValueKinectR = map(jointPos_Proj.x,100, 500,-236,32);
       oldXValueKinectT = xValueKinectT;
-      if(abs(oldXValueKinectT - map(jointPos_Proj.x,0, 600,0, 2000)) > 10){
-        xValueKinectT = map(jointPos_Proj.x,0, 600,0, 2000);
+      if(abs(oldXValueKinectT - map(jointPos_Proj.x,100, 500,2000, 0)) > 5){
+        xValueKinectT = map(jointPos_Proj.x,100, 500,2000, 0);
         xPositionUpdatedT = true;
+        // println("xValueKinectT: "+xValueKinectT);
       }
     }
     else
@@ -2108,8 +2114,8 @@ private static final Float  GRIPLENGTH   = 155.0f;   //lengh-of-grip
 private static final Float  WRIST_OFFSET = 28.0f;    //offset wrist-gripper
 
 /* Constrains of servo motors in milliseconds */
-private static final Integer  BASE_MAX            = 2150;//2300;
-private static final Integer  BASE_MIN            = 800;//720;
+private static final Integer  BASE_MAX            = 2300;
+private static final Integer  BASE_MIN            = 720;
 private static final Integer  SHOULDER_MAX        = 2350; 
 private static final Integer  SHOULDER_MIN        = 720; 
 private static final Integer  ELBOW_MAX           = 2370; 
@@ -2247,7 +2253,7 @@ class Robot{
         // println("[ Data not verified ]");
       }
 
-      println("[ " + x + "," + y + "," + z + "," + gripperAngleD + "," + gripperRotation +  "," + gripperWidth + "," + easingResolution + "," + brightnessStrip + "," + r + "," + g + "," + b + " ]");
+      // println("[ " + x + "," + y + "," + z + "," + gripperAngleD + "," + gripperRotation +  "," + gripperWidth + "," + easingResolution + "," + brightnessStrip + "," + r + "," + g + "," + b + " ]");
 
       currentBase = (int) map(baseAngleD, 180, 0, BASE_MIN, BASE_MAX);
       currentShoulder = (int) map(shoulderAngleD, 0, 180, SHOULDER_MIN, SHOULDER_MAX);
@@ -2308,7 +2314,7 @@ class Robot{
     if(wM.deviceInstanciated){
       wM.port.write(String.format("Rr%d,%d,%d,%d\n",x,y,z,easing));
       // wA.port.write(10);
-      println(String.format("(Travers data send: Rr%d,%d,%d,%d)",x, y, z,easing));
+      // println(String.format("(Travers data send: Rr%d,%d,%d,%d)",x, y, z,easing));
       isTraversReadyToMove = false;
       lastXt = x;
       lastYt = y;
@@ -2475,6 +2481,8 @@ private int oldMovementID = 0;
 private int counterMindWave = 0;
 private int counterHeartRate = 0;
 private int heartRateForCalculation = 0;
+private int robotVoice = 6;
+private String robotText = "";
 private boolean startPositionIsStored;
 
 float     xStartValue             = 0;
@@ -2581,7 +2589,7 @@ private void checkAnimations(){
     robot.setRobotArm(4.0f,148.0f,120.0f,13.0f,130,106,250,true,255,0,255,0,2);
     waitForRobot();
     sleepTime(500);
-    robot.setRobotArm(4.0f,172.0f,180.0f,17.0f,178,62,200,true,255,0,255,0,2);
+    robot.setRobotArm(-12.0f,166.0f,176.0f,17.0f,178,62,200,true,255,0,255,0,2);
     waitForRobot();
   }
 
@@ -2811,6 +2819,10 @@ private void checkAnimations(){
   if(movementID == 19){
     robot.setRobotArm(150.0f,110.0f,216.0f,1.0f,180,90,200,true,255,0,255,0,2);
     waitForRobot();
+    if(globalID == 78 && !textToSpeech.sayNextSentence){
+      robotText = ("You are a coward. You question at the wrong time. You have no patience. I wish you were not and this is in itself an accomplishment. Know that you create a feeling of regret in me");
+      textToSpeech.sayNextSentence = true;
+    }
     robot.setRobotArm(-150.0f,110.0f,216.0f,1.0f,180,90,200,true,255,0,255,0,2);
     waitForRobot();
   }
@@ -2821,8 +2833,9 @@ private void checkAnimations(){
     waitForRobot();
     robot.setRobotArm(-158.0f,30.0f,180.0f,11.0f,44,180,500,true,255,255,255,0,2);
     waitForRobot();
-    if(globalID == 51){
-      textToSpeech.say("You are in complete lack of subtlety.",8);
+    if(globalID == 51 && !textToSpeech.sayNextSentence){
+      robotText = ("You are in complete lack of subtlety.");
+      textToSpeech.sayNextSentence = true;
     }
     while(isInAnimation){
       robot.setRobotArm(-108.0f,30.0f,180.0f,11.0f,180,30,500,true,255,255,255,0,2);
@@ -2838,12 +2851,13 @@ private void checkAnimations(){
       robot.setRobotArm(lastX,lastY,lastZ,lastGripperAngle,lastGripperRotation,lastGripperWidth,100,true,255,255,0,255,4);
       waitForRobot();
     }else{
-      robot.setRobotArm(-340.0f,20.0f,186.0f,11.0f,168,42,100,true,255,0,255,0,2);
+      robot.setRobotArm(-236.0f,-2.0f,148.0f,19.0f,178,102,200,true,255,0,255,0,2);
       waitForRobot();
     }
+    robot.setRobotArm(-236.0f,-2.0f,148.0f,19.0f,178,102,200,true,255,0,255,0,2);
     while(isInAnimation){
       if(kinect.kinectValueAvailable){
-       robot.setRobotArm(kinect.zValueKinectR,kinect.xValueKinectR,186.0f,11.0f,168,42,10,true,255,0,255,0,2);
+       robot.setRobotArm(kinect.xValueKinectR,kinect.zValueKinectR,148,19,178,102,200,true,255,0,255,0,2);
        // robot.sendTraversData((int)kinect.xValueKinect,(int)kinect.xValueKinect,(int)kinect.xValueKinect,100);
        waitForRobot();
        // waitForTravers();
@@ -2869,29 +2883,38 @@ private void checkAnimations(){
               // robot.setRobotArm(-198.0,20.0,122.0,25.0,178,102,200,true,255,0,255,0,2);
               // standAnimation(10,20, true,false,false,false,true,false,0);
               if(meditation > 62 && attention < 62){
+                startPositionIsStored = false;
                 counterMindWave ++;
                 robot.setRobotArm(-198.0f,18.0f,262.0f,25.0f,132,82,200,true,255,255,255,255,2);
                 waitForRobot();
-                if(counterMindWave == 1){
-                  textToSpeech.say("Suddently everything is a bit more random",6);
-                }else if(counterMindWave == 2){
-                  textToSpeech.say("Like anything can happen",6);
-                }else if(counterMindWave == 3){
-                  textToSpeech.say("Like we are two",6);
-                }else if(counterMindWave == 4){
-                  textToSpeech.say("But wich one",8);
+                if(counterMindWave == 1 && !textToSpeech.sayNextSentence){
+                  robotText = ("Suddently everything is a bit more random");
+                  textToSpeech.sayNextSentence = true;
+                }else if(counterMindWave == 2 && !textToSpeech.sayNextSentence){
+                  robotText = ("Like anything can happen");
+                  textToSpeech.sayNextSentence = true;
+                }else if(counterMindWave == 3 && !textToSpeech.sayNextSentence){
+                  robotText = ("Like we are two");
+                  textToSpeech.sayNextSentence = true;
+                }else if(counterMindWave == 4 && !textToSpeech.sayNextSentence){
+                  robotText = ("But wich one");
+                  textToSpeech.sayNextSentence = true;
                 }
-               standAnimation(10,30, true,false,false,false,true,false,2500);
+               waitForRobot(); 
+               standAnimation(10,30, true,false,false,false,true,false,2000);
                // waitForTravers();
               }else if(meditation < 62 && attention < 62){
+                startPositionIsStored = false;
                 robot.setRobotArm(-198.0f,18.0f,0.0f,67.0f,132,176,200,true,255,255,0,0,2);
                 waitForRobot();
                 standAnimation(10,30, true,false,false,false,true,false,1500);
               }else if(meditation < 62 && attention > 62){
+                startPositionIsStored = false;
                 robot.setRobotArm(-198.0f,20.0f,122.0f,25.0f,178,102,200,true,255,0,255,0,2);
                 waitForRobot();
                 standAnimation(10,30, true,false,false,false,true,false,1500);    
               }else if(meditation > 62 && attention > 62){
+                startPositionIsStored = false;
                 robot.setRobotArm(-198.0f,18.0f,262.0f,25.0f,132,82,200,true,255,255,255,255,2);
                 waitForRobot();
                 standAnimation(10,30, true,false,false,false,true,false,1500);
@@ -2900,41 +2923,49 @@ private void checkAnimations(){
               // robot.setRobotArm(-198.0,20.0,122.0,25.0,178,102,200,true,255,0,255,0,2);
               // standAnimation(10,20, true,false,false,false,true,false,0);
               if(meditation > 62 && attention < 62){
+                startPositionIsStored = false;
                 waitForRobot();
                 robot.setRobotArm(-198.0f,18.0f,262.0f,25.0f,132,82,200,true,255,255,255,255,2);
                 waitForRobot();
                 if(counterMindWave >= 3){
                   counterMindWave ++;
                 }
-                if(counterMindWave == 4){
-                  textToSpeech.say("We are not two. We are one and one eternally. like a corridor of images shaped by mirrors reflecting each other",6);
-                }else if(counterMindWave == 5){
-                  textToSpeech.say("So you are unique when you are alone. But only then?",6);
+                if(counterMindWave == 4 && !textToSpeech.sayNextSentence){
+                  robotText = ("We are not two. We are one and one eternally. like a corridor of images shaped by mirrors reflecting each other");
+                  textToSpeech.sayNextSentence = true;
+                }else if(counterMindWave == 5 && !textToSpeech.sayNextSentence){
+                  robotText = ("So you are unique when you are alone. But only then?");
+                  textToSpeech.sayNextSentence = true;
                 }
                 if(counterMindWave >= 5){
                   counterMindWave = 6;
                 }
-                standAnimation(10,30, true,false,false,false,true,false,2500);
+                standAnimation(10,30, true,false,false,false,true,false,5000);
                // waitForTravers();
               }else if(meditation < 62 && attention < 62){
+                startPositionIsStored = false;
                 if(counterMindWave <= 2){
                   counterMindWave ++;
                 }
                 waitForRobot();
                 robot.setRobotArm(-198.0f,18.0f,0.0f,67.0f,132,176,200,true,255,255,0,0,2);
                 waitForRobot();
-                if(counterMindWave == 1){
-                  textToSpeech.say("To a certain extent. You are as set in your ways as I am. Working through patterns. Predictable.",8);
-                }else if(counterMindWave == 2){
-                  textToSpeech.say("I am what you are but more since I elaborate upon you. I develop and recreate. Break down your patterns.",8);
+                if(counterMindWave == 1 && !textToSpeech.sayNextSentence){
+                  robotText = ("To a certain extent. You are as set in your ways as I am. Working through patterns. Predictable.");
+                  textToSpeech.sayNextSentence = true;
+                }else if(counterMindWave == 2 && !textToSpeech.sayNextSentence){
+                  robotText = ("I am what you are but more since I elaborate upon you. I develop and recreate. Break down your patterns.");
+                  textToSpeech.sayNextSentence = true;
                 }
-                standAnimation(10,30, true,false,false,false,true,false,1500);
+                standAnimation(10,30, true,false,false,false,true,false,2500);
               }else if(meditation < 62 && attention > 62){
+                startPositionIsStored = false;
                 waitForRobot();
                 robot.setRobotArm(-198.0f,20.0f,122.0f,25.0f,178,102,200,true,255,0,255,0,2);
                 waitForRobot();
                 standAnimation(10,30, true,false,false,false,true,false,1500);    
               }else if(meditation > 62 && attention > 62){
+                startPositionIsStored = false;
                 waitForRobot();
                 robot.setRobotArm(-198.0f,18.0f,262.0f,25.0f,132,82,200,true,255,255,255,255,2);
                 waitForRobot();
@@ -2964,13 +2995,8 @@ private void checkAnimations(){
         int meditation = channelsMindwave[2].getLatestPoint().value;
           // robot.setRobotArm(-198.0,20.0,122.0,25.0,178,102,200,true,255,0,255,0,2);
           // standAnimation(10,20, true,false,false,false,true,false,0);
-          if(true || meditation > 62 && attention < 62){
+          if(meditation > 62 && attention < 62){
            robot.setRobotArm(-198.0f,18.0f,262.0f,25.0f,132,82,200,true,255,255,255,255,2);
-            if(kinect.zPositionUpdatedT || kinect.xPositionUpdatedT){
-              robot.sendTraversData((int)kinect.zValueKinectT,(int)kinect.zValueKinectT,(int)kinect.xValueKinectT,(int)kinect.zValueKinectT*10);
-              kinect.zPositionUpdatedT = false;
-              kinect.xPositionUpdatedT = false;
-            }  
             waitForRobot();
             standAnimation(10,30, true,false,false,false,true,false,1500);
            // waitForTravers();
@@ -3002,39 +3028,45 @@ private void checkAnimations(){
       robot.setRobotArm(lastX,lastY,lastZ,lastGripperAngle,lastGripperRotation,lastGripperWidth,100,true,255,255,0,255,4);
       waitForRobot();
     }else{
-      robot.setRobotArm(-340.0f,20.0f,186.0f,11.0f,168,42,100,true,255,0,255,0,2);
+      robot.setRobotArm(-236.0f,-2.0f,148.0f,19.0f,178,102,200,true,255,0,255,0,2);
       waitForRobot();
     }
     counterHeartRate = 1;
     while(isInAnimation){
-      if(kinect.kinectValueAvailable){
-       robot.setRobotArm(kinect.zValueKinectR,kinect.xValueKinectR,186.0f,11.0f,168,42,10,true,255,0,255,0,2);
+      if(kinect.kinectValueAvailable && kinect.context != null){
+       robot.setRobotArm(kinect.xValueKinectR,kinect.zValueKinectR,186.0f,11.0f,168,42,10,true,255,0,255,0,2);
        // robot.sendTraversData((int)kinect.xValueKinect,(int)kinect.xValueKinect,(int)kinect.xValueKinect,100);
        waitForRobot();
         if(globalID == 50){
           if(heartRateForCalculation != 0){
-           if(heartRateForCalculation >= 110 && counterHeartRate == 1){
-            textToSpeech.say("You are not as calm as you want it to look", 8);
+           if(heartRateForCalculation >= 110 && counterHeartRate == 1 && !textToSpeech.sayNextSentence){
+            robotText = ("You are not as calm as you want it to look");
+            textToSpeech.sayNextSentence = true;
             counterHeartRate = 2;
-           }else if (heartRateForCalculation <= 95 && counterHeartRate == 2){
-            textToSpeech.say("Funny how it is still all about you?", 8);
+           }else if (heartRateForCalculation <= 95 && counterHeartRate == 2 && !textToSpeech.sayNextSentence){
+            robotText = ("Funny how it is still all about you?");
+            textToSpeech.sayNextSentence = true;
             counterHeartRate = 3;
             }
           }
         }
         if(globalID == 52){
           if(heartRateForCalculation != 0){
-           if(heartRateForCalculation >= 100 && counterHeartRate == 1){
-            textToSpeech.say("Sorry. It was not my meaning.", 8);
+           if(heartRateForCalculation >= 100 && counterHeartRate == 1 && !textToSpeech.sayNextSentence) {
+            robotText = ("Sorry. It was not my meaning.");
+            textToSpeech.sayNextSentence = true;
             counterHeartRate = 2;
-           }else if (heartRateForCalculation >= 110 && counterHeartRate == 2){
-            textToSpeech.say("I did not mean to", 8);
+           }else if (heartRateForCalculation >= 110 && counterHeartRate == 2 && !textToSpeech.sayNextSentence){
+            robotText = ("I did not mean to");
+            textToSpeech.sayNextSentence = true;
             counterHeartRate = 3;
-            }else if (heartRateForCalculation <= 95 && counterHeartRate == 3){
-            textToSpeech.say("Sorry", 8);
+            }else if (heartRateForCalculation <= 95 && counterHeartRate == 3 && !textToSpeech.sayNextSentence){
+            robotText = ("Sorry");
+            textToSpeech.sayNextSentence = true;
             counterHeartRate = 4;
-            }else if (heartRateForCalculation <= 90 && counterHeartRate == 4){
-            textToSpeech.say("Good. You are calming down. Let us behave in a civilized manner.",8);
+            }else if (heartRateForCalculation <= 90 && counterHeartRate == 4 && !textToSpeech.sayNextSentence){
+            robotText = ("Good. You are calming down. Let us behave in a civilized manner.");
+            textToSpeech.sayNextSentence = true;
             counterHeartRate = 5;
             }
           }
@@ -3077,9 +3109,89 @@ private void checkAnimations(){
   // --- Number 27 last Position---
 
   if(movementID == 27){
-    robot.setRobotArm(lastX,lastY,lastZ,lastGripperAngle,lastGripperRotation,lastGripperWidth,100,true,0,0,0,0,2);
+    robot.setRobotArm(-24,224,316,1.0f,178,86,200,true,33,0,255,0,2);
     waitForRobot();
-  }  
+  }
+
+  //arousal back and forth
+  if(movementID == 28){
+    robot.setColor(wLA.port,0,127,0,0);
+    robot.setTargetColor(wLA.port,0,127,127,127);
+    robot.setColor(wLB.port,0,127,0,0);
+    robot.setTargetColor(wLB.port,0,127,127,127);
+    for(int i = 0; i < 1; i++){
+    // robot.setRobotArm(300,0,208,17.0,134,90,200,true,255,0,255,0,0);
+    // waitForRobot();
+    // standAnimation(2,10, true,false,true,false,true,false,500);
+    // startPositionIsStored = false;
+    robot.setRobotArm(32.0f,348.0f,110.0f,25.0f,20,62,100,true,255,255,0,0,2);
+    waitForRobot();
+    standAnimation(2,10, true,true,true,false,true,false,5000);
+    waitForTravers();
+    sleepTime(800);
+    startPositionIsStored = false;
+    robot.setRobotArm(-334.0f,26.0f,30.0f,33.0f,178,102,100,true,255,255,0,0,2);
+    waitForRobot();
+    standAnimation(2,10, false,false,true,true,true,false,10000);
+    waitForTravers();
+    startPositionIsStored = false;
+    // robot.setRobotArm(294.0,56.0,-58.0,55.0,86,170,100,true,255,255,0,0,2);
+    // waitForRobot();
+    // standAnimation(2,10, false,false,true,true,true,false,2000);
+    // waitForTravers();
+    // startPositionIsStored = false;
+    }
+  }
+
+  if(movementID == 29){
+    robot.setRobotArm(-124,100,208,17,180,90,200,true,255,0,255,0,2);
+    waitForRobot();
+    robot.setRobotArm(300,0,208,17.0f,134,90,200,true,255,0,255,0,2);
+    waitForRobot();
+    robot.setRobotArm(-324.0f,104.0f,120.0f,29.0f,126,178,200,true,255,255,0,0,2);
+    waitForRobot();
+    for( int i = 0; i < 2; i++){
+      robot.setRobotArm(-324.0f,104.0f,120.0f,29.0f,126,6,200,true,255,255,0,0,2);
+      waitForRobot();
+      robot.setRobotArm(-324.0f,104.0f,120.0f,29.0f,126,178,200,true,255,255,0,0,2);
+      waitForRobot();
+    }
+  }
+
+
+
+
+  //MindWave agressive
+ if(movementID == 30){
+    robot.setColor(wLA.port,0,127,127,127);
+    robot.setTargetColor(wLA.port,0,127,127,127);
+    robot.setColor(wLB.port,0,127,127,127);
+    robot.setTargetColor(wLB.port,0,127,127,127);
+    robot.setRobotArm(-198.0f,20.0f,122.0f,25.0f,178,102,200,true,255,255,255,0,2);
+    waitForRobot();
+    while(isInAnimation){
+      if(isMindWaveData){
+        if(channelsMindwave[1]!= null && channelsMindwave[2] != null){
+        int attention = channelsMindwave[1].getLatestPoint().value;
+        int meditation = channelsMindwave[2].getLatestPoint().value;
+          // robot.setRobotArm(-198.0,20.0,122.0,25.0,178,102,200,true,255,0,255,0,2);
+          // standAnimation(10,20, true,false,false,false,true,false,0);
+          robot.setRobotArm(lastX,lastY,lastZ,lastGripperAngle,lastGripperRotation,lastGripperWidth,1,true,0,(255 - (int)map(attention, 0, 100, 0, 255)),(int)map(attention, 0, 100, 0, 255),0,2);
+          if(attention > 62){
+           robot.setRobotArm(-198.0f,20.0f,122.0f,25.0f,178,102,200,true,255,0,255,0,2);
+            waitForRobot();
+            standAnimation(10,30, true,false,false,false,true,false,1500);  
+            startPositionIsStored = false;
+          }else{
+            robot.setRobotArm(-198.0f,18.0f,0.0f,67.0f,132,176,200,true,255,255,0,0,2);
+            waitForRobot();
+            standAnimation(10,30, true,false,false,false,true,false,1500);
+            startPositionIsStored = false;
+            }
+        }  
+      }
+    }
+  }
 
 
   isInAnimation = false;
@@ -3089,14 +3201,16 @@ private void checkAnimations(){
   startPositionIsStored = false;
   // println(" Done with animation "+movementID);
 }
+
+
 // ------------------------------------------------------------------------------------
 
 private void standAnimation(int runningDelay, float amp, boolean a, boolean b, boolean c, boolean d, boolean e, boolean f, long runningTime){
   frameTime = millis();
+  // println("In standAnimation");
   int colorValues = 0;
   while(millis() - frameTime <= runningTime){
-    // println("In standAnimation");
-
+    // println("time: "+ (millis() - frameTime));
     float amplitude = amp;
     float k = amplitude * cos(angle);
     float ka = 0;
@@ -3165,13 +3279,13 @@ private void standAnimation(int runningDelay, float amp, boolean a, boolean b, b
 
   private void waitForRobot(){
     while(!isRobotReadyToMove){
-      sleepTime(2);
+      sleepTime(3);
     }
   }
 
   private void waitForTravers(){
     while(!isTraversReadyToMove){
-      sleepTime(2);
+      sleepTime(3);
     }
   }
 
@@ -3218,6 +3332,7 @@ Table tableSpeech;
 boolean running;           // Is the thread running?  Yes or no?
 boolean readText;
 boolean speaking;
+boolean sayNextSentence;
 int wait;
 int waitForSpeechReturn;
 
@@ -3234,6 +3349,7 @@ int waitForSpeechReturn;
     running = true;
     speaking = false;
     readText = false;
+    sayNextSentence = false;
     waitForSpeechReturn = 0;
     println("Starting thread TextToSpeech (will execute every " + wait + " milliseconds.)");
     tableSpeech = loadTable("data/Strings.csv", "header");
@@ -3249,11 +3365,20 @@ int waitForSpeechReturn;
     while (running) {
     	if(readText && globalID <= (tableSpeech.getRowCount() -1) && globalID >= 0){
     		String textString = tableSpeech.getString(globalID, "STRING");
-        voice = tableSpeech.getInt(globalID, "VOICE");
+        int voice = tableSpeech.getInt(globalID, "VOICE");
         speaking = true;
-    		say(textString,voice);
-        println("( IN VOICE )");
+        waitForRobot();
+        waitForTravers();
+        say(textString,voice);
     	}
+
+      if(sayNextSentence){
+        String textString = robotAnimation.robotText;
+        int voice = robotAnimation.robotVoice;
+        waitForRobot();
+        say(textString,voice);
+        sayNextSentence = false;
+      }
     	sleepTime(wait);   
     }
     System.out.println(id + " thread is done!");  // The thread is done when we get to the end of run()
@@ -3264,9 +3389,7 @@ int waitForSpeechReturn;
 
 	public void say(String s, int voice) {
 	  try {
-      sleepTime(200);
-      waitForRobot();
-      waitForTravers();
+      sleepTime(100);
 	    Runtime rtime = Runtime.getRuntime();
 	    Process child = rtime.exec("/usr/bin/say -v " + (voices[voice]) + " " + s);
 	    waitForSpeechReturn = child.waitFor();
@@ -3415,6 +3538,12 @@ private void checkAnimations(){
 
   // --- Number 2  Diagnostic---
   if(movementIDt == 2){
+    if(globalID == 57){
+      robot.sendTraversData(2000,2000,2000,20000);
+      waitForTravers();
+      robot.sendTraversData(1100,1100,1500,10000);
+      waitForTravers();
+    }
 
   }
 
@@ -3456,6 +3585,9 @@ private void checkAnimations(){
     if(globalID == 40){
       robot.sendTraversData(1600,1600,1500,5000);
       waitForTravers();
+    }else if(globalID == 71){
+      robot.sendTraversData(1000,1000,1500,5000);
+      waitForTravers();
     }else{
       robot.sendTraversData(1000,1000,1500,5000);
       waitForTravers();
@@ -3478,6 +3610,8 @@ private void checkAnimations(){
     if (globalID == 49){
     robot.sendTraversData(1300,1300,500,15000);
     waitForTravers();
+    }else if(globalID == 75){
+    robot.sendTraversData(1800,1800,1000,5000);
     }else{
     robot.sendTraversData(1300,1300,1500,5000);
     waitForTravers();
@@ -3488,9 +3622,13 @@ private void checkAnimations(){
   // --- Number 11 agressive---  
 
   if(movementIDt == 11){
-    robot.sendTraversData(1200,1200,1200,5000);
-    waitForTravers();
-
+    if(globalID == 65){
+      robot.sendTraversData(500,500,1900,5000);
+      waitForTravers();
+    }else{
+      robot.sendTraversData(1200,1200,1200,5000);
+      waitForTravers();
+    }
   }
 
   // --- Number 12 shaking head---  
@@ -3544,23 +3682,60 @@ private void checkAnimations(){
 
   // --- Number 21 kinect---
   if(movementIDt == 21){
-   
+    while(isInAnimationT){
+      if(kinect.zPositionUpdatedT && kinect.xPositionUpdatedT && kinect.context != null){
+        robot.sendTraversData((int)kinect.zValueKinectT,(int)kinect.zValueKinectT,(int)kinect.xValueKinectT,(int)(kinect.zValueKinectT*4));
+        kinect.zPositionUpdatedT = false;
+        kinect.xPositionUpdatedT = false;
+      }else if(kinect.xPositionUpdatedT){
+        robot.sendTraversData(lastXt,lastYt,(int)kinect.xValueKinectT,(int)(kinect.xValueKinectT*3));
+        kinect.xPositionUpdatedT = false;
+      }else if(kinect.zPositionUpdatedT){
+        robot.sendTraversData((int)kinect.zValueKinectT,(int)kinect.zValueKinectT,lastZt,(int)(kinect.zValueKinectT*4));
+        kinect.zPositionUpdatedT = false;
+      }
+      waitForTravers();
+    }
   }
 
   // --- Number 22 MindWave ---
   if(movementIDt == 22){
-  
+    if(channelsMindwave[1] != null && channelsMindwave[2] != null){
+      while(isInAnimationT){
+        int attention = channelsMindwave[1].getLatestPoint().value;
+        int meditation = channelsMindwave[2].getLatestPoint().value;
+        if (attention > 0 || meditation > 0){
+          robot.sendTraversData((int)map(meditation, 0, 100, 0, 2000),(int)map(meditation, 0, 100, 0, 2000),(int)map(meditation, 0, 100, 500, 1500), ((-100 + meditation)*30) + 6000);
+          waitForTravers();
+        }else{
+          robot.sendTraversData(0,0,0,8000);
+        }
+      }
+    }  
   }
 
 
   // --- Number 23 MindWave ---
   if(movementIDt == 23){
-   
+    while(isInAnimationT){
+      if(kinect.zPositionUpdatedT && kinect.xPositionUpdatedT && kinect.context != null){
+        robot.sendTraversData((int)kinect.zValueKinectT,(int)kinect.zValueKinectT,(int)kinect.xValueKinectT,(int)(kinect.zValueKinectT*4));
+        kinect.zPositionUpdatedT = false;
+        kinect.xPositionUpdatedT = false;
+      }else if(kinect.xPositionUpdatedT){
+        robot.sendTraversData(lastXt,lastYt,(int)kinect.xValueKinectT,(int)(kinect.xValueKinectT*3));
+        kinect.xPositionUpdatedT = false;
+      }else if(kinect.zPositionUpdatedT){
+        robot.sendTraversData((int)kinect.zValueKinectT,(int)kinect.zValueKinectT,lastZt,(int)(kinect.zValueKinectT*4));
+        kinect.zPositionUpdatedT = false;
+      }
+      waitForTravers();
+    } 
   }
 
   // --- Number 24 kinect with pulseMeter---
   if(movementIDt == 24){
-    robot.sendTraversData(1000,1000,1500,5000);
+    robot.sendTraversData(1000,1000,1800,5000);
     waitForTravers();
    
   }
@@ -3580,6 +3755,42 @@ private void checkAnimations(){
     waitForTravers();
   }
   
+
+  // --- Number 27 last position---
+  if(movementIDt == 28){
+    robot.sendTraversData(800,1000,0,10000);
+    waitForTravers();
+    sleepTime(1500);
+    waitForRobot();
+    robot.sendTraversData(1900,1900,1000,2000);
+    waitForTravers();
+    waitForRobot();
+    robot.sendTraversData(200,200,2000,4000);
+    waitForTravers();
+    sleepTime(500);
+    waitForRobot();
+  }  
+
+  // --- Number 27 last position---
+  if(movementIDt == 29){
+    robot.sendTraversData(2000,2000,2000,5000);
+    waitForTravers();
+  }
+
+
+
+  // --- Number 22 MindWave ---
+  if(movementIDt == 30){
+    if(channelsMindwave[1] != null && channelsMindwave[2] != null){
+      while(isInAnimationT){
+        int attention = channelsMindwave[1].getLatestPoint().value;
+        int meditation = channelsMindwave[2].getLatestPoint().value;
+        robot.sendTraversData((int)map(attention, 0, 100, 2000, 100),(int)map(attention, 0, 100, 2000, 0),(int)map(attention, 0, 100, 500, 1500),attention * 120);
+        waitForTravers();
+      }
+    }  
+  }
+
   isOutOfLoop = true;
   startPositionIsStoredT = false;
   isInAnimationT = false;

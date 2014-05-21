@@ -71,7 +71,9 @@ private void checkAnimations(){
   // --- Number 2  Diagnostic---
   if(movementIDt == 2){
     if(globalID == 57){
-      robot.sendTraversData(1000,1000,1500,5000);
+      robot.sendTraversData(2000,2000,2000,20000);
+      waitForTravers();
+      robot.sendTraversData(1100,1100,1500,10000);
       waitForTravers();
     }
 
@@ -115,6 +117,9 @@ private void checkAnimations(){
     if(globalID == 40){
       robot.sendTraversData(1600,1600,1500,5000);
       waitForTravers();
+    }else if(globalID == 71){
+      robot.sendTraversData(1000,1000,1500,5000);
+      waitForTravers();
     }else{
       robot.sendTraversData(1000,1000,1500,5000);
       waitForTravers();
@@ -137,6 +142,8 @@ private void checkAnimations(){
     if (globalID == 49){
     robot.sendTraversData(1300,1300,500,15000);
     waitForTravers();
+    }else if(globalID == 75){
+    robot.sendTraversData(1800,1800,1000,5000);
     }else{
     robot.sendTraversData(1300,1300,1500,5000);
     waitForTravers();
@@ -147,9 +154,13 @@ private void checkAnimations(){
   // --- Number 11 agressive---  
 
   if(movementIDt == 11){
-    robot.sendTraversData(1200,1200,1200,5000);
-    waitForTravers();
-
+    if(globalID == 65){
+      robot.sendTraversData(500,500,1900,5000);
+      waitForTravers();
+    }else{
+      robot.sendTraversData(1200,1200,1200,5000);
+      waitForTravers();
+    }
   }
 
   // --- Number 12 shaking head---  
@@ -203,23 +214,60 @@ private void checkAnimations(){
 
   // --- Number 21 kinect---
   if(movementIDt == 21){
-   
+    while(isInAnimationT){
+      if(kinect.zPositionUpdatedT && kinect.xPositionUpdatedT && kinect.context != null){
+        robot.sendTraversData((int)kinect.zValueKinectT,(int)kinect.zValueKinectT,(int)kinect.xValueKinectT,(int)(kinect.zValueKinectT*4));
+        kinect.zPositionUpdatedT = false;
+        kinect.xPositionUpdatedT = false;
+      }else if(kinect.xPositionUpdatedT){
+        robot.sendTraversData(lastXt,lastYt,(int)kinect.xValueKinectT,(int)(kinect.xValueKinectT*3));
+        kinect.xPositionUpdatedT = false;
+      }else if(kinect.zPositionUpdatedT){
+        robot.sendTraversData((int)kinect.zValueKinectT,(int)kinect.zValueKinectT,lastZt,(int)(kinect.zValueKinectT*4));
+        kinect.zPositionUpdatedT = false;
+      }
+      waitForTravers();
+    }
   }
 
   // --- Number 22 MindWave ---
   if(movementIDt == 22){
-  
+    if(channelsMindwave[1] != null && channelsMindwave[2] != null){
+      while(isInAnimationT){
+        int attention = channelsMindwave[1].getLatestPoint().value;
+        int meditation = channelsMindwave[2].getLatestPoint().value;
+        if (attention > 0 || meditation > 0){
+          robot.sendTraversData((int)map(meditation, 0, 100, 0, 2000),(int)map(meditation, 0, 100, 0, 2000),(int)map(meditation, 0, 100, 500, 1500), ((-100 + meditation)*30) + 6000);
+          waitForTravers();
+        }else{
+          robot.sendTraversData(0,0,0,8000);
+        }
+      }
+    }  
   }
 
 
   // --- Number 23 MindWave ---
   if(movementIDt == 23){
-   
+    while(isInAnimationT){
+      if(kinect.zPositionUpdatedT && kinect.xPositionUpdatedT && kinect.context != null){
+        robot.sendTraversData((int)kinect.zValueKinectT,(int)kinect.zValueKinectT,(int)kinect.xValueKinectT,(int)(kinect.zValueKinectT*4));
+        kinect.zPositionUpdatedT = false;
+        kinect.xPositionUpdatedT = false;
+      }else if(kinect.xPositionUpdatedT){
+        robot.sendTraversData(lastXt,lastYt,(int)kinect.xValueKinectT,(int)(kinect.xValueKinectT*3));
+        kinect.xPositionUpdatedT = false;
+      }else if(kinect.zPositionUpdatedT){
+        robot.sendTraversData((int)kinect.zValueKinectT,(int)kinect.zValueKinectT,lastZt,(int)(kinect.zValueKinectT*4));
+        kinect.zPositionUpdatedT = false;
+      }
+      waitForTravers();
+    } 
   }
 
   // --- Number 24 kinect with pulseMeter---
   if(movementIDt == 24){
-    robot.sendTraversData(1000,1000,1500,5000);
+    robot.sendTraversData(1000,1000,1800,5000);
     waitForTravers();
    
   }
@@ -239,6 +287,42 @@ private void checkAnimations(){
     waitForTravers();
   }
   
+
+  // --- Number 27 last position---
+  if(movementIDt == 28){
+    robot.sendTraversData(800,1000,0,10000);
+    waitForTravers();
+    sleepTime(1500);
+    waitForRobot();
+    robot.sendTraversData(1900,1900,1000,2000);
+    waitForTravers();
+    waitForRobot();
+    robot.sendTraversData(200,200,2000,4000);
+    waitForTravers();
+    sleepTime(500);
+    waitForRobot();
+  }  
+
+  // --- Number 27 last position---
+  if(movementIDt == 29){
+    robot.sendTraversData(2000,2000,2000,5000);
+    waitForTravers();
+  }
+
+
+
+  // --- Number 22 MindWave ---
+  if(movementIDt == 30){
+    if(channelsMindwave[1] != null && channelsMindwave[2] != null){
+      while(isInAnimationT){
+        int attention = channelsMindwave[1].getLatestPoint().value;
+        int meditation = channelsMindwave[2].getLatestPoint().value;
+        robot.sendTraversData((int)map(attention, 0, 100, 2000, 100),(int)map(attention, 0, 100, 2000, 0),(int)map(attention, 0, 100, 500, 1500),attention * 120);
+        waitForTravers();
+      }
+    }  
+  }
+
   isOutOfLoop = true;
   startPositionIsStoredT = false;
   isInAnimationT = false;

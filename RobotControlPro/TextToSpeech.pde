@@ -39,6 +39,7 @@ Table tableSpeech;
 boolean running;           // Is the thread running?  Yes or no?
 boolean readText;
 boolean speaking;
+boolean sayNextSentence;
 int wait;
 int waitForSpeechReturn;
 
@@ -55,6 +56,7 @@ int waitForSpeechReturn;
     running = true;
     speaking = false;
     readText = false;
+    sayNextSentence = false;
     waitForSpeechReturn = 0;
     println("Starting thread TextToSpeech (will execute every " + wait + " milliseconds.)");
     tableSpeech = loadTable("data/Strings.csv", "header");
@@ -70,11 +72,20 @@ int waitForSpeechReturn;
     while (running) {
     	if(readText && globalID <= (tableSpeech.getRowCount() -1) && globalID >= 0){
     		String textString = tableSpeech.getString(globalID, "STRING");
-        voice = tableSpeech.getInt(globalID, "VOICE");
+        int voice = tableSpeech.getInt(globalID, "VOICE");
         speaking = true;
-    		say(textString,voice);
-        println("( IN VOICE )");
+        waitForRobot();
+        waitForTravers();
+        say(textString,voice);
     	}
+
+      if(sayNextSentence){
+        String textString = robotAnimation.robotText;
+        int voice = robotAnimation.robotVoice;
+        waitForRobot();
+        say(textString,voice);
+        sayNextSentence = false;
+      }
     	sleepTime(wait);   
     }
     System.out.println(id + " thread is done!");  // The thread is done when we get to the end of run()
@@ -85,9 +96,7 @@ int waitForSpeechReturn;
 
 	void say(String s, int voice) {
 	  try {
-      sleepTime(200);
-      waitForRobot();
-      waitForTravers();
+      sleepTime(100);
 	    Runtime rtime = Runtime.getRuntime();
 	    Process child = rtime.exec("/usr/bin/say -v " + (voices[voice]) + " " + s);
 	    waitForSpeechReturn = child.waitFor();

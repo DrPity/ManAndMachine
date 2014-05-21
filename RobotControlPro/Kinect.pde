@@ -110,22 +110,24 @@ boolean xPositionUpdatedT = false;
 
     // println("X: " + jointPos_Proj.x + " Y: " + jointPos_Proj.y + " Z: " + jointPos_Proj.z);
 
-    if(jointPos_Proj.z > 848 && jointPos_Proj.z < 3300){
+    if(jointPos_Proj.z > 848 && jointPos_Proj.z < 3300 && context != null){
       kinectValueAvailable = true;
-      zValueKinectR = map(jointPos_Proj.z,848, 3300,-70, -340);
+      zValueKinectR = map(jointPos_Proj.z,848, 3300, -2, 166);
       oldZValueKinectT = zValueKinectT;
-      if(abs(oldZValueKinectT - map(jointPos_Proj.z,848, 3300,0, 2000)) > 100){
+      if(abs(oldZValueKinectT - map(jointPos_Proj.z,848, 3300,0, 2000)) > 50){
         zValueKinectT = map(jointPos_Proj.z,848, 3300,0, 2000);
         zPositionUpdatedT = true;
+        // println("zValueKinectT: "+zValueKinectT);
       }
     } 
-    if(jointPos_Proj.x > 0 && jointPos_Proj.x < 600){
+    if(jointPos_Proj.x > 100 && jointPos_Proj.x < 500 && context != null){
       kinectValueAvailable = true;
-      xValueKinectR = map(jointPos_Proj.x,0, 600,0, 200);
+      xValueKinectR = map(jointPos_Proj.x,100, 500,-236,32);
       oldXValueKinectT = xValueKinectT;
-      if(abs(oldXValueKinectT - map(jointPos_Proj.x,0, 600,0, 2000)) > 10){
-        xValueKinectT = map(jointPos_Proj.x,0, 600,0, 2000);
+      if(abs(oldXValueKinectT - map(jointPos_Proj.x,100, 500,2000, 0)) > 5){
+        xValueKinectT = map(jointPos_Proj.x,100, 500,2000, 0);
         xPositionUpdatedT = true;
+        // println("xValueKinectT: "+xValueKinectT);
       }
     }
     else

@@ -198,7 +198,7 @@ class Graph {
 			// println("Drawing GridX");
 			while (gridTime >= leftTime) {
 				int gridX = (int)helpers.mapLong(gridTime, leftTime, rightTime, 0L, (long)w);
-				line(gridX, 0, gridX, round(height * 0.40));
+				line(gridX, 0, gridX, height);
 				gridTime -= (long)(1000 * gridSeconds);
 			}
 		gridXisDrawn = true;
@@ -209,7 +209,7 @@ class Graph {
 		//Draw square horizontal grid for now
 		if(!gridYisDrawn){
 			// println("Drawing GridY");
-			int gridY = round(height * 0.40);
+			int gridY = height;
 			while (gridY >= 0) {
 				gridY -= pixelsPerSecond * gridSeconds; 
 				line(0, gridY, w, gridY);
