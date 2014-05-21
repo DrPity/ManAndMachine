@@ -118,7 +118,10 @@ private void checkAnimations(){
       robot.sendTraversData(1600,1600,1500,5000);
       waitForTravers();
     }else if(globalID == 71){
-      robot.sendTraversData(1000,1000,1500,5000);
+      robot.sendTraversData(lastXt,lastYt,lastZt,5000);
+      waitForTravers();
+    }else if(globalID == 72){
+      robot.sendTraversData(1900,1900,1600,5000);
       waitForTravers();
     }else{
       robot.sendTraversData(1000,1000,1500,5000);
@@ -317,10 +320,25 @@ private void checkAnimations(){
       while(isInAnimationT){
         int attention = channelsMindwave[1].getLatestPoint().value;
         int meditation = channelsMindwave[2].getLatestPoint().value;
-        robot.sendTraversData((int)map(attention, 0, 100, 2000, 100),(int)map(attention, 0, 100, 2000, 0),(int)map(attention, 0, 100, 500, 1500),attention * 120);
+        robot.sendTraversData((int)map(attention, 0, 100, 2000, 100),(int)map(attention, 0, 100, 2000, 0),(int)map(attention, 0, 100, 500, 1500),((-100 + attention)*30) + 6000);
         waitForTravers();
       }
     }  
+  }
+
+
+  //talking left aroused
+  if(movementIDt == 31){
+    if (globalID == 73){
+      robot.sendTraversData(1000,1000,500,15000);
+      waitForTravers();
+    }else if(globalID == 74){
+      robot.sendTraversData(1000,1000,500,5000);
+      waitForTravers();
+    }else{
+      robot.sendTraversData(1700,1700,1600,5000);
+      waitForTravers();
+    }
   }
 
   isOutOfLoop = true;

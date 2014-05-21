@@ -130,7 +130,7 @@ class HelperClass {
   {
     // wait for text to be done
 
-    if(!textToSpeech.speaking)
+    if(!textToSpeech.speaking && !textToSpeech.sayNextSentence)
     {
       if (robotAnimation.isInAnimation)
       {
