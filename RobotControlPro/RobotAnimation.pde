@@ -143,16 +143,27 @@ private void checkAnimations(){
 
   // --- Number 4  Neutral forward---
   if(movementID == 4){
-    robot.setColor(wLA.port,0,127,127,127);
-    robot.setTargetColor(wLA.port,0,127,127,127);
-    robot.setColor(wLB.port,0,127,127,127);
-    robot.setTargetColor(wLB.port,0,127,127,127);
-    // println(" In animation Nr 4 ");
-    robot.setRobotArm(-4,184,184,42,126,90,200,true,255,0,255,0,2);
-    waitForRobot();
-    while(isInAnimation){
-      // println("In while loop Nr 4");
-      standAnimation(10,10, true,false,false,false,true,false,0);
+    if(globalID == 109){
+      robot.setRobotArm(-4,184,184,42,126,90,200,true,255,0,0,255,2);
+      waitForRobot();
+      standAnimation(10,10, true,false,false,false,true,false,3000);
+      while(isInAnimation){
+        // println("In while loop Nr 4");
+        standAnimation(10,10, true,false,false,false,true,false,0);
+        lbStartValue = (int)random(0, 255);
+      }
+    }else {
+      robot.setColor(wLA.port,0,127,127,127);
+      robot.setTargetColor(wLA.port,0,127,127,127);
+      robot.setColor(wLB.port,0,127,127,127);
+      robot.setTargetColor(wLB.port,0,127,127,127);
+      // println(" In animation Nr 4 ");
+      robot.setRobotArm(-4,184,184,42,126,90,200,true,255,0,255,0,2);
+      waitForRobot();
+      while(isInAnimation){
+        // println("In while loop Nr 4");
+        standAnimation(10,10, true,false,false,false,true,false,0);
+      }
     }
   }
 
@@ -187,7 +198,6 @@ private void checkAnimations(){
 
   // --- Number 7 sighing--- 
   if(movementID == 7){
-    println(" In animation Nr 7 ");
     robot.setRobotArm(-7.75081,32.0,92.0,70.0,116,66,200,true,255,0,255,0,2);
     waitForRobot();
     sleepTime(500);
@@ -313,7 +323,16 @@ private void checkAnimations(){
       waitForRobot();
       robot.setRobotArm(-148.0,184.0,312.0,1.0,46,90,200,true,255,lastR,lastG,lastB,2);
       waitForRobot();
-    }else{
+    }else if(globalID == 107){
+      robot.setRobotArm(-96,100,208,17,46,90,250,true,255,0,255,0,2);
+      waitForRobot();
+      robot.setRobotArm(-148.0,184.0,312.0,1.0,46,90,200,true,255,0,255,0,2);
+      waitForRobot();
+      sleepTime(1500);
+      robotText = ("Then do it.");
+      textToSpeech.sayNextSentence = true;
+    }
+    else{
       robot.setRobotArm(-96,100,208,17,46,90,250,true,255,0,255,0,2);
       waitForRobot();
       robot.setRobotArm(-148.0,184.0,312.0,1.0,46,90,200,true,255,0,255,0,2);
@@ -829,7 +848,22 @@ private void checkAnimations(){
       robot.setTargetColor(wLB.port,0,127,127,127);
       robot.setRobotArm(-300,0,208,17.0,134,90,200,true,255,lastR,lastG,lastB,2);
       waitForRobot();
-    }else{
+    }else if(globalID == 104){
+      robot.setRobotArm(-300,0,208,17.0,134,90,200,true,255,0,255,0,2);
+      waitForRobot();
+      waitForTravers();
+      robotText = ("Unpredictability.");
+      textToSpeech.sayNextSentence = true;
+      waitForSpeech();
+    }else if(globalID == 115){
+      robot.setRobotArm(-300,0,208,17.0,134,90,200,true,255,0,255,0,2);
+      waitForRobot();
+      waitForTravers();
+      robotText = ("Right here.");
+      textToSpeech.sayNextSentence = true;
+      waitForSpeech();
+    }
+    else{
       robot.setRobotArm(-300,0,208,17.0,134,90,200,true,255,lastR,lastG,lastB,2);
       waitForRobot();
     }
@@ -847,7 +881,7 @@ private void checkAnimations(){
       robot.setTargetColor(wLA.port,0,127,127,127);
       robot.setColor(wLB.port,0,127,127,127);
       robot.setTargetColor(wLB.port,0,127,127,127);
-      robot.setRobotArm(-300,0,208,17.0,134,90,200,true,255,lastR,lastG,lastB,2);
+      robot.setRobotArm(300,0,208,17.0,134,90,200,true,255,lastR,lastG,lastB,2);
       waitForRobot();
     }
   }

@@ -2626,16 +2626,27 @@ private void checkAnimations(){
 
   // --- Number 4  Neutral forward---
   if(movementID == 4){
-    robot.setColor(wLA.port,0,127,127,127);
-    robot.setTargetColor(wLA.port,0,127,127,127);
-    robot.setColor(wLB.port,0,127,127,127);
-    robot.setTargetColor(wLB.port,0,127,127,127);
-    // println(" In animation Nr 4 ");
-    robot.setRobotArm(-4,184,184,42,126,90,200,true,255,0,255,0,2);
-    waitForRobot();
-    while(isInAnimation){
-      // println("In while loop Nr 4");
-      standAnimation(10,10, true,false,false,false,true,false,0);
+    if(globalID == 109){
+      robot.setRobotArm(-4,184,184,42,126,90,200,true,255,0,0,255,2);
+      waitForRobot();
+      standAnimation(10,10, true,false,false,false,true,false,3000);
+      while(isInAnimation){
+        // println("In while loop Nr 4");
+        standAnimation(10,10, true,false,false,false,true,false,0);
+        lbStartValue = (int)random(0, 255);
+      }
+    }else {
+      robot.setColor(wLA.port,0,127,127,127);
+      robot.setTargetColor(wLA.port,0,127,127,127);
+      robot.setColor(wLB.port,0,127,127,127);
+      robot.setTargetColor(wLB.port,0,127,127,127);
+      // println(" In animation Nr 4 ");
+      robot.setRobotArm(-4,184,184,42,126,90,200,true,255,0,255,0,2);
+      waitForRobot();
+      while(isInAnimation){
+        // println("In while loop Nr 4");
+        standAnimation(10,10, true,false,false,false,true,false,0);
+      }
     }
   }
 
@@ -2796,7 +2807,16 @@ private void checkAnimations(){
       waitForRobot();
       robot.setRobotArm(-148.0f,184.0f,312.0f,1.0f,46,90,200,true,255,lastR,lastG,lastB,2);
       waitForRobot();
-    }else{
+    }else if(globalID == 107){
+      robot.setRobotArm(-96,100,208,17,46,90,250,true,255,0,255,0,2);
+      waitForRobot();
+      robot.setRobotArm(-148.0f,184.0f,312.0f,1.0f,46,90,200,true,255,0,255,0,2);
+      waitForRobot();
+      sleepTime(1500);
+      robotText = ("Then do it.");
+      textToSpeech.sayNextSentence = true;
+    }
+    else{
       robot.setRobotArm(-96,100,208,17,46,90,250,true,255,0,255,0,2);
       waitForRobot();
       robot.setRobotArm(-148.0f,184.0f,312.0f,1.0f,46,90,200,true,255,0,255,0,2);
@@ -3312,7 +3332,15 @@ private void checkAnimations(){
       robot.setTargetColor(wLB.port,0,127,127,127);
       robot.setRobotArm(-300,0,208,17.0f,134,90,200,true,255,lastR,lastG,lastB,2);
       waitForRobot();
-    }else{
+    }else if(globalID == 104){
+      robot.setRobotArm(-300,0,208,17.0f,134,90,200,true,255,0,255,0,2);
+      waitForRobot();
+      waitForTravers();
+      robotText = ("Unpredictability.");
+      textToSpeech.sayNextSentence = true;
+      waitForSpeech();
+    }
+    else{
       robot.setRobotArm(-300,0,208,17.0f,134,90,200,true,255,lastR,lastG,lastB,2);
       waitForRobot();
     }
@@ -3330,7 +3358,7 @@ private void checkAnimations(){
       robot.setTargetColor(wLA.port,0,127,127,127);
       robot.setColor(wLB.port,0,127,127,127);
       robot.setTargetColor(wLB.port,0,127,127,127);
-      robot.setRobotArm(-300,0,208,17.0f,134,90,200,true,255,lastR,lastG,lastB,2);
+      robot.setRobotArm(300,0,208,17.0f,134,90,200,true,255,lastR,lastG,lastB,2);
       waitForRobot();
     }
   }
@@ -3914,6 +3942,9 @@ private void checkAnimations(){
       println("In travers mov. 82");
       robot.sendTraversData(1900,1900,1900,5000);
       waitForTravers();
+    }else if(globalID == 102){
+      robot.sendTraversData(lastXt,lastYt,lastZt,5000);
+      waitForTravers();
     }else{
       robot.sendTraversData(1000,1000,1500,5000);
       waitForTravers();
@@ -3987,6 +4018,10 @@ private void checkAnimations(){
     waitForTravers();
     }else if(globalID == 75){
     robot.sendTraversData(1800,1800,1000,5000);
+    }else if(globalID == 103){
+    robot.sendTraversData(lastXt,lastYt,lastZt,5000);
+    }else if(globalID == 107){
+    robot.sendTraversData(1000,1000,1700,5000);
     }else{
     robot.sendTraversData(1300,1300,1500,5000);
     waitForTravers();
@@ -4026,7 +4061,8 @@ private void checkAnimations(){
 
   // --- Number 15 looking from top to bottom---  
   if(movementIDt == 15){
-
+    robot.sendTraversData(lastXt,lastYt,lastZt,5000);
+    waitForTravers();
   }
 
   // --- swaying --- 
@@ -4036,12 +4072,14 @@ private void checkAnimations(){
 
   // --- Number 17 powerMove---  
   if(movementIDt == 17){
-
+    robot.sendTraversData(1000,1000,1000,5000);
+    waitForTravers();
   }
 
   // --- Number 18 exhausted---
   if(movementIDt == 18){
-
+    robot.sendTraversData(1000,1000,1600,5000);
+    waitForTravers();
   }
 
   // --- Number 19 looking left to right---
@@ -4183,8 +4221,13 @@ private void checkAnimations(){
 
   //talking left aroused
   if(movementIDt == 32){
-    robot.sendTraversData(2000,2000,2000,5000);
-    waitForTravers();
+    if (globalID == 104){
+      robot.sendTraversData(1700,1700,1700,6000);
+      waitForTravers();
+    }else{
+      robot.sendTraversData(2000,2000,2000,5000);
+      waitForTravers();
+    }
   }
 
 

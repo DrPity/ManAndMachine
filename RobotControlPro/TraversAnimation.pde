@@ -91,6 +91,9 @@ private void checkAnimations(){
       println("In travers mov. 82");
       robot.sendTraversData(1900,1900,1900,5000);
       waitForTravers();
+    }else if(globalID == 102){
+      robot.sendTraversData(lastXt,lastYt,lastZt,5000);
+      waitForTravers();
     }else{
       robot.sendTraversData(1000,1000,1500,5000);
       waitForTravers();
@@ -118,8 +121,13 @@ private void checkAnimations(){
 
   // --- Number 7 sighing--- 
   if(movementIDt == 7){
-    robot.sendTraversData(1000,1000,1500,5000);
-    waitForTravers();
+    if(globalID == 114){
+      robot.sendTraversData(lastXt,lastYt,lastZt,5000);
+      waitForTravers();  
+    }else{
+      robot.sendTraversData(1000,1000,1500,5000);
+      waitForTravers();
+    }
     // println(" In animation Nr 7 ");
   }
 
@@ -139,6 +147,9 @@ private void checkAnimations(){
       waitForTravers();
     }else if(globalID == 89){
       robot.sendTraversData(1000,1000,2000,5000);
+      waitForTravers();
+    }else if(globalID == 112){
+      robot.sendTraversData(lastXt,lastYt,lastZt,5000);
       waitForTravers();
     }else{
       robot.sendTraversData(1000,1000,1500,5000);
@@ -164,6 +175,10 @@ private void checkAnimations(){
     waitForTravers();
     }else if(globalID == 75){
     robot.sendTraversData(1800,1800,1000,5000);
+    }else if(globalID == 103){
+    robot.sendTraversData(lastXt,lastYt,lastZt,5000);
+    }else if(globalID == 107){
+    robot.sendTraversData(1000,1000,1700,5000);
     }else{
     robot.sendTraversData(1300,1300,1500,5000);
     waitForTravers();
@@ -209,17 +224,20 @@ private void checkAnimations(){
 
   // --- swaying --- 
   if(movementIDt == 16){
-
+    robot.sendTraversData(1000,1000,800,5000);
+    waitForTravers();
    }
 
   // --- Number 17 powerMove---  
   if(movementIDt == 17){
-
+    robot.sendTraversData(1000,1000,1000,5000);
+    waitForTravers();
   }
 
   // --- Number 18 exhausted---
   if(movementIDt == 18){
-
+    robot.sendTraversData(1000,1000,1600,5000);
+    waitForTravers();
   }
 
   // --- Number 19 looking left to right---
@@ -361,8 +379,16 @@ private void checkAnimations(){
 
   //talking left aroused
   if(movementIDt == 32){
-    robot.sendTraversData(2000,2000,2000,5000);
-    waitForTravers();
+    if (globalID == 104){
+      robot.sendTraversData(1700,1700,1700,6000);
+      waitForTravers();
+    }else if (globalID == 115){
+      robot.sendTraversData(1500,1500,1700,6000);
+      waitForTravers();
+    }else{
+      robot.sendTraversData(2000,2000,2000,5000);
+      waitForTravers();
+    }
   }
 
 
