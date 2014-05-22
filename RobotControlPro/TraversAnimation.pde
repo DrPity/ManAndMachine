@@ -87,8 +87,14 @@ private void checkAnimations(){
 
   // --- Number 4  Neutral forward---
   if(movementIDt == 4){
-    robot.sendTraversData(1000,1000,1500,5000);
-    waitForTravers();
+    if(globalID == 82){
+      println("In travers mov. 82");
+      robot.sendTraversData(1900,1900,1900,5000);
+      waitForTravers();
+    }else{
+      robot.sendTraversData(1000,1000,1500,5000);
+      waitForTravers();
+    }
   }
 
   // --- Number 5 right to left---  
@@ -100,8 +106,13 @@ private void checkAnimations(){
 
   // --- Number 6 looking backwards---  
   if(movementIDt == 6){
-    robot.sendTraversData(200,200,1800,5000);
-    waitForTravers();
+    if(globalID == 90){
+      robot.sendTraversData(lastXt,lastYt,lastZt,5000);
+      waitForTravers();
+    }else{
+      robot.sendTraversData(200,200,1800,5000);
+      waitForTravers();
+    }
     // println(" In animation Nr 6 ");
   }
 
@@ -122,6 +133,12 @@ private void checkAnimations(){
       waitForTravers();
     }else if(globalID == 72){
       robot.sendTraversData(1900,1900,1600,5000);
+      waitForTravers();
+    }else if(globalID == 84){
+      robot.sendTraversData(1000,1000,1000,5000);
+      waitForTravers();
+    }else if(globalID == 89){
+      robot.sendTraversData(1000,1000,2000,5000);
       waitForTravers();
     }else{
       robot.sendTraversData(1000,1000,1500,5000);
@@ -186,7 +203,8 @@ private void checkAnimations(){
 
   // --- Number 15 looking from top to bottom---  
   if(movementIDt == 15){
-
+    robot.sendTraversData(lastXt,lastYt,lastZt,5000);
+    waitForTravers();
   }
 
   // --- swaying --- 
@@ -338,6 +356,70 @@ private void checkAnimations(){
     }else{
       robot.sendTraversData(1700,1700,1600,5000);
       waitForTravers();
+    }
+  }
+
+  //talking left aroused
+  if(movementIDt == 32){
+    robot.sendTraversData(2000,2000,2000,5000);
+    waitForTravers();
+  }
+
+
+  //timed triggeres when technican gets up
+  if(movementIDt == 33){
+    boolean doneT = false;
+    while(!doneT){
+      if(robotAnimation.triggerValue == 0){
+        robot.sendTraversData(1800,1800,2000,5000);
+        waitForTravers();
+      }
+
+      if(robotAnimation.triggerValue == 1){
+        robot.sendTraversData(0,0,2000,7000);
+        waitForTravers();
+      }
+
+      if(robotAnimation.triggerValue == 2){
+        robot.sendTraversData(300,300,1700,5000);
+        waitForTravers();
+      }
+
+      if(robotAnimation.triggerValue == 3){
+        robot.sendTraversData(300,300,1700,4000);
+        waitForTravers();
+      }
+
+      if(robotAnimation.triggerValue == 4){
+        robot.sendTraversData(500,500,2000,4000);
+        waitForTravers();
+      }
+
+      if(robotAnimation.triggerValue == 5){
+        robot.sendTraversData(1000,1000,1800,5000);
+        waitForTravers();
+      }
+
+      // if(robotAnimation.triggerValue == 6){
+      //   robot.sendTraversData(1000,1000,1800,5000);
+      //   waitForTravers();
+      // }
+
+      if(robotAnimation.triggerValue == 6){
+        robot.sendTraversData(1000,1000,1800,5000);
+        waitForTravers();
+      }
+
+      if(robotAnimation.triggerValue == 7){
+        robot.sendTraversData(1000,1000,1800,5000);
+        waitForTravers();
+      }
+
+       if(robotAnimation.triggerValue == 8){
+        robot.sendTraversData(2000,2000,2000,5000);
+        waitForTravers();
+        doneT = true;
+      }
     }
   }
 

@@ -123,25 +123,30 @@ void setup() {
   robotAnimation.start();
   traversAnimation = new TraversAnimation(1);
   traversAnimation.start();
+
+  // Set up the knobs and dials
+  controlP5 = new ControlP5(this);
+  controlP5.setColorLabel(color(0));
+  controlP5.setColorBackground(color(127));
+  drawings = new Drawings();
   delay(100);
 
 // ----------------------------------------
-
-	// Set up the knobs and dials
-	controlP5 = new ControlP5(this);
-	controlP5.setColorLabel(color(0));
-	controlP5.setColorBackground(color(127));
-  drawings = new Drawings();
   mindWaveCLE = new ManageCLE();
+  println("before drwawing");
   drawings.CP5Init();
   // mindWaveCLE.thingearInit();
 
+println("before setting fonts");
 	font = new ControlFont(createFont("DIN-MediumAlternate", 12), 12);
+println("before trying");
   try {
    mindWaveCLE.connectToMindWave(this); 
   } catch (Exception e) {
     println("Mindwave: " + e);    
   }
+
+println("before channel init");  
 
   // ----------------------------------------
        
@@ -159,6 +164,9 @@ void setup() {
 	channelsMindwave[9]  = new Channel("Low Gamma", color(39, 25, 159), "???");
 	channelsMindwave[10] = new Channel("High Gamma", color(23, 26, 153), "???");
 	
+  delay(200);
+
+  println("before mindwave channel init");  
 	// Manual override for a couple of limits.
 	channelsMindwave[0].minValue = 0;
 	channelsMindwave[0].maxValue = 200;
@@ -167,18 +175,20 @@ void setup() {
 	channelsMindwave[2].minValue = 0;
 	channelsMindwave[2].maxValue = 100;
 
+  println("before pleth channel init");  
   channelPleth[0] = new Channel("Pleth", color(255, 127, 0), "???");
   channelPleth[0].minValue = 0;
   channelPleth[0].maxValue = 100;
 	
 // ----------------------------------------
-
+  println("before graph init");  
 	// Set up the graph
 	mindWave = new Graph(0, 0, width, round(height / 2), channelsMindwave, 1000, "Lines");
   pleth = new Graph(0, round(height / 2), width, round(height / 2), channelPleth, 200, "Lines");
   // ecg = new Graph(0, round(height * 0.30), width, round(height * 0.10), channelPleth, 200, "Lines");
   // emg = new Graph(0, round(height * 0.20), width, round(height * 0.10), channelPleth, 200, "Lines");
 	
+  println("before connection light init");  
 	connectionLight     = new ConnectionLight(width - 98, 10, 10);
   bluetoothConnection = new ConnectionLight(width - 98, 30, 10);
   robotConnection     = new ConnectionLight(width - 98, 50, 10);
@@ -186,7 +196,7 @@ void setup() {
   ledAConnection      = new ConnectionLight(width - 98, 90, 10);
   ledBConnection      = new ConnectionLight(width - 98, 110, 10);
   
-
+  println("setting global max");  
 	globalMax = 0;
   isReadyToRecord = true;
   inCharA = null;
@@ -194,7 +204,7 @@ void setup() {
   inCharLA = null;
   inCharLB = null;
   isReadyForButtonCommands = true;
-
+  println("Setup finished");  
   // kinect = addControlFrame("extra", 320,240);
 
     
@@ -207,8 +217,12 @@ void draw() {
 
   background(180);
   pulseValue.setValue(heartRateString);
-  attentionValue.setValue(String.valueOf(channelsMindwave[1].getLatestPoint().value));
-  meditationValue.setValue(String.valueOf(channelsMindwave[2].getLatestPoint().value));
+
+  if(channelsMindwave[1]!= null)
+    attentionValue.setValue(String.valueOf(channelsMindwave[1].getLatestPoint().value));
+  if(channelsMindwave[2]!= null)
+    meditationValue.setValue(String.valueOf(channelsMindwave[2].getLatestPoint().value));
+
   lableID.setValue(String.valueOf(globalID));
   drawings.drawRectangle(0,0,width,height,0,0,255,255,255,150);
   
@@ -228,8 +242,11 @@ void draw() {
   drawings.drawRectangle(round(width*0.008), round(height * 0.408) ,400,300,0,0,255,255,255,150);  
   drawings.drawRectangle(0, 0, 88, 118, width - 98, 10, 255,255,255, 150);
   drawings.drawRectangle(round(width*0.13), round(height * 0.49),40,20, 60,0, 255-isReadyColor ,isReadyColor - 50,0, 220);
-	connectionLight.update(channelsMindwave[0].getLatestPoint().value);
-	connectionLight.draw();
+	
+  if(channelsMindwave[0]!= null)
+    connectionLight.update(channelsMindwave[0].getLatestPoint().value);
+	
+  connectionLight.draw();
   connectionLight.mindWave.draw();
   bluetoothConnection.update(wPm.conValue);
   bluetoothConnection.draw();
@@ -379,8 +396,7 @@ void controlEvent(ControlEvent theEvent) {
       //helpers.setStep();
       try {
         String[] list = split(theEvent.getStringValue(), ',');
-        if (list.length == 1){
-          println(list.length + "Arrrrrrrg");
+        if (list.length == 1 && !textToSpeech.speaking && !checkIfReadyForNextStep){
           globalID = Integer.parseInt(list[0]);
           checkIfReadyForNextStep = true;
         }else if (list.length == 6){

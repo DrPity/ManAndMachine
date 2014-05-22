@@ -129,7 +129,7 @@ class HelperClass {
   void checkStep()
   {
     // wait for text to be done
-
+    
     if(!textToSpeech.speaking && !textToSpeech.sayNextSentence)
     {
       if (robotAnimation.isInAnimation)

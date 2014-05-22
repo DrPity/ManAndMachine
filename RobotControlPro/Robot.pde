@@ -296,6 +296,7 @@ class Robot{
   void readNextRobotPosition(){
   if(globalID <= (tablePositions.getRowCount() -1) && globalID >= 0){
 
+    println("globalID: "+globalID);
         int x = tablePositions.getInt(globalID, "X");
         int y = tablePositions.getInt(globalID, "Y");
         int z = tablePositions.getInt(globalID, "Z");

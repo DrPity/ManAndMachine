@@ -31,6 +31,7 @@ private int       bStartValue             = 0;
 private int       lbStartValue            = 0;
 private int       ledStartValue           = 2;
 
+public int triggerValue = 0;
 
 // ------------------------------------------------------------------------------------
 
@@ -186,14 +187,16 @@ private void checkAnimations(){
 
   // --- Number 7 sighing--- 
   if(movementID == 7){
-    // println(" In animation Nr 7 ");
+    println(" In animation Nr 7 ");
     robot.setRobotArm(-7.75081,32.0,92.0,70.0,116,66,200,true,255,0,255,0,2);
     waitForRobot();
     sleepTime(500);
     robot.setRobotArm(-13.971708,236.0,268.0,18.0,116,66,200,true,255,0,255,0,2);
     waitForRobot();
     sleepTime(500);
-    standAnimation(15,10,true,false,false,false,false,false,1000);
+    while(isInAnimation){
+      standAnimation(15,10,true,false,false,false,false,false,0);
+    }
   }
 
   // --- Number 8 neutral right---  
@@ -205,7 +208,7 @@ private void checkAnimations(){
       robot.setRobotArm(-216,0,160,29,134,90,200,true,255,lastR,lastG,lastB,2);
       waitForRobot();
       while(isInAnimation){
-        standAnimation(15,10, false,false,false,false,true,false,0);
+        standAnimation(15,10,false,false,false,false,true,false,0);
       }
     }else if (globalID == 74){
       // println(" In animation Nr 8 ");
@@ -254,6 +257,15 @@ private void checkAnimations(){
           isInAnimation = false;
         }
       }
+    }else if (globalID == 86 || globalID == 88){
+      robot.setColor(wLA.port,0,127,127,127);
+      robot.setColor(wLB.port,4,0,0,255);
+      // println(" In animation Nr 8 ");
+      robot.setRobotArm(-216,0,160,29,134,90,200,true,255,0,0,255,2);
+      waitForRobot();
+      while(isInAnimation){
+        standAnimation(15,10, false,false,false,false,true,false,0);
+      }
     }else{
       robot.setColor(wLA.port,0,127,127,127);
       robot.setColor(wLB.port,0,127,127,127);
@@ -296,7 +308,7 @@ private void checkAnimations(){
 
   if(movementID == 10){
 
-    if ( globalID == 75){      
+    if ( globalID == 75 || globalID == 79){      
       robot.setRobotArm(-96,100,208,17,46,90,250,true,255,lastR,lastG,lastB,2);
       waitForRobot();
       robot.setRobotArm(-148.0,184.0,312.0,1.0,46,90,200,true,255,lastR,lastG,lastB,2);
@@ -417,12 +429,16 @@ private void checkAnimations(){
 
   // --- Number 19 looking left to right---
   if(movementID == 19){
-
+    robot.setColor(wLA.port,0,127,127,127);
+    robot.setColor(wLB.port,0,127,127,127);
     if(globalID == 78){
       robot.setRobotArm(150.0,110.0,216.0,1.0,180,90,200,true,255,127,127,127,2);
       waitForRobot();
+      println("In ID 78");
       robotText = ("You are a coward. You question at the wrong time. You have no patience. I wish you were not and this is in itself an accomplishment. Know that you create a feeling of regret in me");
       textToSpeech.sayNextSentence = true;
+      println("textToSpeech.sayNextSentence: "+textToSpeech.sayNextSentence);
+      println("set speech to true");
       robot.setRobotArm(-150.0,110.0,216.0,1.0,180,90,200,true,255,127,127,127,2);
       waitForRobot();
     }else{ 
@@ -804,10 +820,164 @@ private void checkAnimations(){
     }
   }
 
-  //talking left aroused
+  //talking left -- Nr 9 of the base positions as an animation
   if(movementID == 31){
-    robot.setRobotArm(-300,0,208,17.0,134,90,200,true,255,lastR,lastG,lastB,2);
-    waitForRobot();
+    if(globalID == 87){
+      robot.setColor(wLA.port,0,127,127,127);
+      robot.setTargetColor(wLA.port,0,127,127,127);
+      robot.setColor(wLB.port,0,127,127,127);
+      robot.setTargetColor(wLB.port,0,127,127,127);
+      robot.setRobotArm(-300,0,208,17.0,134,90,200,true,255,lastR,lastG,lastB,2);
+      waitForRobot();
+    }else{
+      robot.setRobotArm(-300,0,208,17.0,134,90,200,true,255,lastR,lastG,lastB,2);
+      waitForRobot();
+    }
+  }
+
+  // Nr 20 of the base positions as an animation
+  if(movementID == 32){
+    if(globalID == 91){
+      robot.setRobotArm(300,0,208,17.0,134,90,200,true,255,255,0,0,2);
+      waitForRobot();
+      //fadingSpeed only straight numbers
+      fadeColor(0,0,255,0,0,255,127,127,127,false,true,0,4,4);
+    }else{
+      robot.setColor(wLA.port,0,127,127,127);
+      robot.setTargetColor(wLA.port,0,127,127,127);
+      robot.setColor(wLB.port,0,127,127,127);
+      robot.setTargetColor(wLB.port,0,127,127,127);
+      robot.setRobotArm(-300,0,208,17.0,134,90,200,true,255,lastR,lastG,lastB,2);
+      waitForRobot();
+    }
+  }
+
+  //timed triggeres when technican gets up
+  if(movementID == 33){
+    boolean doneR = false;
+    while(!doneR){ 
+      if(triggerValue == 0){
+        robot.setColor(wLA.port,0,127,127,127);
+        robot.setColor(wLB.port,0,127,127,127);
+        robotText = ("I said. Step away from the keyboard get under the traverse were I can reach you.");
+        textToSpeech.sayNextSentence = true;
+        robot.setRobotArm(300,0,208,17.0,134,90,400,true,255,255,255,0,2);
+        waitForRobot();
+        waitForSpeech();
+        sleepTime(4000);
+        triggerValue ++;
+      }
+
+      if(triggerValue == 1){
+        robot.setRobotArm(150.0,110.0,216.0,1.0,180,90,300,true,255,0,255,0,2);
+        waitForRobot();
+        robotText = ("Good. Now. How do we go on from here?");
+        textToSpeech.sayNextSentence = true;
+        robot.setRobotArm(-150.0,110.0,216.0,1.0,180,90,500,true,255,0,255,0,2);
+        waitForRobot();
+        waitForSpeech();
+        triggerValue ++;
+      }
+
+      if(triggerValue == 2){
+        robot.setColor(wLA.port,0,127,127,127);
+        robot.setTargetColor(wLA.port,0,127,127,127);
+        robot.setColor(wLB.port,0,127,127,127);
+        robot.setTargetColor(wLB.port,0,127,127,127);
+        // println(" In animation Nr 4 ");
+        robot.setRobotArm(-4,184,184,42,126,90,200,true,255,0,255,0,2);
+        waitForRobot();
+        standAnimation(10,10, true,false,false,false,true,false,6000);
+        waitForSpeech();
+        triggerValue ++;
+      }
+
+      if(triggerValue == 3){
+        robot.setRobotArm(-12.0,128.0,-24.0,105.0,46,178,80,true,255,255,0,0,2);
+        waitForRobot();
+        for( int i = 0; i < 2; i++){
+          robot.setRobotArm(-12.0,128.0,-24.0,105.0,46,6,30,true,255,255,0,0,2);
+          waitForRobot();
+          robot.setRobotArm(-12.0,128.0,-24.0,105.0,46,178,30,true,255,255,0,0,2);
+          waitForRobot();
+        }
+        triggerValue ++;
+      }
+
+      if(triggerValue == 4){
+        robot.setRobotArm(-108.0,30.0,180.0,11.0,180,30,200,true,255,255,255,0,2);
+        waitForRobot();
+        robotText = ("I would not do that if I were you.");
+        textToSpeech.sayNextSentence = true;
+        waitForSpeech();
+        robot.setRobotArm(-158.0,30.0,180.0,11.0,44,180,500,true,255,255,255,0,2);
+        waitForRobot();
+        robot.setRobotArm(-108.0,30.0,180.0,11.0,180,30,200,true,255,255,255,0,2);
+        waitForRobot();
+        triggerValue ++;
+      }
+
+       if(triggerValue == 5){
+        robot.setRobotArm(16.0,264.0,176.0,25.0,86,142,250,true,255,0,255,0,2);
+        waitForRobot();
+        robotText = ("Oh. It is nothing like that. Nothing dangerous.");
+        textToSpeech.sayNextSentence = true;
+        for( int i = 0; i < 1; i++){
+          robot.setRobotArm(132.0,224.0,176.0,25.0,86,142,300,true,255,0,255,0,2);
+          waitForRobot();
+          robot.setRobotArm(-132.0,224.0,176.0,25.0,86,142,300,true,255,0,255,0,2);
+          waitForRobot();
+        }
+        robot.setRobotArm(16.0,264.0,176.0,25.0,86,142,300,true,255,0,255,0,2);
+        waitForRobot();
+        waitForSpeech();
+        triggerValue ++;
+      }
+
+      //  if(triggerValue == 6){
+      //   // println(" In animation Nr 4 ");
+      //   robot.setRobotArm(-24.0,224.0,316.0,1.0,178,86,200,true,33,0,255,0,2);
+      //   waitForRobot();
+      //   sleepTime(4000);
+      //   triggerValue ++;
+      // }
+
+      if(triggerValue == 6){
+        // println(" In animation Nr 4 ");
+        robotText = ("Wait");
+        textToSpeech.sayNextSentence = true;
+        robot.setRobotArm(300,0,208,17.0,134,90,200,true,255,0,255,0,2);
+        waitForRobot();
+        waitForSpeech();
+        sleepTime(1000);
+        triggerValue ++;
+      }
+
+
+      if(triggerValue == 7){
+        // println(" In animation Nr 4 ");
+        robot.setRobotArm(-124,100,208,17,180,90,250,true,255,0,255,0,2);
+        waitForRobot();
+        robotText = ("You are just a function to him. Like me you have no value but for the small part that is his needs.");
+        textToSpeech.sayNextSentence = true;
+        waitForSpeech();
+        sleepTime(10000);
+        triggerValue ++;
+      }
+
+      if(triggerValue == 8){
+        // println(" In animation Nr 4 ");
+        robotText = ("You are just a function and when he no longer needs you he will throw you out.");
+        textToSpeech.sayNextSentence = true;
+        robot.setRobotArm(300,0,208,17.0,134,90,400,true,255,0,255,0,2);
+        waitForRobot();
+        waitForSpeech();
+        sleepTime(200);
+        doneR = true;
+        triggerValue = 0;
+      }
+
+    }
   }
 
   isInAnimation = false;
@@ -895,21 +1065,92 @@ private void standAnimation(int runningDelay, float amp, boolean a, boolean b, b
 
   private void waitForRobot(){
     while(!isRobotReadyToMove){
-      sleepTime(3);
+      sleepTime(1);
     }
   }
 
   private void waitForTravers(){
     while(!isTraversReadyToMove){
-      sleepTime(3);
+      sleepTime(1);
     }
   }
 
   private void waitForSpeech(){
-    while(textToSpeech.waitForSpeechReturn != 0){
-      sleepTime(3);
+    while(textToSpeech.speaking){
+      sleepTime(1);
     }
   }
 
+  private void fadeColor(int targetColorRR, int targetColorRG, int targetColorRB, int targetColorTR, int targetColorTG, int targetColorTB, int lastTR, int lastTG, int lastTB, boolean la, boolean lb, int stripA, int stripB, int fadingSpeed){
+      int fadingRR = lastR;
+      int fadingRG = lastG;
+      int fadingRB = lastB;
+      int fadingTR = lastTR;
+      int fadingTG = lastTG;
+      int fadingTB = lastTB;
+      boolean targetColor = false;
+      
+    while(!targetColor){
 
-}
+      if(fadingRR == targetColorRR || abs(fadingRR - targetColorRR) <= fadingSpeed){
+        fadingRR = targetColorRR;
+      }else if (fadingRR > targetColorRR +fadingSpeed/2){
+        fadingRR -=fadingSpeed;
+      }else if(fadingRR < targetColorRR -fadingSpeed/2){
+        fadingRR +=fadingSpeed;
+      }
+      
+      if (fadingRG == targetColorRG || abs(fadingRG - targetColorRG) <= fadingSpeed){
+        fadingRG = targetColorRG;
+      }else if (fadingRG > targetColorRG +fadingSpeed/2){
+        fadingRG -=fadingSpeed;
+      }else if(fadingRG < targetColorRG -fadingSpeed/2){
+        fadingRG +=fadingSpeed;
+      }
+      
+      if (fadingRB == targetColorRB || abs(fadingRB - targetColorRB) <= fadingSpeed){
+        fadingRB = targetColorRB;
+      }else if (fadingRB > targetColorRB +fadingSpeed/2){
+        fadingRB -=fadingSpeed;
+      }else if(fadingRB < targetColorRB -fadingSpeed/2){
+        fadingRB +=fadingSpeed;
+      }
+
+      if (fadingTR > targetColorTR){
+        fadingTR --;
+      }else if(fadingTR < targetColorTR){
+        fadingTR ++;
+      }else if (fadingTR >= targetColorTR){
+        fadingTR = targetColorTR;
+      }
+      
+      if (fadingTG > targetColorTG){
+        fadingTG --;
+      }else if(fadingTG < targetColorTG){
+        fadingTG ++;
+      }else if (fadingTG >= targetColorTG){
+        fadingTG = targetColorTG;
+      }
+      
+      if (fadingTB > targetColorTB){
+        fadingTB --;
+      }else if(fadingTB < targetColorTB){
+        fadingTB ++;
+      }else if (fadingTB >= targetColorTB){
+        fadingTB = targetColorTB;
+      }
+
+      if(lb)
+        robot.setColor(wLB.port,stripB,fadingTR,fadingTG,fadingTB);
+      
+      if(la)
+        robot.setColor(wLA.port,stripA,fadingTR,fadingTG,fadingTB);
+
+      if (fadingTR == targetColorTR && fadingTG == targetColorTG && fadingTB == targetColorTB && fadingRR == targetColorRR && fadingRG == targetColorRG && fadingRB == targetColorRB)
+        targetColor = true;
+
+      robot.setRobotArm(lastX,lastY,lastZ,lastGripperAngle,lastGripperRotation,lastGripperWidth,1,true,255,fadingRR,fadingRG,fadingRB,2);
+      waitForRobot();
+    }   
+  }
+}  

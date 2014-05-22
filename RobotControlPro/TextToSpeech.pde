@@ -36,12 +36,12 @@ String[] voices = {
 };
 
 Table tableSpeech;
-boolean running;           // Is the thread running?  Yes or no?
-boolean readText;
-boolean speaking;
-boolean sayNextSentence;
-int wait;
-int waitForSpeechReturn;
+private boolean running;           // Is the thread running?  Yes or no?
+private boolean readText;
+public boolean speaking;
+public boolean sayNextSentence;
+private int wait;
+public int waitForSpeechReturn;
 
 // ------------------------------------------------------------------------------------
 
@@ -70,19 +70,28 @@ int waitForSpeechReturn;
     // sleep(2000);
     sleepTime(300);
     while (running) {
-    	if(readText && globalID <= (tableSpeech.getRowCount() -1) && globalID >= 0){
+    	if(readText && globalID <= (tableSpeech.getRowCount() -1) && globalID >= 0 && !speaking){
+        // println("In text to speech");
     		String textString = tableSpeech.getString(globalID, "STRING");
         int voice = tableSpeech.getInt(globalID, "VOICE");
-        speaking = true;
-        waitForRobot();
-        waitForTravers();
-        say(textString,voice);
+        // if (!textString.equals("-")){
+          println("In speaking");
+          println("globalID: "+globalID);
+          speaking = true;
+          waitForRobot();
+          waitForTravers();
+          say(textString,voice);
+          readText = false;
+        // }
     	}
 
-      if(sayNextSentence){
+      if(sayNextSentence && !speaking){
+        println("In say sentence");
         String textString = robotAnimation.robotText;
+        println("textString: "+textString);
         int voice = robotAnimation.robotVoice;
-        waitForRobot();
+        // waitForRobot();
+        speaking = true;
         say(textString,voice);
         sayNextSentence = false;
       }
@@ -97,11 +106,11 @@ int waitForSpeechReturn;
 	void say(String s, int voice) {
 	  try {
       sleepTime(100);
+      println("In say");
 	    Runtime rtime = Runtime.getRuntime();
 	    Process child = rtime.exec("/usr/bin/say -v " + (voices[voice]) + " " + s);
 	    waitForSpeechReturn = child.waitFor();
       waitUntilTextIsSpoken();
-      readText = false;
 	  }
 	  catch (Exception e) {
 	    e.printStackTrace();
