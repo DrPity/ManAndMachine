@@ -20,8 +20,8 @@ unsigned long currentPositionC = 0;
 long currentStepsAB;
 long currentStepsC;
 
-unsigned long MAX_STEPS_AB = 33000;
-unsigned long MAX_STEPS_C = 33000;
+unsigned long MAX_STEPS_AB = 34037;
+unsigned long MAX_STEPS_C = 20500;
 
 unsigned long MIN_STEPS_AB = 0;
 unsigned long MIN_STEPS_C = 0;
@@ -128,7 +128,8 @@ void loop(){
 
     if(inByte.equals("W") == true){
 
-      connectionTimeOut ++;
+     if(connectionTimeOut < 10) 
+        connectionTimeOut = 10;
 
     }
 
@@ -158,11 +159,6 @@ void loop(){
   }else if ((millis() - watchdog) >= 2000){
         watchdogCall();
     }
-
-  if (connectionTimeOut <= 0){
-
-    // Serial.println("TimeOut");
-  }
 
 
  //  ******* Setting Target Position *******
@@ -329,20 +325,37 @@ for (int i = 0; i <= 3; i++){
   b             = parameterArray[1];
   c             = parameterArray[2];
   easingRes     = parameterArray[3];
-
   // Serial.println("Before Mapping: ");
   // Serial.println(a);
   // Serial.println(b);
   // Serial.println(c);
+
+  a = map(a,0,2000,MIN_STEPS_AB ,MAX_STEPS_AB); // Wokaround -> make fx with button instead
+  b = map(b,0,2000,MIN_STEPS_AB ,MAX_STEPS_AB);
+  c = map(c,0,2000,MIN_STEPS_C ,MAX_STEPS_C);
+
+
+  if(currentPositionA == a && currentPositionB == b && currentPositionC == c){
+    easingRes = 100;
+    // Serial.println("In check for easing");
+  }
+
 
     for (int i = 0; i < 3; ++i)
   {
     stepperMotors[i]->easing_resolution = easingRes;
   }
 
-  a = map(a,0,2000,MIN_STEPS_AB ,MAX_STEPS_AB); // Wokaround -> make fx with button instead
-  b = map(b,0,2000,MIN_STEPS_AB ,MAX_STEPS_AB);
-  c = map(c,0,2000,MIN_STEPS_C ,MAX_STEPS_C);
+
+  // Serial.println(stepperMotors[0]->_currentPosition);
+  // Serial.println(stepperMotors[1]->_currentPosition);
+  // Serial.println(stepperMotors[2]->_currentPosition);
+  // Serial.println(currentPositionA);
+  // Serial.println(currentPositionB);
+  // Serial.println(currentPositionC);
+  // Serial.println(a);
+  // Serial.println(b);
+  // Serial.println(c);
   // Serial.println("After Mapping: ");
   // Serial.println(a);
   // Serial.println(b);
@@ -376,6 +389,9 @@ void watchdogCall() {
     connectionTimeOut --;
     // delay(30);
     watchdogActive = false;
+    if (connectionTimeOut <= 0){
+      requestNextPosition();
+    }
 }  
 
 // ------------------------------------------------------------------------------------
@@ -478,6 +494,7 @@ void initializeMovement()
         delay(500);
         done = true;
         Serial.println("both buttons reached");
+        watchdogCall();
     }
     sendStep();   
   }
@@ -538,6 +555,7 @@ void initializeMovement()
     } 
     
     if(!AB && !C){
+      watchdogCall();
       delay(500);
       done = true;
     }

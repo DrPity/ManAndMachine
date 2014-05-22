@@ -64,8 +64,13 @@ private void checkAnimations(){
 
   // --- Number 1  WakeUP---
   if(movementIDt == 1){
-    robot.sendTraversData(1000,1000,1500,5000);
-    waitForTravers();
+    if(globalID == 131){
+      robot.sendTraversData(lastXt,lastYt,lastZt,5000);
+      waitForTravers();
+    }else{
+      robot.sendTraversData(1000,1000,1500,5000);
+      waitForTravers();
+    }  
   }
 
   // --- Number 2  Diagnostic---
@@ -74,6 +79,19 @@ private void checkAnimations(){
       robot.sendTraversData(2000,2000,2000,20000);
       waitForTravers();
       robot.sendTraversData(1100,1100,1500,10000);
+      waitForTravers();
+    }else if(globalID == 132){
+      robot.sendTraversData(lastXt,lastYt,2000,5000);
+      waitForTravers();
+      robot.sendTraversData(2000,2000,2000,5000);
+      waitForTravers();
+      robot.sendTraversData(1000,1000,2000,5000);
+      waitForTravers();
+      robot.sendTraversData(1000,1000,0,5000);
+      waitForTravers();
+      robot.sendTraversData(0,0,0,5000);
+      waitForTravers();
+      robot.sendTraversData(1000,1500,1000,5000);
       waitForTravers();
     }
 
@@ -88,11 +106,16 @@ private void checkAnimations(){
   // --- Number 4  Neutral forward---
   if(movementIDt == 4){
     if(globalID == 82){
-      println("In travers mov. 82");
       robot.sendTraversData(1900,1900,1900,5000);
       waitForTravers();
-    }else if(globalID == 102){
+    }else if(globalID == 102 || globalID == 133){
       robot.sendTraversData(lastXt,lastYt,lastZt,5000);
+      waitForTravers();
+    }else if(globalID == 117){
+      robot.sendTraversData(400,400,1600,5000);
+      waitForTravers();
+    }else if(globalID == 134){
+      robot.sendTraversData(lastXt,lastYt,300,5000);
       waitForTravers();
     }else{
       robot.sendTraversData(1000,1000,1500,5000);
@@ -136,9 +159,6 @@ private void checkAnimations(){
     if(globalID == 40){
       robot.sendTraversData(1600,1600,1500,5000);
       waitForTravers();
-    }else if(globalID == 71){
-      robot.sendTraversData(lastXt,lastYt,lastZt,5000);
-      waitForTravers();
     }else if(globalID == 72){
       robot.sendTraversData(1900,1900,1600,5000);
       waitForTravers();
@@ -148,7 +168,7 @@ private void checkAnimations(){
     }else if(globalID == 89){
       robot.sendTraversData(1000,1000,2000,5000);
       waitForTravers();
-    }else if(globalID == 112){
+    }else if(globalID == 112 || globalID == 116 || globalID == 118 || globalID == 71 || globalID == 121 || globalID == 123 ){
       robot.sendTraversData(lastXt,lastYt,lastZt,5000);
       waitForTravers();
     }else{
@@ -175,7 +195,7 @@ private void checkAnimations(){
     waitForTravers();
     }else if(globalID == 75){
     robot.sendTraversData(1800,1800,1000,5000);
-    }else if(globalID == 103){
+    }else if(globalID == 103 || globalID == 126){
     robot.sendTraversData(lastXt,lastYt,lastZt,5000);
     }else if(globalID == 107){
     robot.sendTraversData(1000,1000,1700,5000);
@@ -218,14 +238,25 @@ private void checkAnimations(){
 
   // --- Number 15 looking from top to bottom---  
   if(movementIDt == 15){
-    robot.sendTraversData(lastXt,lastYt,lastZt,5000);
-    waitForTravers();
+    if(globalID == 137){
+      robot.sendTraversData(1000,1000,600,5000);
+      waitForTravers();
+      
+    }else{
+      robot.sendTraversData(lastXt,lastYt,lastZt,5000);
+      waitForTravers();
+    }
   }
 
   // --- swaying --- 
   if(movementIDt == 16){
-    robot.sendTraversData(1000,1000,800,5000);
-    waitForTravers();
+    if(globalID == 119 || globalID == 127 || globalID == 129){
+      robot.sendTraversData(lastXt,lastYt,lastZt,5000);
+      waitForTravers();  
+    }else{
+      robot.sendTraversData(1000,1000,800,5000);
+      waitForTravers();
+    }
    }
 
   // --- Number 17 powerMove---  
@@ -371,6 +402,9 @@ private void checkAnimations(){
     }else if(globalID == 74){
       robot.sendTraversData(1000,1000,500,5000);
       waitForTravers();
+    }else if(globalID == 120 || globalID == 122 || globalID == 125){
+      robot.sendTraversData(lastXt,lastYt,lastZt,5000);
+      waitForTravers();
     }else{
       robot.sendTraversData(1700,1700,1600,5000);
       waitForTravers();
@@ -470,12 +504,12 @@ private void standAnimationT(int runningDelay, float amp, boolean xT, boolean zT
     angleT += aVelocityT;
 
     if(!startPositionIsStoredT){
-      println("In startposition stored Travers");
+      // println("In startposition stored Travers");
       xStartValueT = lastXt;
       yStartValueT = lastYt;
       zStartValueT = lastZt;
       startPositionIsStoredT = true;
-      println("lastXt: " + lastXt + " lastYt: " + lastYt + " lastZt: " + lastZt + " startValueX: " + xStartValueT + "startValueY: " + yStartValueT + "startValueZ: " + zStartValueT);
+      // println("lastXt: " + lastXt + " lastYt: " + lastYt + " lastZt: " + lastZt + " startValueX: " + xStartValueT + "startValueY: " + yStartValueT + "startValueZ: " + zStartValueT);
     }
 
     if(xT)

@@ -90,8 +90,8 @@ ConnectionLight connectionLight, bluetoothConnection, robotConnection, traversCo
 
 void setup() {
   frameRate(120);
-	// size(displayWidth, displayHeight,P2D);
-  size(1280,720,P2D);
+	size(displayWidth, displayHeight,P2D);
+  // size(1280,720,P2D);
   noSmooth();
   hint(ENABLE_RETINA_PIXELS);
   smooth(4);
@@ -397,6 +397,11 @@ void controlEvent(ControlEvent theEvent) {
       try {
         String[] list = split(theEvent.getStringValue(), ',');
         if (list.length == 1 && !textToSpeech.speaking && !checkIfReadyForNextStep){
+          println("isTraversReadyToMove: "+isTraversReadyToMove);
+          println("isRobotReadyToMove: "+isRobotReadyToMove);
+          println("checkIfReadyForNextStep: "+checkIfReadyForNextStep);
+          println("stepForward: "+stepForward);
+          println("textToSpeech.speaking: "+textToSpeech.speaking);
           globalID = Integer.parseInt(list[0]);
           checkIfReadyForNextStep = true;
         }else if (list.length == 6){
@@ -516,6 +521,11 @@ void keyPressed(){
 
    if (key == CODED){
       if (keyCode == LEFT){
+        println("isTraversReadyToMove: "+isTraversReadyToMove);
+        println("isRobotReadyToMove: "+isRobotReadyToMove);
+        println("checkIfReadyForNextStep: "+checkIfReadyForNextStep);
+        println("stepForward: "+stepForward);
+        println("textToSpeech.speaking: "+textToSpeech.speaking);
         if(!stepBack && !textToSpeech.speaking && !checkIfReadyForNextStep){
           globalID--;
           textToSpeech.checkTableConstrains();
@@ -524,6 +534,11 @@ void keyPressed(){
         }
       }
       if (keyCode == RIGHT){
+        println("isTraversReadyToMove: "+isTraversReadyToMove);
+        println("isRobotReadyToMove: "+isRobotReadyToMove);
+        println("checkIfReadyForNextStep: "+checkIfReadyForNextStep);
+        println("stepForward: "+stepForward);
+        println("textToSpeech.speaking: "+textToSpeech.speaking);
         if(!stepForward && !textToSpeech.speaking && !checkIfReadyForNextStep){
           globalID++;
           textToSpeech.checkTableConstrains();
@@ -541,8 +556,6 @@ void keyPressed(){
         // debugVariable -= 2;
       }
     }
-
-    println("Debug Variable : " + debugVariable);
 }
 
 // ------------------------------------------------------------------------------------
@@ -573,5 +586,5 @@ void calculateBioInput(){
 // ------------------------------------------------------------------------------------
 
 boolean sketchFullScreen() {
-return false;
+return true;
 }
