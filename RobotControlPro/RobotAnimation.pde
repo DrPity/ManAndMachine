@@ -504,8 +504,6 @@ private void checkAnimations(){
 
   // --- Number 19 looking left to right---
   if(movementID == 19){
-    robot.setColor(wLA.port,0,127,127,127);
-    robot.setColor(wLB.port,0,127,127,127);
     if(globalID == 78){
       robot.setRobotArm(150.0,110.0,216.0,1.0,180,90,200,true,255,127,127,127,2);
       waitForRobot();
@@ -539,6 +537,7 @@ private void checkAnimations(){
         waitForRobot();
       }
     }else{
+      println("In 20");
       robot.setRobotArm(-108.0,30.0,180.0,11.0,180,30,200,true,255,255,255,0,2);
       waitForRobot();
       robot.setRobotArm(-158.0,30.0,180.0,11.0,44,180,500,true,255,255,255,0,2);
@@ -567,7 +566,7 @@ private void checkAnimations(){
     }
     robot.setRobotArm(-236.0,-2.0,148.0,19.0,178,102,200,true,255,0,255,0,2);
     while(isInAnimation){
-      if(kinect.kinectValueAvailable){
+      if(kinect.kinectValueAvailable && kinect.context != null){
        robot.setRobotArm(kinect.xValueKinectR,kinect.zValueKinectR,148,19,178,102,200,true,255,0,255,0,2);
        // robot.sendTraversData((int)kinect.xValueKinect,(int)kinect.xValueKinect,(int)kinect.xValueKinect,100);
        waitForRobot();
@@ -866,6 +865,7 @@ private void checkAnimations(){
 
   //MindWave agressive
  if(movementID == 30){
+  println("In 67");
     robot.setRobotArm(-198.0,20.0,122.0,25.0,178,102,200,true,255,255,255,0,2);
     waitForRobot();
     while(isInAnimation){
@@ -902,7 +902,7 @@ private void checkAnimations(){
       robot.setTargetColor(wLA.port,0,127,127,127);
       robot.setColor(wLB.port,0,127,127,127);
       robot.setTargetColor(wLB.port,0,127,127,127);
-      robot.setRobotArm(-300,0,208,17.0,134,90,200,true,255,lastR,lastG,lastB,2);
+      robot.setRobotArm(-300,0,208,17.0,134,90,200,true,255,0,255,0,2);
       waitForRobot();
     }else if(globalID == 104){
       robot.setRobotArm(-300,0,208,17.0,134,90,200,true,255,0,255,0,2);

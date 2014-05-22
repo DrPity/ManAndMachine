@@ -229,7 +229,7 @@ println("before channel init");
   inCharLB = null;
   isReadyForButtonCommands = true;
   println("Setup finished");  
-  // kinect = addControlFrame("extra", 320,240);
+  kinect = addControlFrame("extra", 320,240);
 
     
 }
@@ -1175,68 +1175,69 @@ class Graph {
 			noFill();				
 			if(renderMode == "Shaded" || renderMode == "Triangles") noStroke();		
 			if(renderMode == "Lines" || renderMode == "Curves") strokeWeight(1.5f);
-			// println("Before loop");
-			
+			// println("Before loop")
 			for (int i = 0; i < thisChannels.length; i++) {
-				Channel thisChannel = thisChannels[i];
-				// println("In for loop");
-				// println("Drawing value:" + thisChannel.getLatestPoint().value + " " + i ) ;
-				
-				if(thisChannel.graphMe) {
-				
-					//Draw the line
-					if(renderMode == "Lines" || renderMode == "Curves") stroke(thisChannel.drawColor);
-
-					if(renderMode == "Shaded" || renderMode == "Triangles") {
-						noStroke();
-						fill(thisChannel.drawColor, 120);
-					}
-				
-					if(renderMode == "Triangles") {
-						beginShape(TRIANGLES);
-					}
-					else {
-						beginShape();			
-					}
-
-					if(renderMode == "Curves") vertex(0, h);
-				
-				
-					for (int j = 0; j < thisChannel.points.size(); j++) {
-						Point thisPoint = (Point)thisChannel.points.get(j);
-							
-						// check bounds
-						if((thisPoint.time >= leftTime) && (thisPoint.time <= rightTime)) {
+				if(thisChannels[i] != null){
+					Channel thisChannel = thisChannels[i];
+					// println("In for loop");
+					// println("Drawing value:" + thisChannel.getLatestPoint().value + " " + i ) ;
 					
-							int pointX = (int)helpers.mapLong(thisPoint.time, leftTime, rightTime, 0L, (long)w);
+					if(thisChannel.graphMe) {
+					
+						//Draw the line
+						if(renderMode == "Lines" || renderMode == "Curves") stroke(thisChannel.drawColor);
+
+						if(renderMode == "Shaded" || renderMode == "Triangles") {
+							noStroke();
+							fill(thisChannel.drawColor, 120);
+						}
+					
+						if(renderMode == "Triangles") {
+							beginShape(TRIANGLES);
+						}
+						else {
+							beginShape();			
+						}
+
+						if(renderMode == "Curves") vertex(0, h);
+					
+					
+						for (int j = 0; j < thisChannel.points.size(); j++) {
+							Point thisPoint = (Point)thisChannel.points.get(j);
+								
+							// check bounds
+							if((thisPoint.time >= leftTime) && (thisPoint.time <= rightTime)) {
 						
-							int pointY = 0;
-							if((scaleMode == "Global") && (i > 2)) {					
-								pointY = (int)map(thisPoint.value, 0, globalMax, h, 0);
+								int pointX = (int)helpers.mapLong(thisPoint.time, leftTime, rightTime, 0L, (long)w);
+							
+								int pointY = 0;
+								if((scaleMode == "Global") && (i > 2)) {					
+									pointY = (int)map(thisPoint.value, 0, globalMax, h, 0);
+								}
+								else {
+									// Local scale
+									pointY = (int)map(thisPoint.value, thisChannel.minValue, thisChannel.maxValue, h, 0);
+								}
+						
+								// ellipseMode(CENTER);
+								// ellipse(pointX, pointY, 5, 5);
+						
+								if(renderMode == "Curves") {
+									curveVertex(pointX, pointY);					
+								}
+								else {
+									vertex(pointX, pointY);
+								}				
 							}
-							else {
-								// Local scale
-								pointY = (int)map(thisPoint.value, thisChannel.minValue, thisChannel.maxValue, h, 0);
-							}
-					
-							// ellipseMode(CENTER);
-							// ellipse(pointX, pointY, 5, 5);
-					
-							if(renderMode == "Curves") {
-								curveVertex(pointX, pointY);					
-							}
-							else {
-								vertex(pointX, pointY);
-							}				
 						}
 					}
+
+					
+					if(renderMode == "Curves") vertex(w, h);
+					if(renderMode == "Lines" || renderMode == "Curves" || renderMode == "Triangles") endShape();
+					if(renderMode == "Shaded") endShape(CLOSE);
 				}
-				
-				if(renderMode == "Curves") vertex(w, h);
-				if(renderMode == "Lines" || renderMode == "Curves" || renderMode == "Triangles") endShape();
-				if(renderMode == "Shaded") endShape(CLOSE);
-			}
-			
+			}	
 
 
 			
@@ -1839,8 +1840,8 @@ private int[] bitArray = new int[8];
           isFallingP = false;
           isIncreasingP = false;
           // println("plethRate: "+plethRate);
-          if(plethRate >= 55){
-            if(millis() - beatTime >= 450){
+          if(plethRate >= 55 && globalID < 67){
+            if(millis() - beatTime >= 500){
               robot.setTargetColor(wLB.port,0,127,127,127);
               robot.setTargetColor(wLA.port,0,127,127,127);
               // println("Beat");
@@ -3000,8 +3001,6 @@ private void checkAnimations(){
 
   // --- Number 19 looking left to right---
   if(movementID == 19){
-    robot.setColor(wLA.port,0,127,127,127);
-    robot.setColor(wLB.port,0,127,127,127);
     if(globalID == 78){
       robot.setRobotArm(150.0f,110.0f,216.0f,1.0f,180,90,200,true,255,127,127,127,2);
       waitForRobot();
@@ -3035,6 +3034,7 @@ private void checkAnimations(){
         waitForRobot();
       }
     }else{
+      println("In 20");
       robot.setRobotArm(-108.0f,30.0f,180.0f,11.0f,180,30,200,true,255,255,255,0,2);
       waitForRobot();
       robot.setRobotArm(-158.0f,30.0f,180.0f,11.0f,44,180,500,true,255,255,255,0,2);
@@ -3063,7 +3063,7 @@ private void checkAnimations(){
     }
     robot.setRobotArm(-236.0f,-2.0f,148.0f,19.0f,178,102,200,true,255,0,255,0,2);
     while(isInAnimation){
-      if(kinect.kinectValueAvailable){
+      if(kinect.kinectValueAvailable && kinect.context != null){
        robot.setRobotArm(kinect.xValueKinectR,kinect.zValueKinectR,148,19,178,102,200,true,255,0,255,0,2);
        // robot.sendTraversData((int)kinect.xValueKinect,(int)kinect.xValueKinect,(int)kinect.xValueKinect,100);
        waitForRobot();
@@ -3362,6 +3362,7 @@ private void checkAnimations(){
 
   //MindWave agressive
  if(movementID == 30){
+  println("In 67");
     robot.setRobotArm(-198.0f,20.0f,122.0f,25.0f,178,102,200,true,255,255,255,0,2);
     waitForRobot();
     while(isInAnimation){

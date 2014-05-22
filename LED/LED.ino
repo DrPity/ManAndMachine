@@ -6,10 +6,10 @@
 #define ArduinoB
 
 #ifdef ArduinoB
-#define STRIP_PIN_CENTER 2
-#define STRIP_PIN_RF 3
-#define STRIP_PIN_LF 4
-#define STRIP_PIN_ROBOT 5
+#define STRIP_PIN_CENTER 3
+#define STRIP_PIN_RF 4
+#define STRIP_PIN_LF 5
+#define STRIP_PIN_ROBOT 6
 #define NUMBEROFPIXELSCORNER 107
 #define NUMBEROFPIXELSROBOT 40
 #define NUMBEROFPIXELSCENTER 116

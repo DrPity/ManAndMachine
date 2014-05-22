@@ -205,7 +205,7 @@ println("before channel init");
   inCharLB = null;
   isReadyForButtonCommands = true;
   println("Setup finished");  
-  // kinect = addControlFrame("extra", 320,240);
+  kinect = addControlFrame("extra", 320,240);
 
     
 }
