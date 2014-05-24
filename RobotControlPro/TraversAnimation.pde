@@ -12,6 +12,7 @@ private int xStartValueT;
 private int yStartValueT;
 private int zStartValueT;
 public int movementIDt;
+private int flash;
 private long frameTimeT;
 
 
@@ -36,6 +37,7 @@ private long frameTimeT;
     aVelocityT     = 0.2;
     frameTimeT = 0;
     movementIDt = 0;
+    flash = 0;
     super.start();
   }
  
@@ -263,6 +265,12 @@ private void checkAnimations(){
   if(movementIDt == 17){
     robot.sendTraversData(1000,1000,1000,5000);
     waitForTravers();
+    while(isInAnimationT){
+      flash();
+      sleepTime(50);
+
+    }
+
   }
 
   // --- Number 18 exhausted---
@@ -306,7 +314,7 @@ private void checkAnimations(){
       while(isInAnimationT){
         int attention = channelsMindwave[1].getLatestPoint().value;
         int meditation = channelsMindwave[2].getLatestPoint().value;
-        if (attention > 0 || meditation > 0){
+        if (meditation > 0){
           robot.sendTraversData((int)map(meditation, 0, 100, 0, 2000),(int)map(meditation, 0, 100, 0, 2000),(int)map(meditation, 0, 100, 500, 1500), ((-100 + meditation)*30) + 6000);
           waitForTravers();
         }else{
@@ -317,7 +325,7 @@ private void checkAnimations(){
   }
 
 
-  // --- Number 23 MindWave ---
+  // --- Number 23 kinect ---
   if(movementIDt == 23){
     while(isInAnimationT){
       if(kinect.zPositionUpdatedT && kinect.xPositionUpdatedT && kinect.context != null){
@@ -387,8 +395,12 @@ private void checkAnimations(){
       while(isInAnimationT){
         int attention = channelsMindwave[1].getLatestPoint().value;
         int meditation = channelsMindwave[2].getLatestPoint().value;
-        robot.sendTraversData((int)map(attention, 0, 100, 2000, 100),(int)map(attention, 0, 100, 2000, 0),(int)map(attention, 0, 100, 500, 1500),((-100 + attention)*30) + 6000);
-        waitForTravers();
+        if (attention > 0){
+          robot.sendTraversData((int)map(attention, 0, 100, 2000, 100),(int)map(attention, 0, 100, 2000, 0),(int)map(attention, 0, 100, 500, 1500),((-100 + attention)*30) + 6000);
+          waitForTravers();
+        }else{
+          robot.sendTraversData(0,0,0,8000);
+        }
       }
     }  
   }
@@ -446,7 +458,7 @@ private void checkAnimations(){
       }
 
       if(robotAnimation.triggerValue == 3){
-        robot.sendTraversData(300,300,1700,4000);
+        robot.sendTraversData(300,300,500,3000);
         waitForTravers();
       }
 
@@ -519,7 +531,7 @@ private void standAnimationT(int runningDelay, float amp, boolean xT, boolean zT
 
     robot.sendTraversData((int)(xStartValueT + kx), (int)(xStartValueT + kx), (int)(zStartValueT + kz), (int)abs(xStartValueT + k)/5 ); 
     waitForTravers();
-    println(abs(xStartValueT + k)*10);
+    // println(abs(xStartValueT + k)*10);
     sleepTime(runningDelay);
   }
 
@@ -559,5 +571,15 @@ private void standAnimationT(int runningDelay, float amp, boolean xT, boolean zT
     }
   }
 
+  private void flash(){
+      flash = (int)random(0, 100);
+      if (flash > 50){
+        robot.setColor(wLA.port,0,127,127,127);
+        robot.setColor(wLB.port,0,127,127,127);
+      }else {
+        robot.setColor(wLA.port,0,0,0,0);
+        robot.setColor(wLB.port,0,0,0,0);
+      }  
 
-}
+  }
+}  

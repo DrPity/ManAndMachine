@@ -80,7 +80,7 @@ TextToSpeech textToSpeech;
 RobotAnimation robotAnimation;
 TraversAnimation traversAnimation;
 Robot robot;
-Channel[] channelsMindwave = new Channel[11];
+Channel[] channelsMindwave = new Channel[3]; // switch to 11 and comment in channels to get full data
 Channel[] channelPleth = new Channel[1];
 Graph mindWave, emg, ecg, pleth;
 Textlabel lableID, textID, fRate, headlineText_1, headlineText_2, textMindwave, attentionLevel, attentionValue, meditationLevel, meditationValue, blinkStrength, blinkValue, textPulseMeter, pulseLevel, pulseValue;
@@ -153,16 +153,16 @@ println("before channel init");
 	// Creat the channel objects
 	// yellow to purple and then the space in between, grays for the alphas
 	channelsMindwave[0]  = new Channel("Signal Quality", color(0), "");
-	channelsMindwave[1]  = new Channel("Attention", color(100), "");
-	channelsMindwave[2]  = new Channel("Meditation", color(50), "");
-	channelsMindwave[3]  = new Channel("Delta", color(219, 211, 42), "Dreamless Sleep");
-	channelsMindwave[4]  = new Channel("Theta", color(245, 80, 71), "Drowsy");
-	channelsMindwave[5]  = new Channel("Low Alpha", color(237, 0, 119), "Relaxed");
-	channelsMindwave[6]  = new Channel("High Alpha", color(212, 0, 149), "Relaxed");
-	channelsMindwave[7]  = new Channel("Low Beta", color(158, 18, 188), "Alert");
-	channelsMindwave[8]  = new Channel("High Beta", color(116, 23, 190), "Alert");
-	channelsMindwave[9]  = new Channel("Low Gamma", color(39, 25, 159), "???");
-	channelsMindwave[10] = new Channel("High Gamma", color(23, 26, 153), "???");
+	channelsMindwave[1]  = new Channel("Attention", color(39, 160, 25), "");
+	channelsMindwave[2]  = new Channel("Meditation", color(23, 26, 153), "");
+	// channelsMindwave[3]  = new Channel("Delta", color(219, 211, 42), "Dreamless Sleep");
+	// channelsMindwave[4]  = new Channel("Theta", color(245, 80, 71), "Drowsy");
+	// channelsMindwave[5]  = new Channel("Low Alpha", color(237, 0, 119), "Relaxed");
+	// channelsMindwave[6]  = new Channel("High Alpha", color(212, 0, 149), "Relaxed");
+	// channelsMindwave[7]  = new Channel("Low Beta", color(158, 18, 188), "Alert");
+	// channelsMindwave[8]  = new Channel("High Beta", color(116, 23, 190), "Alert");
+	// channelsMindwave[9]  = new Channel("Low Gamma", color(39, 25, 159), "???");
+	// channelsMindwave[10] = new Channel("High Gamma", color(23, 26, 153), "???");
 	
   delay(200);
 
@@ -183,8 +183,8 @@ println("before channel init");
 // ----------------------------------------
   println("before graph init");  
 	// Set up the graph
-	mindWave = new Graph(0, 0, width, round(height / 2), channelsMindwave, 1000, "Lines");
-  pleth = new Graph(0, round(height / 2), width, round(height / 2), channelPleth, 200, "Lines");
+	mindWave = new Graph(0, 0, width, round(height / 2), channelsMindwave, 1000, "Shaded");
+  pleth = new Graph(0, round(height / 2), width, round(height / 2), channelPleth, 500, "Lines");
   // ecg = new Graph(0, round(height * 0.30), width, round(height * 0.10), channelPleth, 200, "Lines");
   // emg = new Graph(0, round(height * 0.20), width, round(height * 0.10), channelPleth, 200, "Lines");
 	
@@ -205,7 +205,7 @@ println("before channel init");
   inCharLB = null;
   isReadyForButtonCommands = true;
   println("Setup finished");  
-  kinect = addControlFrame("extra", 320,240);
+  // kinect = addControlFrame("extra", 320,240);
 
     
 }
@@ -233,15 +233,15 @@ void draw() {
   // ecg.draw();
   pleth.draw();
   drawings.drawLine(0,height / 2, width, height/2,2);
-  // drawings.drawLine(0,round(emg.y + (height * 0.10)), width, round(emg.y + (height * 0.10)),2);
+  // drawings.drawLine(0,round(emg.y + (height * 0.10)), width, round(emg + (height * 0.10)),2);
   // drawings.drawLine(0,round(ecg.y + (height * 0.10)), width, round(ecg.y + (height * 0.10)),2);
   drawings.drawLine(0, height, width, height,2);
-  drawings.drawLine(20,round(height * 0.44), 210, round(height * 0.44),1);
+  drawings.drawLine(20,round(height * 0.535), 210, round(height * 0.535),1);
   noStroke();
   // drawings.drawRectangle(10,10,195,300,0,0,255,150);
-  drawings.drawRectangle(round(width*0.008), round(height * 0.408) ,400,300,0,0,255,255,255,150);  
+  drawings.drawRectangle(round(width*0.008), round(height * 0.508) ,395,150,0,0,255,255,255,150);  
   drawings.drawRectangle(0, 0, 88, 118, width - 98, 10, 255,255,255, 150);
-  drawings.drawRectangle(round(width*0.13), round(height * 0.49),40,20, 60,0, 255-isReadyColor ,isReadyColor - 50,0, 220);
+  drawings.drawRectangle(round(width*0.13), round(height * 0.49),40,20, 85,65, 255-isReadyColor ,isReadyColor - 50,0, 220);
 	
   if(channelsMindwave[0]!= null)
     connectionLight.update(channelsMindwave[0].getLatestPoint().value);
@@ -521,11 +521,11 @@ void keyPressed(){
 
    if (key == CODED){
       if (keyCode == LEFT){
-        println("isTraversReadyToMove: "+isTraversReadyToMove);
-        println("isRobotReadyToMove: "+isRobotReadyToMove);
-        println("checkIfReadyForNextStep: "+checkIfReadyForNextStep);
-        println("stepForward: "+stepForward);
-        println("textToSpeech.speaking: "+textToSpeech.speaking);
+        // println("isTraversReadyToMove: "+isTraversReadyToMove);
+        // println("isRobotReadyToMove: "+isRobotReadyToMove);
+        // println("checkIfReadyForNextStep: "+checkIfReadyForNextStep);
+        // println("stepForward: "+stepForward);
+        // println("textToSpeech.speaking: "+textToSpeech.speaking);
         if(!stepBack && !textToSpeech.speaking && !checkIfReadyForNextStep){
           globalID--;
           textToSpeech.checkTableConstrains();
@@ -534,11 +534,11 @@ void keyPressed(){
         }
       }
       if (keyCode == RIGHT){
-        println("isTraversReadyToMove: "+isTraversReadyToMove);
-        println("isRobotReadyToMove: "+isRobotReadyToMove);
-        println("checkIfReadyForNextStep: "+checkIfReadyForNextStep);
-        println("stepForward: "+stepForward);
-        println("textToSpeech.speaking: "+textToSpeech.speaking);
+        // println("isTraversReadyToMove: "+isTraversReadyToMove);
+        // println("isRobotReadyToMove: "+isRobotReadyToMove);
+        // println("checkIfReadyForNextStep: "+checkIfReadyForNextStep);
+        // println("stepForward: "+stepForward);
+        // println("textToSpeech.speaking: "+textToSpeech.speaking);
         if(!stepForward && !textToSpeech.speaking && !checkIfReadyForNextStep){
           globalID++;
           textToSpeech.checkTableConstrains();

@@ -104,7 +104,7 @@ TextToSpeech textToSpeech;
 RobotAnimation robotAnimation;
 TraversAnimation traversAnimation;
 Robot robot;
-Channel[] channelsMindwave = new Channel[11];
+Channel[] channelsMindwave = new Channel[3]; // switch to 11 and comment in channels to get full data
 Channel[] channelPleth = new Channel[1];
 Graph mindWave, emg, ecg, pleth;
 Textlabel lableID, textID, fRate, headlineText_1, headlineText_2, textMindwave, attentionLevel, attentionValue, meditationLevel, meditationValue, blinkStrength, blinkValue, textPulseMeter, pulseLevel, pulseValue;
@@ -177,16 +177,16 @@ println("before channel init");
 	// Creat the channel objects
 	// yellow to purple and then the space in between, grays for the alphas
 	channelsMindwave[0]  = new Channel("Signal Quality", color(0), "");
-	channelsMindwave[1]  = new Channel("Attention", color(100), "");
-	channelsMindwave[2]  = new Channel("Meditation", color(50), "");
-	channelsMindwave[3]  = new Channel("Delta", color(219, 211, 42), "Dreamless Sleep");
-	channelsMindwave[4]  = new Channel("Theta", color(245, 80, 71), "Drowsy");
-	channelsMindwave[5]  = new Channel("Low Alpha", color(237, 0, 119), "Relaxed");
-	channelsMindwave[6]  = new Channel("High Alpha", color(212, 0, 149), "Relaxed");
-	channelsMindwave[7]  = new Channel("Low Beta", color(158, 18, 188), "Alert");
-	channelsMindwave[8]  = new Channel("High Beta", color(116, 23, 190), "Alert");
-	channelsMindwave[9]  = new Channel("Low Gamma", color(39, 25, 159), "???");
-	channelsMindwave[10] = new Channel("High Gamma", color(23, 26, 153), "???");
+	channelsMindwave[1]  = new Channel("Attention", color(39, 160, 25), "");
+	channelsMindwave[2]  = new Channel("Meditation", color(23, 26, 153), "");
+	// channelsMindwave[3]  = new Channel("Delta", color(219, 211, 42), "Dreamless Sleep");
+	// channelsMindwave[4]  = new Channel("Theta", color(245, 80, 71), "Drowsy");
+	// channelsMindwave[5]  = new Channel("Low Alpha", color(237, 0, 119), "Relaxed");
+	// channelsMindwave[6]  = new Channel("High Alpha", color(212, 0, 149), "Relaxed");
+	// channelsMindwave[7]  = new Channel("Low Beta", color(158, 18, 188), "Alert");
+	// channelsMindwave[8]  = new Channel("High Beta", color(116, 23, 190), "Alert");
+	// channelsMindwave[9]  = new Channel("Low Gamma", color(39, 25, 159), "???");
+	// channelsMindwave[10] = new Channel("High Gamma", color(23, 26, 153), "???");
 	
   delay(200);
 
@@ -207,8 +207,8 @@ println("before channel init");
 // ----------------------------------------
   println("before graph init");  
 	// Set up the graph
-	mindWave = new Graph(0, 0, width, round(height / 2), channelsMindwave, 1000, "Lines");
-  pleth = new Graph(0, round(height / 2), width, round(height / 2), channelPleth, 200, "Lines");
+	mindWave = new Graph(0, 0, width, round(height / 2), channelsMindwave, 1000, "Shaded");
+  pleth = new Graph(0, round(height / 2), width, round(height / 2), channelPleth, 500, "Lines");
   // ecg = new Graph(0, round(height * 0.30), width, round(height * 0.10), channelPleth, 200, "Lines");
   // emg = new Graph(0, round(height * 0.20), width, round(height * 0.10), channelPleth, 200, "Lines");
 	
@@ -229,7 +229,7 @@ println("before channel init");
   inCharLB = null;
   isReadyForButtonCommands = true;
   println("Setup finished");  
-  kinect = addControlFrame("extra", 320,240);
+  // kinect = addControlFrame("extra", 320,240);
 
     
 }
@@ -257,15 +257,15 @@ public void draw() {
   // ecg.draw();
   pleth.draw();
   drawings.drawLine(0,height / 2, width, height/2,2);
-  // drawings.drawLine(0,round(emg.y + (height * 0.10)), width, round(emg.y + (height * 0.10)),2);
+  // drawings.drawLine(0,round(emg.y + (height * 0.10)), width, round(emg + (height * 0.10)),2);
   // drawings.drawLine(0,round(ecg.y + (height * 0.10)), width, round(ecg.y + (height * 0.10)),2);
   drawings.drawLine(0, height, width, height,2);
-  drawings.drawLine(20,round(height * 0.44f), 210, round(height * 0.44f),1);
+  drawings.drawLine(20,round(height * 0.535f), 210, round(height * 0.535f),1);
   noStroke();
   // drawings.drawRectangle(10,10,195,300,0,0,255,150);
-  drawings.drawRectangle(round(width*0.008f), round(height * 0.408f) ,400,300,0,0,255,255,255,150);  
+  drawings.drawRectangle(round(width*0.008f), round(height * 0.508f) ,395,150,0,0,255,255,255,150);  
   drawings.drawRectangle(0, 0, 88, 118, width - 98, 10, 255,255,255, 150);
-  drawings.drawRectangle(round(width*0.13f), round(height * 0.49f),40,20, 60,0, 255-isReadyColor ,isReadyColor - 50,0, 220);
+  drawings.drawRectangle(round(width*0.13f), round(height * 0.49f),40,20, 85,65, 255-isReadyColor ,isReadyColor - 50,0, 220);
 	
   if(channelsMindwave[0]!= null)
     connectionLight.update(channelsMindwave[0].getLatestPoint().value);
@@ -545,11 +545,11 @@ public void keyPressed(){
 
    if (key == CODED){
       if (keyCode == LEFT){
-        println("isTraversReadyToMove: "+isTraversReadyToMove);
-        println("isRobotReadyToMove: "+isRobotReadyToMove);
-        println("checkIfReadyForNextStep: "+checkIfReadyForNextStep);
-        println("stepForward: "+stepForward);
-        println("textToSpeech.speaking: "+textToSpeech.speaking);
+        // println("isTraversReadyToMove: "+isTraversReadyToMove);
+        // println("isRobotReadyToMove: "+isRobotReadyToMove);
+        // println("checkIfReadyForNextStep: "+checkIfReadyForNextStep);
+        // println("stepForward: "+stepForward);
+        // println("textToSpeech.speaking: "+textToSpeech.speaking);
         if(!stepBack && !textToSpeech.speaking && !checkIfReadyForNextStep){
           globalID--;
           textToSpeech.checkTableConstrains();
@@ -558,11 +558,11 @@ public void keyPressed(){
         }
       }
       if (keyCode == RIGHT){
-        println("isTraversReadyToMove: "+isTraversReadyToMove);
-        println("isRobotReadyToMove: "+isRobotReadyToMove);
-        println("checkIfReadyForNextStep: "+checkIfReadyForNextStep);
-        println("stepForward: "+stepForward);
-        println("textToSpeech.speaking: "+textToSpeech.speaking);
+        // println("isTraversReadyToMove: "+isTraversReadyToMove);
+        // println("isRobotReadyToMove: "+isRobotReadyToMove);
+        // println("checkIfReadyForNextStep: "+checkIfReadyForNextStep);
+        // println("stepForward: "+stepForward);
+        // println("textToSpeech.speaking: "+textToSpeech.speaking);
         if(!stepForward && !textToSpeech.speaking && !checkIfReadyForNextStep){
           globalID++;
           textToSpeech.checkTableConstrains();
@@ -793,101 +793,101 @@ class Drawings  {
     //  .setSize(100,20)
     //  ;
   
-  controlP5.addButton("X+")
-    .setValue(0)
-    .setCaptionLabel("X+")
-    .setSize(round(30),round(30))
-    .setPosition(440,round(height * 0.55f))
-    .setColorBackground(color(0, 200, 0))
-    ;
+  // controlP5.addButton("X+")
+  //   .setValue(0)
+  //   .setCaptionLabel("X+")
+  //   .setSize(round(30),round(30))
+  //   .setPosition(440,round(height * 0.55))
+  //   .setColorBackground(color(0, 200, 0))
+  //   ;
 
-  controlP5.addButton("X-")
-    .setValue(0)
-    .setCaptionLabel("X-")
-    .setSize(round(30),round(30))
-    .setPosition(440,round(height * 0.60f))
-    .setColorBackground(color(0, 200, 0))
-    ;
+  // controlP5.addButton("X-")
+  //   .setValue(0)
+  //   .setCaptionLabel("X-")
+  //   .setSize(round(30),round(30))
+  //   .setPosition(440,round(height * 0.60))
+  //   .setColorBackground(color(0, 200, 0))
+  //   ;
   
-  controlP5.addButton("Y+")
-    .setValue(0)
-    .setCaptionLabel("Y+")
-    .setSize(round(30),round(30))
-    .setPosition(490,round(height * 0.55f))
-    .setColorBackground(color(0, 200, 0))
-    ;
+  // controlP5.addButton("Y+")
+  //   .setValue(0)
+  //   .setCaptionLabel("Y+")
+  //   .setSize(round(30),round(30))
+  //   .setPosition(490,round(height * 0.55))
+  //   .setColorBackground(color(0, 200, 0))
+  //   ;
 
-  controlP5.addButton("Y-")
-    .setValue(0)
-    .setCaptionLabel("Y-")
-    .setSize(round(30),round(30))
-    .setPosition(490,round(height * 0.60f))
-    .setColorBackground(color(0, 200, 0))
-    ;
+  // controlP5.addButton("Y-")
+  //   .setValue(0)
+  //   .setCaptionLabel("Y-")
+  //   .setSize(round(30),round(30))
+  //   .setPosition(490,round(height * 0.60))
+  //   .setColorBackground(color(0, 200, 0))
+  //   ;
 
-  controlP5.addButton("Z+")
-    .setValue(0)
-    .setCaptionLabel("Z+")
-    .setSize(round(30),round(30))
-    .setPosition(540,round(height * 0.55f))
-    .setColorBackground(color(0, 200, 0))
-    ;
+  // controlP5.addButton("Z+")
+  //   .setValue(0)
+  //   .setCaptionLabel("Z+")
+  //   .setSize(round(30),round(30))
+  //   .setPosition(540,round(height * 0.55))
+  //   .setColorBackground(color(0, 200, 0))
+  //   ;
 
-  controlP5.addButton("Z-")
-    .setValue(0)
-    .setCaptionLabel("Z-")
-    .setSize(round(30),round(30))
-    .setPosition(540,round(height * 0.60f))
-    .setColorBackground(color(0, 200, 0))
-    ;
+  // controlP5.addButton("Z-")
+  //   .setValue(0)
+  //   .setCaptionLabel("Z-")
+  //   .setSize(round(30),round(30))
+  //   .setPosition(540,round(height * 0.60))
+  //   .setColorBackground(color(0, 200, 0))
+  //   ;
   
-  controlP5.addButton("GA+")
-    .setValue(0)
-    .setCaptionLabel("GA+")
-    .setSize(round(30),round(30))
-    .setPosition(590,round(height * 0.55f))
-    .setColorBackground(color(0, 200, 0))
-    ;
+  // controlP5.addButton("GA+")
+  //   .setValue(0)
+  //   .setCaptionLabel("GA+")
+  //   .setSize(round(30),round(30))
+  //   .setPosition(590,round(height * 0.55))
+  //   .setColorBackground(color(0, 200, 0))
+  //   ;
 
-  controlP5.addButton("GA-")
-    .setValue(0)
-    .setCaptionLabel("GA-")
-    .setSize(round(30),round(30))
-    .setPosition(590,round(height * 0.60f))
-    .setColorBackground(color(0, 200, 0))
-    ;
+  // controlP5.addButton("GA-")
+  //   .setValue(0)
+  //   .setCaptionLabel("GA-")
+  //   .setSize(round(30),round(30))
+  //   .setPosition(590,round(height * 0.60))
+  //   .setColorBackground(color(0, 200, 0))
+  //   ;
 
-  controlP5.addButton("GC+")
-  .setValue(0)
-  .setCaptionLabel("GC+")
-  .setSize(round(30),round(30))
-  .setPosition(640,round(height * 0.55f))
-  .setColorBackground(color(0, 200, 0))
-  ;
+  // controlP5.addButton("GC+")
+  // .setValue(0)
+  // .setCaptionLabel("GC+")
+  // .setSize(round(30),round(30))
+  // .setPosition(640,round(height * 0.55))
+  // .setColorBackground(color(0, 200, 0))
+  // ;
 
-  controlP5.addButton("GC-")
-    .setValue(0)
-    .setCaptionLabel("GC-")
-    .setSize(round(30),round(30))
-    .setPosition(640,round(height * 0.60f))
-    .setColorBackground(color(0, 200, 0))
-    ;
+  // controlP5.addButton("GC-")
+  //   .setValue(0)
+  //   .setCaptionLabel("GC-")
+  //   .setSize(round(30),round(30))
+  //   .setPosition(640,round(height * 0.60))
+  //   .setColorBackground(color(0, 200, 0))
+  //   ;
 
-  controlP5.addButton("GR+")
-    .setValue(0)
-    .setCaptionLabel("GR+")
-    .setSize(round(30),round(30))
-    .setPosition(690,round(height * 0.55f))
-    .setColorBackground(color(0, 200, 0))
-    ;
+  // controlP5.addButton("GR+")
+  //   .setValue(0)
+  //   .setCaptionLabel("GR+")
+  //   .setSize(round(30),round(30))
+  //   .setPosition(690,round(height * 0.55))
+  //   .setColorBackground(color(0, 200, 0))
+  //   ;
 
-  controlP5.addButton("GR-")
-    .setValue(0)
-    .setCaptionLabel("GR-")
-    .setSize(round(30),round(30))
-    .setPosition(690,round(height * 0.60f))
-    .setColorBackground(color(0, 200, 0))
-    ;  
+  // controlP5.addButton("GR-")
+  //   .setValue(0)
+  //   .setCaptionLabel("GR-")
+  //   .setSize(round(30),round(30))
+  //   .setPosition(690,round(height * 0.60))
+  //   .setColorBackground(color(0, 200, 0))
+  //   ;  
   // controlP5.addButton("loadBtnDefault")
   //   .setValue(0)
   //   .setCaptionLabel("load Default")
@@ -924,15 +924,15 @@ class Drawings  {
   controlP5.addButton("Back")
    .setValue(0)
    .setCaptionLabel("Back")
-   .setPosition(round(width*0.09f),round(height * 0.53f))
-   .setSize(round(100*sF),round(20*sF))
+   .setPosition(round(width*0.1f),round(height * 0.6f))
+   .setSize(round(65*sF),round(20*sF))
    ;
 
    controlP5.addButton("Forward")
    .setValue(0)
    .setCaptionLabel("Forward")
-   .setPosition(round(width*0.15f),round(height * 0.53f))
-   .setSize(round(100*sF),round(20*sF))
+   .setPosition(round(width*0.145f),round(height * 0.6f))
+   .setSize(round(65*sF),round(20*sF))
    ;
 
   // toggleTestMode = controlP5.addRadioButton("testMode")
@@ -1018,7 +1018,7 @@ class Drawings  {
 
   headlineText_1 = controlP5.addTextlabel("label4")
                   .setText("ROBOT CONTROLS: ")
-                  .setPosition(round(width*0.01f),round(height * 0.42f))
+                  .setPosition(round(width*0.01f),round(height * 0.51f))
                   .setColorValue(255)
                   .setFont(fontHeadline)
                   ;
@@ -1033,7 +1033,7 @@ class Drawings  {
 
 
   controlP5.addTextfield("Set Global ID - [ ENTER ]")
-                .setPosition(round(width*0.09f),round(height * 0.49f))
+                .setPosition(round(width*0.1f),round(height * 0.55f))
                 .setSize(150,20)
                 .setFont(fontSmallBold)
                 .setFocus(true)
@@ -1057,13 +1057,13 @@ class Drawings  {
 
    lableID = controlP5.addTextlabel("lableID")
                 .setText("global ID")
-                .setPosition(round(width*0.01f),round(height * 0.44f))
+                .setPosition(round(width*0.01f),round(height * 0.53f))
                 .setColorValue(255)
                 .setFont(fontHeadLableBig)
                 ;
     textID = controlP5.addTextlabel("label7")
                 .setText("ID")
-                .setPosition(round(width*0.02f),round(height*0.53f))
+                .setPosition(round(width*0.015f),round(height*0.61f))
                 .setColorValue(255)
                 .setFont(fontHeadline)
                 ;                     
@@ -1096,7 +1096,7 @@ class Graph {
 		h = _h;
 		timeScale = _timeScale;
 		thisChannels =  _thisChannels;
-		pixelsPerSecond = 10;
+		pixelsPerSecond = 20;
 		gridColor = color(0);
 		gridSeconds = 1; // seconds per grid line
 		scrollGrid = false;
@@ -1178,64 +1178,68 @@ class Graph {
 			// println("Before loop")
 			for (int i = 0; i < thisChannels.length; i++) {
 				if(thisChannels[i] != null){
-					Channel thisChannel = thisChannels[i];
-					// println("In for loop");
-					// println("Drawing value:" + thisChannel.getLatestPoint().value + " " + i ) ;
-					
-					if(thisChannel.graphMe) {
-					
-						//Draw the line
-						if(renderMode == "Lines" || renderMode == "Curves") stroke(thisChannel.drawColor);
+					if(!thisChannels[i].name.equals("Signal Quality")){
+						Channel thisChannel = thisChannels[i];
+						// println("In for loop");
+						// println("Drawing value:" + thisChannel.getLatestPoint().value + " " + i ) ;
+						
+						if(thisChannel.graphMe) {
+						
+							//Draw the line
+							if(renderMode == "Lines" || renderMode == "Curves") stroke(thisChannel.drawColor);
 
-						if(renderMode == "Shaded" || renderMode == "Triangles") {
-							noStroke();
-							fill(thisChannel.drawColor, 120);
-						}
-					
-						if(renderMode == "Triangles") {
-							beginShape(TRIANGLES);
-						}
-						else {
-							beginShape();			
-						}
+							if(renderMode == "Shaded" || renderMode == "Triangles") {
+								noStroke();
+								fill(thisChannel.drawColor, 127);
+							}
+						
+							if(renderMode == "Triangles") {
+								beginShape(QUAD_STRIP);
+							}
+							else {
+								beginShape();			
+							}
 
-						if(renderMode == "Curves") vertex(0, h);
-					
-					
-						for (int j = 0; j < thisChannel.points.size(); j++) {
-							Point thisPoint = (Point)thisChannel.points.get(j);
-								
-							// check bounds
-							if((thisPoint.time >= leftTime) && (thisPoint.time <= rightTime)) {
+							if(renderMode == "Curves" || renderMode == "Shaded") vertex(0, h);
 						
-								int pointX = (int)helpers.mapLong(thisPoint.time, leftTime, rightTime, 0L, (long)w);
-							
-								int pointY = 0;
-								if((scaleMode == "Global") && (i > 2)) {					
-									pointY = (int)map(thisPoint.value, 0, globalMax, h, 0);
-								}
-								else {
-									// Local scale
-									pointY = (int)map(thisPoint.value, thisChannel.minValue, thisChannel.maxValue, h, 0);
-								}
-						
-								// ellipseMode(CENTER);
-								// ellipse(pointX, pointY, 5, 5);
-						
-								if(renderMode == "Curves") {
-									curveVertex(pointX, pointY);					
-								}
-								else {
-									vertex(pointX, pointY);
-								}				
+							if(thisChannel != null){
+								for (int j = 0; j < thisChannel.points.size(); j++) {
+									Point thisPoint = (Point)thisChannel.points.get(j);
+									if(thisPoint != null){	
+									// check bounds
+										if((thisPoint.time >= leftTime) && (thisPoint.time <= rightTime)) {
+									
+											int pointX = (int)helpers.mapLong(thisPoint.time, leftTime, rightTime, 0L, (long)w);
+										
+											int pointY = 0;
+											if((scaleMode == "Global") && (i > 2)) {					
+												pointY = (int)map(thisPoint.value, 0, globalMax, h, 0);
+											}
+											else {
+												// Local scale
+												pointY = (int)map(thisPoint.value, thisChannel.minValue, thisChannel.maxValue, h, 0);
+											}
+									
+											// ellipseMode(CENTER);
+											// ellipse(pointX, pointY, 5, 5);
+									
+											if(renderMode == "Curves") {
+												curveVertex(pointX, pointY);					
+											}
+											else {
+												vertex(pointX, pointY);
+											}				
+										}
+									}
+								}	
 							}
 						}
-					}
 
-					
-					if(renderMode == "Curves") vertex(w, h);
-					if(renderMode == "Lines" || renderMode == "Curves" || renderMode == "Triangles") endShape();
-					if(renderMode == "Shaded") endShape(CLOSE);
+						
+						if(renderMode == "Curves" || renderMode == "Shaded") vertex(w, h);
+						if(renderMode == "Lines" || renderMode == "Curves" || renderMode == "Triangles") endShape();
+						if(renderMode == "Shaded") endShape(CLOSE);
+					}
 				}
 			}	
 
@@ -1600,7 +1604,7 @@ boolean xPositionUpdatedT = false;
 
   public void onNewUser(SimpleOpenNI curContext,int userId)
   {
-    println("New User Detected - userId: " + userId);
+    // println("New User Detected - userId: " + userId);
    
    // start pose detection
     curContext.startTrackingSkeleton(userId);
@@ -1611,7 +1615,7 @@ boolean xPositionUpdatedT = false;
 
   public void onLostUser(int userId)
   {
-    println("User Lost - userId: " + userId);
+    // println("User Lost - userId: " + userId);
   }
 
 // ------------------------------------------------------------------------------------
@@ -1697,44 +1701,47 @@ class ManageCLE {
           	isEsenseEvent = true;
             if(!isMindWaveData)
               isMindWaveData = true;
+
+
+            mindWave.isDataToGraph = true; 
         }
         
-        org.json.JSONObject eegPower = json.getJSONObject("eegPower");
+      //   org.json.JSONObject eegPower = json.getJSONObject("eegPower");
         
-        if (eegPower != null) {
-          channelsMindwave[3].addDataPoint(Integer.parseInt(eegPower.getString("delta")));
-          channelsMindwave[4].addDataPoint(Integer.parseInt(eegPower.getString("theta"))); 
-          channelsMindwave[5].addDataPoint(Integer.parseInt(eegPower.getString("lowAlpha")));
-          channelsMindwave[6].addDataPoint(Integer.parseInt(eegPower.getString("highAlpha")));  
-          channelsMindwave[7].addDataPoint(Integer.parseInt(eegPower.getString("lowBeta")));
-          channelsMindwave[8].addDataPoint(Integer.parseInt(eegPower.getString("highBeta")));
-          channelsMindwave[9].addDataPoint(Integer.parseInt(eegPower.getString("lowGamma")));
-          channelsMindwave[10].addDataPoint(Integer.parseInt(eegPower.getString("highGamma")));
+      //   if (eegPower != null) {
+      //     channelsMindwave[3].addDataPoint(Integer.parseInt(eegPower.getString("delta")));
+      //     channelsMindwave[4].addDataPoint(Integer.parseInt(eegPower.getString("theta"))); 
+      //     channelsMindwave[5].addDataPoint(Integer.parseInt(eegPower.getString("lowAlpha")));
+      //     channelsMindwave[6].addDataPoint(Integer.parseInt(eegPower.getString("highAlpha")));  
+      //     channelsMindwave[7].addDataPoint(Integer.parseInt(eegPower.getString("lowBeta")));
+      //     channelsMindwave[8].addDataPoint(Integer.parseInt(eegPower.getString("highBeta")));
+      //     channelsMindwave[9].addDataPoint(Integer.parseInt(eegPower.getString("lowGamma")));
+      //     channelsMindwave[10].addDataPoint(Integer.parseInt(eegPower.getString("highGamma")));
 
-         	if (isRecording){
-  			TableRow newRow = table.addRow();
-  			newRow.setInt("ID", table.getRowCount() -1);
-         	newRow.setInt("Heart_Rate", receivedHeartRate);
-  			newRow.setInt("attention", channelsMindwave[1].getLatestPoint().value);
-  			newRow.setInt("meditation", channelsMindwave[2].getLatestPoint().value);
-  			newRow.setInt("delta", channelsMindwave[3].getLatestPoint().value);
-  			newRow.setInt("theta", channelsMindwave[4].getLatestPoint().value);
-  			newRow.setInt("lowAlpha", channelsMindwave[5].getLatestPoint().value);
-  			newRow.setInt("highAlpha", channelsMindwave[6].getLatestPoint().value);
-  			newRow.setInt("lowBeta", channelsMindwave[7].getLatestPoint().value);
-  			newRow.setInt("highBeta", channelsMindwave[8].getLatestPoint().value);
-  			newRow.setInt("lowGamma", channelsMindwave[9].getLatestPoint().value);
-  			newRow.setInt("highGamma", channelsMindwave[10].getLatestPoint().value);
-  			newRow.setInt("timestamp", millis());
-          	id =  table.getRowCount() -1;
-          	// println("Packeg");
-  		  	}
+      //   if (isRecording){
+    		// 	TableRow newRow = table.addRow();
+    		// 	newRow.setInt("ID", table.getRowCount() -1);
+      //      	newRow.setInt("Heart_Rate", receivedHeartRate);
+    		// 	newRow.setInt("attention", channelsMindwave[1].getLatestPoint().value);
+    		// 	newRow.setInt("meditation", channelsMindwave[2].getLatestPoint().value);
+    		// 	newRow.setInt("delta", channelsMindwave[3].getLatestPoint().value);
+    		// 	newRow.setInt("theta", channelsMindwave[4].getLatestPoint().value);
+    		// 	newRow.setInt("lowAlpha", channelsMindwave[5].getLatestPoint().value);
+    		// 	newRow.setInt("highAlpha", channelsMindwave[6].getLatestPoint().value);
+    		// 	newRow.setInt("lowBeta", channelsMindwave[7].getLatestPoint().value);
+    		// 	newRow.setInt("highBeta", channelsMindwave[8].getLatestPoint().value);
+    		// 	newRow.setInt("lowGamma", channelsMindwave[9].getLatestPoint().value);
+    		// 	newRow.setInt("highGamma", channelsMindwave[10].getLatestPoint().value);
+    		// 	newRow.setInt("timestamp", millis());
+      //       	id =  table.getRowCount() -1;
+      //       	// println("Packeg");
+  		  // }
 
-         mindWave.isDataToGraph = true; 
-       	}
+      //    mindWave.isDataToGraph = true; 
+      //  	}
         
        	 packetCount++;
-         for (int i = 0; i < 11; ++i) {
+         for (int i = 0; i < channelsMindwave.length; ++i) {
           channelsMindwave[i].graphMe = true; 
          }
        
@@ -1842,8 +1849,6 @@ private int[] bitArray = new int[8];
           // println("plethRate: "+plethRate);
           if(plethRate >= 55 && globalID < 67){
             if(millis() - beatTime >= 500){
-              robot.setTargetColor(wLB.port,0,127,127,127);
-              robot.setTargetColor(wLA.port,0,127,127,127);
               // println("Beat");
               robot.sendBeat(wLA.port,0,250,100,0);
               robot.sendBeat(wLB.port,0,250,100,0);
@@ -2383,7 +2388,7 @@ class Robot{
     if(wLA.deviceInstanciated || wLB.deviceInstanciated){
       port.write(String.format("Cc%d,%d,%d,%d\n",strip,r,g,b,0));
       // wA.port.write(10);
-      println(String.format("(Rr%d,%d,%d,%d)",strip, r, g,b));
+      // println(String.format("(Rr%d,%d,%d,%d)",strip, r, g,b));
       laLedIsready = false;
     }
 
@@ -2674,19 +2679,24 @@ private void checkAnimations(){
       while(isInAnimation){
         // println("In while loop Nr 4");
         standAnimation(10,10, true,false,false,false,true,false,0);
-        fadeColor(0,0,0,0,0,0,127,127,127,false,true,0,4,4,false,true);
+        fadeColor(0,0,0,0,0,0,127,127,127,false,true,0,3,4,false,true);
       }
     }else {
-      if(globalID != 133){
+      if(globalID != 133 && globalID != 4){
         robot.setColor(wLA.port,0,127,127,127);
-        robot.setTargetColor(wLA.port,0,127,127,127);
+        // robot.setTargetColor(wLA.port,0,127,127,127);
         robot.setColor(wLB.port,0,127,127,127);
-        robot.setTargetColor(wLB.port,0,127,127,127);
+        // robot.setTargetColor(wLB.port,0,127,127,127);
       }
+      robot.setTargetColor(wLA.port,0,127,127,127);
+      robot.setTargetColor(wLB.port,0,127,127,127);
       // println(" In animation Nr 4 ");
       robot.setRobotArm(-4,184,184,42,126,90,200,true,255,0,255,0,2);
       waitForRobot();
       while(isInAnimation){
+        if (globalID == 4){
+          fadeColor(0,255,0,127,127,127,0,0,0,true,true,0,0,4,false,false);
+        }
         // println("In while loop Nr 4");
         standAnimation(10,10, true,false,false,false,true,false,0);
       }
@@ -2717,7 +2727,7 @@ private void checkAnimations(){
     waitForRobot();
     robot.setRobotArm(-4,184,184,42,126,90,200,true,255,0,255,0,2);
     waitForRobot();
-    standAnimation(15, 10, true,false,false,false,true,false, 3000);
+    standAnimation(15, 10, true,false,false,false,true,false, 1000);
     robot.sendRobotData(1475, 1500, 2300, 800, 1500, 1500, 200, 255, 255, 0, 0,2);
     waitForRobot();
   }
@@ -2795,7 +2805,7 @@ private void checkAnimations(){
       }
     }else if (globalID == 86 || globalID == 88){
       robot.setColor(wLA.port,0,127,127,127);
-      robot.setColor(wLB.port,4,0,0,255);
+      robot.setColor(wLB.port,3,0,0,255);
       // println(" In animation Nr 8 ");
       robot.setRobotArm(-216,0,160,29,134,90,200,true,255,0,0,255,2);
       waitForRobot();
@@ -2829,7 +2839,7 @@ private void checkAnimations(){
     robot.setColor(wLB.port,10,127,127,127);
     robot.setRobotArm(lastX,lastY,lastZ,lastGripperAngle,lastGripperRotation,lastGripperWidth,1,true,255,255,0,255,4);
     waitForRobot();
-    // delay(100);
+    sleepTime(100);
     // robot.setColor(wLA.port,0,127,127,127);
     // robot.setColor(wLB.port,0,127,127,127);
 
@@ -2904,12 +2914,13 @@ private void checkAnimations(){
     if(globalID == 130){
       robot.setColor(wLB.port,1,0,0,0);
       robot.setColor(wLB.port,2,0,0,0);
-      robot.setColor(wLB.port,3,0,0,0);
+      robot.setColor(wLA.port,1,0,0,0);
       // robot.setColor(wLB.port,4,127,127,127);
       robot.sendRobotData(1475, 1500, 2300, 800, 1500, 1500, 100, 0, 0, 255, 0, 2);
       waitForRobot();
       sleepTime(1500);
       robot.setColor(wLA.port,0,0,0,0);
+      robot.setColor(wLB.port,0,0,0,0);
 
     }else{
       robot.sendRobotData(1475, 1500, 2300, 800, 1500, 1500, 100, 0, 0, 255, 0, 2);
@@ -2936,10 +2947,11 @@ private void checkAnimations(){
       waitForRobot();
       robot.setRobotArm(8.0f,145.0f,279.0f,0.0f,180,90,400,true,255,0,255,0,2);
       waitForRobot();
-      robotText = ("Thank you. Thank you for coming.,6");
+      robotText = ("Thank you. Thank you for coming.");
       textToSpeech.sayNextSentence = true;
       robot.setRobotArm(8.0f,180.0f,120.0f,49.0f,180,86,400,true,255,0,255,0,2);
       waitForRobot();
+      waitForSpeech();
     }else{
       robot.setRobotArm(8.0f,180.0f,120.0f,49.0f,180,86,300,true,255,0,255,0,2);
       waitForRobot();
@@ -2959,14 +2971,24 @@ private void checkAnimations(){
       robot.setTargetColor(wLB.port,0,127,127,127);
       robot.setRobotArm(8.0f,140.0f,272.0f,17.0f,86,30,200,true,255,0,255,0,2);
       waitForRobot();
+      if(!isAnimation)
+        break;
       robot.setRobotArm(-152.0f,140.0f,244.0f,17.0f,134,30,200,true,255,0,255,0,2);
       waitForRobot();
+      if(!isAnimation)
+        break;
       robot.setRobotArm(152.0f,140.0f,244.0f,17.0f,50,30,300,true,255,0,255,0,2);
       waitForRobot();
+      if(!isAnimation)
+        break;
       robot.setRobotArm(-152.0f,140.0f,244.0f,17.0f,134,30,300,true,255,0,255,0,2);
       waitForRobot();
+      if(!isAnimation)
+        break;
       robot.setRobotArm(152.0f,140.0f,244.0f,17.0f,50,30,300,true,255,0,255,0,2);
       waitForRobot();
+      if(!isAnimation)
+        break;
     }
    }
 
@@ -2987,6 +3009,8 @@ private void checkAnimations(){
 
   // --- Number 18 exhausted---
   if(movementID == 18){
+    robot.setColor(wLA.port,0,127,127,127);
+    robot.setColor(wLB.port,0,127,127,127);
     robot.setRobotArm(-4.0f,136.0f,92.0f,29.0f,178,146,200,true,33,255,0,0,2);
     waitForRobot();
     while(isInAnimation){
@@ -3004,13 +3028,13 @@ private void checkAnimations(){
     if(globalID == 78){
       robot.setRobotArm(150.0f,110.0f,216.0f,1.0f,180,90,200,true,255,127,127,127,2);
       waitForRobot();
-      println("In ID 78");
       robotText = ("You are a coward. You question at the wrong time. You have no patience. I wish you were not and this is in itself an accomplishment. Know that you create a feeling of regret in me");
       textToSpeech.sayNextSentence = true;
-      println("textToSpeech.sayNextSentence: "+textToSpeech.sayNextSentence);
-      println("set speech to true");
+      // println("textToSpeech.sayNextSentence: "+textToSpeech.sayNextSentence);
+      // println("set speech to true");
       robot.setRobotArm(-150.0f,110.0f,216.0f,1.0f,180,90,200,true,255,127,127,127,2);
       waitForRobot();
+      waitForSpeech();
     }else{ 
       robot.setRobotArm(150.0f,110.0f,216.0f,1.0f,180,90,200,true,255,0,255,0,2);
       waitForRobot();
@@ -3034,19 +3058,23 @@ private void checkAnimations(){
         waitForRobot();
       }
     }else{
-      println("In 20");
       robot.setRobotArm(-108.0f,30.0f,180.0f,11.0f,180,30,200,true,255,255,255,0,2);
       waitForRobot();
       robot.setRobotArm(-158.0f,30.0f,180.0f,11.0f,44,180,500,true,255,255,255,0,2);
       waitForRobot();
-      if(globalID == 51 && !textToSpeech.sayNextSentence){
+      if(globalID == 51){
         robotText = ("You are in complete lack of subtlety.");
         textToSpeech.sayNextSentence = true;
       }
-      while(isInAnimation){
+      if(globalID != 80){
+        while(isInAnimation){
+          robot.setRobotArm(-108.0f,30.0f,180.0f,11.0f,180,30,500,true,255,255,255,0,2);
+          waitForRobot();
+          robot.setRobotArm(-158.0f,30.0f,180.0f,11.0f,44,180,500,true,255,255,255,0,2);
+          waitForRobot();
+        }
+      }else{
         robot.setRobotArm(-108.0f,30.0f,180.0f,11.0f,180,30,500,true,255,255,255,0,2);
-        waitForRobot();
-        robot.setRobotArm(-158.0f,30.0f,180.0f,11.0f,44,180,500,true,255,255,255,0,2);
         waitForRobot();
       }
     }
@@ -3107,7 +3135,8 @@ private void checkAnimations(){
                   robotText = ("But wich one");
                   textToSpeech.sayNextSentence = true;
                 }
-               waitForRobot(); 
+               waitForRobot();
+               waitForSpeech();
                standAnimation(10,30, true,false,false,false,true,false,2000);
                // waitForTravers();
               }else if(meditation < 62 && attention < 62){
@@ -3147,6 +3176,8 @@ private void checkAnimations(){
                 if(counterMindWave >= 5){
                   counterMindWave = 6;
                 }
+
+                waitForSpeech();
                 standAnimation(10,30, true,false,false,false,true,false,5000);
                // waitForTravers();
               }else if(meditation < 62 && attention < 62){
@@ -3164,7 +3195,8 @@ private void checkAnimations(){
                   robotText = ("I am what you are but more since I elaborate upon you. I develop and recreate. Break down your patterns.");
                   textToSpeech.sayNextSentence = true;
                 }
-                standAnimation(10,30, true,false,false,false,true,false,2500);
+                waitForSpeech();
+                standAnimation(10,30, true,false,false,false,true,false,5000);
               }else if(meditation < 62 && attention > 62){
                 startPositionIsStored = false;
                 waitForRobot();
@@ -3255,6 +3287,7 @@ private void checkAnimations(){
             textToSpeech.sayNextSentence = true;
             counterHeartRate = 3;
             }
+            waitForSpeech();
           }
         }
         if(globalID == 52){
@@ -3276,6 +3309,7 @@ private void checkAnimations(){
             textToSpeech.sayNextSentence = true;
             counterHeartRate = 5;
             }
+            waitForSpeech();
           }
         }  
       }
@@ -3329,13 +3363,12 @@ private void checkAnimations(){
     for(int i = 0; i < 1; i++){
     robot.setRobotArm(32.0f,348.0f,110.0f,25.0f,20,62,100,true,255,255,0,0,2);
     waitForRobot();
-    standAnimation(2,10, true,true,true,false,true,false,5000);
+    standAnimation(2,10, true,true,true,false,true,false,2000);
     waitForTravers();
-    sleepTime(800);
     startPositionIsStored = false;
     robot.setRobotArm(-334.0f,26.0f,30.0f,33.0f,178,102,100,true,255,255,0,0,2);
     waitForRobot();
-    standAnimation(2,10, false,false,true,true,true,false,10000);
+    standAnimation(2,10, false,false,true,true,true,false,2000);
     waitForTravers();
     startPositionIsStored = false;
     }
@@ -3399,7 +3432,7 @@ private void checkAnimations(){
       robot.setTargetColor(wLA.port,0,127,127,127);
       robot.setColor(wLB.port,0,127,127,127);
       robot.setTargetColor(wLB.port,0,127,127,127);
-      robot.setRobotArm(-300,0,208,17.0f,134,90,200,true,255,lastR,lastG,lastB,2);
+      robot.setRobotArm(-300,0,208,17.0f,134,90,200,true,255,0,255,0,2);
       waitForRobot();
     }else if(globalID == 104){
       robot.setRobotArm(-300,0,208,17.0f,134,90,200,true,255,0,255,0,2);
@@ -3430,7 +3463,7 @@ private void checkAnimations(){
       //fadingSpeed only straight numbers
       colorFadeRunning = true;
       while(colorFadeRunning){
-      fadeColor(0,0,255,0,0,255,127,127,127,false,true,0,4,4,true,false);
+      fadeColor(0,0,255,0,0,255,127,127,127,false,true,0,3,4,true,false);
       }
       fadeInit = false;
     }else{
@@ -3752,7 +3785,8 @@ private void standAnimation(int runningDelay, float amp, boolean a, boolean b, b
         gStartValue = fadingRG;
         bStartValue = fadingRB;
       }
-    }   
+    }
+   
 }  
 class TextToSpeech extends Thread{
 
@@ -3835,16 +3869,18 @@ public int waitForSpeechReturn;
           println("globalID: "+globalID);
           speaking = true;
           waitForRobot();
-          waitForTravers();
+          if(globalID != 53){
+            waitForTravers();
+          }
           say(textString,voice);
           readText = false;
         // }
     	}
 
       if(sayNextSentence && !speaking){
-        println("In say sentence");
+        // println("In say sentence");
         String textString = robotAnimation.robotText;
-        println("textString: "+textString);
+        // println("textString: "+textString);
         int voice = robotAnimation.robotVoice;
         // waitForRobot();
         speaking = true;
@@ -3862,7 +3898,7 @@ public int waitForSpeechReturn;
 	public void say(String s, int voice) {
 	  try {
       sleepTime(100);
-      println("In say");
+      // println("In say");
 	    Runtime rtime = Runtime.getRuntime();
 	    Process child = rtime.exec("/usr/bin/say -v " + (voices[voice]) + " " + s);
 	    waitForSpeechReturn = child.waitFor();
@@ -3952,6 +3988,7 @@ private int xStartValueT;
 private int yStartValueT;
 private int zStartValueT;
 public int movementIDt;
+private int flash;
 private long frameTimeT;
 
 
@@ -3976,6 +4013,7 @@ private long frameTimeT;
     aVelocityT     = 0.2f;
     frameTimeT = 0;
     movementIDt = 0;
+    flash = 0;
     super.start();
   }
  
@@ -4203,6 +4241,12 @@ private void checkAnimations(){
   if(movementIDt == 17){
     robot.sendTraversData(1000,1000,1000,5000);
     waitForTravers();
+    while(isInAnimationT){
+      flash();
+      sleepTime(50);
+
+    }
+
   }
 
   // --- Number 18 exhausted---
@@ -4246,7 +4290,7 @@ private void checkAnimations(){
       while(isInAnimationT){
         int attention = channelsMindwave[1].getLatestPoint().value;
         int meditation = channelsMindwave[2].getLatestPoint().value;
-        if (attention > 0 || meditation > 0){
+        if (meditation > 0){
           robot.sendTraversData((int)map(meditation, 0, 100, 0, 2000),(int)map(meditation, 0, 100, 0, 2000),(int)map(meditation, 0, 100, 500, 1500), ((-100 + meditation)*30) + 6000);
           waitForTravers();
         }else{
@@ -4257,7 +4301,7 @@ private void checkAnimations(){
   }
 
 
-  // --- Number 23 MindWave ---
+  // --- Number 23 kinect ---
   if(movementIDt == 23){
     while(isInAnimationT){
       if(kinect.zPositionUpdatedT && kinect.xPositionUpdatedT && kinect.context != null){
@@ -4327,8 +4371,12 @@ private void checkAnimations(){
       while(isInAnimationT){
         int attention = channelsMindwave[1].getLatestPoint().value;
         int meditation = channelsMindwave[2].getLatestPoint().value;
-        robot.sendTraversData((int)map(attention, 0, 100, 2000, 100),(int)map(attention, 0, 100, 2000, 0),(int)map(attention, 0, 100, 500, 1500),((-100 + attention)*30) + 6000);
-        waitForTravers();
+        if (attention > 0){
+          robot.sendTraversData((int)map(attention, 0, 100, 2000, 100),(int)map(attention, 0, 100, 2000, 0),(int)map(attention, 0, 100, 500, 1500),((-100 + attention)*30) + 6000);
+          waitForTravers();
+        }else{
+          robot.sendTraversData(0,0,0,8000);
+        }
       }
     }  
   }
@@ -4386,7 +4434,7 @@ private void checkAnimations(){
       }
 
       if(robotAnimation.triggerValue == 3){
-        robot.sendTraversData(300,300,1700,4000);
+        robot.sendTraversData(300,300,500,3000);
         waitForTravers();
       }
 
@@ -4459,7 +4507,7 @@ private void standAnimationT(int runningDelay, float amp, boolean xT, boolean zT
 
     robot.sendTraversData((int)(xStartValueT + kx), (int)(xStartValueT + kx), (int)(zStartValueT + kz), (int)abs(xStartValueT + k)/5 ); 
     waitForTravers();
-    println(abs(xStartValueT + k)*10);
+    // println(abs(xStartValueT + k)*10);
     sleepTime(runningDelay);
   }
 
@@ -4499,8 +4547,18 @@ private void standAnimationT(int runningDelay, float amp, boolean xT, boolean zT
     }
   }
 
+  private void flash(){
+      flash = (int)random(0, 100);
+      if (flash > 50){
+        robot.setColor(wLA.port,0,127,127,127);
+        robot.setColor(wLB.port,0,127,127,127);
+      }else {
+        robot.setColor(wLA.port,0,0,0,0);
+        robot.setColor(wLB.port,0,0,0,0);
+      }  
 
-}
+  }
+}  
 class WatchDog extends Thread{
 
 boolean running;           // Is the thread running?  Yes or no?

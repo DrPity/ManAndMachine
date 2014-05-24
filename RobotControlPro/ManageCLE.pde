@@ -58,44 +58,47 @@ class ManageCLE {
           	isEsenseEvent = true;
             if(!isMindWaveData)
               isMindWaveData = true;
+
+
+            mindWave.isDataToGraph = true; 
         }
         
-        org.json.JSONObject eegPower = json.getJSONObject("eegPower");
+      //   org.json.JSONObject eegPower = json.getJSONObject("eegPower");
         
-        if (eegPower != null) {
-          channelsMindwave[3].addDataPoint(Integer.parseInt(eegPower.getString("delta")));
-          channelsMindwave[4].addDataPoint(Integer.parseInt(eegPower.getString("theta"))); 
-          channelsMindwave[5].addDataPoint(Integer.parseInt(eegPower.getString("lowAlpha")));
-          channelsMindwave[6].addDataPoint(Integer.parseInt(eegPower.getString("highAlpha")));  
-          channelsMindwave[7].addDataPoint(Integer.parseInt(eegPower.getString("lowBeta")));
-          channelsMindwave[8].addDataPoint(Integer.parseInt(eegPower.getString("highBeta")));
-          channelsMindwave[9].addDataPoint(Integer.parseInt(eegPower.getString("lowGamma")));
-          channelsMindwave[10].addDataPoint(Integer.parseInt(eegPower.getString("highGamma")));
+      //   if (eegPower != null) {
+      //     channelsMindwave[3].addDataPoint(Integer.parseInt(eegPower.getString("delta")));
+      //     channelsMindwave[4].addDataPoint(Integer.parseInt(eegPower.getString("theta"))); 
+      //     channelsMindwave[5].addDataPoint(Integer.parseInt(eegPower.getString("lowAlpha")));
+      //     channelsMindwave[6].addDataPoint(Integer.parseInt(eegPower.getString("highAlpha")));  
+      //     channelsMindwave[7].addDataPoint(Integer.parseInt(eegPower.getString("lowBeta")));
+      //     channelsMindwave[8].addDataPoint(Integer.parseInt(eegPower.getString("highBeta")));
+      //     channelsMindwave[9].addDataPoint(Integer.parseInt(eegPower.getString("lowGamma")));
+      //     channelsMindwave[10].addDataPoint(Integer.parseInt(eegPower.getString("highGamma")));
 
-         	if (isRecording){
-  			TableRow newRow = table.addRow();
-  			newRow.setInt("ID", table.getRowCount() -1);
-         	newRow.setInt("Heart_Rate", receivedHeartRate);
-  			newRow.setInt("attention", channelsMindwave[1].getLatestPoint().value);
-  			newRow.setInt("meditation", channelsMindwave[2].getLatestPoint().value);
-  			newRow.setInt("delta", channelsMindwave[3].getLatestPoint().value);
-  			newRow.setInt("theta", channelsMindwave[4].getLatestPoint().value);
-  			newRow.setInt("lowAlpha", channelsMindwave[5].getLatestPoint().value);
-  			newRow.setInt("highAlpha", channelsMindwave[6].getLatestPoint().value);
-  			newRow.setInt("lowBeta", channelsMindwave[7].getLatestPoint().value);
-  			newRow.setInt("highBeta", channelsMindwave[8].getLatestPoint().value);
-  			newRow.setInt("lowGamma", channelsMindwave[9].getLatestPoint().value);
-  			newRow.setInt("highGamma", channelsMindwave[10].getLatestPoint().value);
-  			newRow.setInt("timestamp", millis());
-          	id =  table.getRowCount() -1;
-          	// println("Packeg");
-  		  	}
+      //   if (isRecording){
+    		// 	TableRow newRow = table.addRow();
+    		// 	newRow.setInt("ID", table.getRowCount() -1);
+      //      	newRow.setInt("Heart_Rate", receivedHeartRate);
+    		// 	newRow.setInt("attention", channelsMindwave[1].getLatestPoint().value);
+    		// 	newRow.setInt("meditation", channelsMindwave[2].getLatestPoint().value);
+    		// 	newRow.setInt("delta", channelsMindwave[3].getLatestPoint().value);
+    		// 	newRow.setInt("theta", channelsMindwave[4].getLatestPoint().value);
+    		// 	newRow.setInt("lowAlpha", channelsMindwave[5].getLatestPoint().value);
+    		// 	newRow.setInt("highAlpha", channelsMindwave[6].getLatestPoint().value);
+    		// 	newRow.setInt("lowBeta", channelsMindwave[7].getLatestPoint().value);
+    		// 	newRow.setInt("highBeta", channelsMindwave[8].getLatestPoint().value);
+    		// 	newRow.setInt("lowGamma", channelsMindwave[9].getLatestPoint().value);
+    		// 	newRow.setInt("highGamma", channelsMindwave[10].getLatestPoint().value);
+    		// 	newRow.setInt("timestamp", millis());
+      //       	id =  table.getRowCount() -1;
+      //       	// println("Packeg");
+  		  // }
 
-         mindWave.isDataToGraph = true; 
-       	}
+      //    mindWave.isDataToGraph = true; 
+      //  	}
         
        	 packetCount++;
-         for (int i = 0; i < 11; ++i) {
+         for (int i = 0; i < channelsMindwave.length; ++i) {
           channelsMindwave[i].graphMe = true; 
          }
        

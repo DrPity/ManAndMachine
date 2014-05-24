@@ -19,7 +19,7 @@ class Graph {
 		h = _h;
 		timeScale = _timeScale;
 		thisChannels =  _thisChannels;
-		pixelsPerSecond = 10;
+		pixelsPerSecond = 20;
 		gridColor = color(0);
 		gridSeconds = 1; // seconds per grid line
 		scrollGrid = false;
@@ -101,64 +101,68 @@ class Graph {
 			// println("Before loop")
 			for (int i = 0; i < thisChannels.length; i++) {
 				if(thisChannels[i] != null){
-					Channel thisChannel = thisChannels[i];
-					// println("In for loop");
-					// println("Drawing value:" + thisChannel.getLatestPoint().value + " " + i ) ;
-					
-					if(thisChannel.graphMe) {
-					
-						//Draw the line
-						if(renderMode == "Lines" || renderMode == "Curves") stroke(thisChannel.drawColor);
+					if(!thisChannels[i].name.equals("Signal Quality")){
+						Channel thisChannel = thisChannels[i];
+						// println("In for loop");
+						// println("Drawing value:" + thisChannel.getLatestPoint().value + " " + i ) ;
+						
+						if(thisChannel.graphMe) {
+						
+							//Draw the line
+							if(renderMode == "Lines" || renderMode == "Curves") stroke(thisChannel.drawColor);
 
-						if(renderMode == "Shaded" || renderMode == "Triangles") {
-							noStroke();
-							fill(thisChannel.drawColor, 120);
-						}
-					
-						if(renderMode == "Triangles") {
-							beginShape(TRIANGLES);
-						}
-						else {
-							beginShape();			
-						}
+							if(renderMode == "Shaded" || renderMode == "Triangles") {
+								noStroke();
+								fill(thisChannel.drawColor, 127);
+							}
+						
+							if(renderMode == "Triangles") {
+								beginShape(QUAD_STRIP);
+							}
+							else {
+								beginShape();			
+							}
 
-						if(renderMode == "Curves") vertex(0, h);
-					
-					
-						for (int j = 0; j < thisChannel.points.size(); j++) {
-							Point thisPoint = (Point)thisChannel.points.get(j);
-								
-							// check bounds
-							if((thisPoint.time >= leftTime) && (thisPoint.time <= rightTime)) {
+							if(renderMode == "Curves" || renderMode == "Shaded") vertex(0, h);
 						
-								int pointX = (int)helpers.mapLong(thisPoint.time, leftTime, rightTime, 0L, (long)w);
-							
-								int pointY = 0;
-								if((scaleMode == "Global") && (i > 2)) {					
-									pointY = (int)map(thisPoint.value, 0, globalMax, h, 0);
-								}
-								else {
-									// Local scale
-									pointY = (int)map(thisPoint.value, thisChannel.minValue, thisChannel.maxValue, h, 0);
-								}
-						
-								// ellipseMode(CENTER);
-								// ellipse(pointX, pointY, 5, 5);
-						
-								if(renderMode == "Curves") {
-									curveVertex(pointX, pointY);					
-								}
-								else {
-									vertex(pointX, pointY);
-								}				
+							if(thisChannel != null){
+								for (int j = 0; j < thisChannel.points.size(); j++) {
+									Point thisPoint = (Point)thisChannel.points.get(j);
+									if(thisPoint != null){	
+									// check bounds
+										if((thisPoint.time >= leftTime) && (thisPoint.time <= rightTime)) {
+									
+											int pointX = (int)helpers.mapLong(thisPoint.time, leftTime, rightTime, 0L, (long)w);
+										
+											int pointY = 0;
+											if((scaleMode == "Global") && (i > 2)) {					
+												pointY = (int)map(thisPoint.value, 0, globalMax, h, 0);
+											}
+											else {
+												// Local scale
+												pointY = (int)map(thisPoint.value, thisChannel.minValue, thisChannel.maxValue, h, 0);
+											}
+									
+											// ellipseMode(CENTER);
+											// ellipse(pointX, pointY, 5, 5);
+									
+											if(renderMode == "Curves") {
+												curveVertex(pointX, pointY);					
+											}
+											else {
+												vertex(pointX, pointY);
+											}				
+										}
+									}
+								}	
 							}
 						}
-					}
 
-					
-					if(renderMode == "Curves") vertex(w, h);
-					if(renderMode == "Lines" || renderMode == "Curves" || renderMode == "Triangles") endShape();
-					if(renderMode == "Shaded") endShape(CLOSE);
+						
+						if(renderMode == "Curves" || renderMode == "Shaded") vertex(w, h);
+						if(renderMode == "Lines" || renderMode == "Curves" || renderMode == "Triangles") endShape();
+						if(renderMode == "Shaded") endShape(CLOSE);
+					}
 				}
 			}	
 

@@ -94,8 +94,6 @@ private int[] bitArray = new int[8];
           // println("plethRate: "+plethRate);
           if(plethRate >= 55 && globalID < 67){
             if(millis() - beatTime >= 500){
-              robot.setTargetColor(wLB.port,0,127,127,127);
-              robot.setTargetColor(wLA.port,0,127,127,127);
               // println("Beat");
               robot.sendBeat(wLA.port,0,250,100,0);
               robot.sendBeat(wLB.port,0,250,100,0);

@@ -177,19 +177,24 @@ private void checkAnimations(){
       while(isInAnimation){
         // println("In while loop Nr 4");
         standAnimation(10,10, true,false,false,false,true,false,0);
-        fadeColor(0,0,0,0,0,0,127,127,127,false,true,0,4,4,false,true);
+        fadeColor(0,0,0,0,0,0,127,127,127,false,true,0,3,4,false,true);
       }
     }else {
-      if(globalID != 133){
+      if(globalID != 133 && globalID != 4){
         robot.setColor(wLA.port,0,127,127,127);
-        robot.setTargetColor(wLA.port,0,127,127,127);
+        // robot.setTargetColor(wLA.port,0,127,127,127);
         robot.setColor(wLB.port,0,127,127,127);
-        robot.setTargetColor(wLB.port,0,127,127,127);
+        // robot.setTargetColor(wLB.port,0,127,127,127);
       }
+      robot.setTargetColor(wLA.port,0,127,127,127);
+      robot.setTargetColor(wLB.port,0,127,127,127);
       // println(" In animation Nr 4 ");
       robot.setRobotArm(-4,184,184,42,126,90,200,true,255,0,255,0,2);
       waitForRobot();
       while(isInAnimation){
+        if (globalID == 4){
+          fadeColor(0,255,0,127,127,127,0,0,0,true,true,0,0,4,false,false);
+        }
         // println("In while loop Nr 4");
         standAnimation(10,10, true,false,false,false,true,false,0);
       }
@@ -220,7 +225,7 @@ private void checkAnimations(){
     waitForRobot();
     robot.setRobotArm(-4,184,184,42,126,90,200,true,255,0,255,0,2);
     waitForRobot();
-    standAnimation(15, 10, true,false,false,false,true,false, 3000);
+    standAnimation(15, 10, true,false,false,false,true,false, 1000);
     robot.sendRobotData(1475, 1500, 2300, 800, 1500, 1500, 200, 255, 255, 0, 0,2);
     waitForRobot();
   }
@@ -298,7 +303,7 @@ private void checkAnimations(){
       }
     }else if (globalID == 86 || globalID == 88){
       robot.setColor(wLA.port,0,127,127,127);
-      robot.setColor(wLB.port,4,0,0,255);
+      robot.setColor(wLB.port,3,0,0,255);
       // println(" In animation Nr 8 ");
       robot.setRobotArm(-216,0,160,29,134,90,200,true,255,0,0,255,2);
       waitForRobot();
@@ -332,7 +337,7 @@ private void checkAnimations(){
     robot.setColor(wLB.port,10,127,127,127);
     robot.setRobotArm(lastX,lastY,lastZ,lastGripperAngle,lastGripperRotation,lastGripperWidth,1,true,255,255,0,255,4);
     waitForRobot();
-    // delay(100);
+    sleepTime(100);
     // robot.setColor(wLA.port,0,127,127,127);
     // robot.setColor(wLB.port,0,127,127,127);
 
@@ -407,12 +412,13 @@ private void checkAnimations(){
     if(globalID == 130){
       robot.setColor(wLB.port,1,0,0,0);
       robot.setColor(wLB.port,2,0,0,0);
-      robot.setColor(wLB.port,3,0,0,0);
+      robot.setColor(wLA.port,1,0,0,0);
       // robot.setColor(wLB.port,4,127,127,127);
       robot.sendRobotData(1475, 1500, 2300, 800, 1500, 1500, 100, 0, 0, 255, 0, 2);
       waitForRobot();
       sleepTime(1500);
       robot.setColor(wLA.port,0,0,0,0);
+      robot.setColor(wLB.port,0,0,0,0);
 
     }else{
       robot.sendRobotData(1475, 1500, 2300, 800, 1500, 1500, 100, 0, 0, 255, 0, 2);
@@ -439,10 +445,11 @@ private void checkAnimations(){
       waitForRobot();
       robot.setRobotArm(8.0,145.0,279.0,0.0,180,90,400,true,255,0,255,0,2);
       waitForRobot();
-      robotText = ("Thank you. Thank you for coming.,6");
+      robotText = ("Thank you. Thank you for coming.");
       textToSpeech.sayNextSentence = true;
       robot.setRobotArm(8.0,180.0,120.0,49.0,180,86,400,true,255,0,255,0,2);
       waitForRobot();
+      waitForSpeech();
     }else{
       robot.setRobotArm(8.0,180.0,120.0,49.0,180,86,300,true,255,0,255,0,2);
       waitForRobot();
@@ -462,14 +469,24 @@ private void checkAnimations(){
       robot.setTargetColor(wLB.port,0,127,127,127);
       robot.setRobotArm(8.0,140.0,272.0,17.0,86,30,200,true,255,0,255,0,2);
       waitForRobot();
+      if(!isAnimation)
+        break;
       robot.setRobotArm(-152.0,140.0,244.0,17.0,134,30,200,true,255,0,255,0,2);
       waitForRobot();
+      if(!isAnimation)
+        break;
       robot.setRobotArm(152.0,140.0,244.0,17.0,50,30,300,true,255,0,255,0,2);
       waitForRobot();
+      if(!isAnimation)
+        break;
       robot.setRobotArm(-152.0,140.0,244.0,17.0,134,30,300,true,255,0,255,0,2);
       waitForRobot();
+      if(!isAnimation)
+        break;
       robot.setRobotArm(152.0,140.0,244.0,17.0,50,30,300,true,255,0,255,0,2);
       waitForRobot();
+      if(!isAnimation)
+        break;
     }
    }
 
@@ -490,6 +507,8 @@ private void checkAnimations(){
 
   // --- Number 18 exhausted---
   if(movementID == 18){
+    robot.setColor(wLA.port,0,127,127,127);
+    robot.setColor(wLB.port,0,127,127,127);
     robot.setRobotArm(-4.0,136.0,92.0,29.0,178,146,200,true,33,255,0,0,2);
     waitForRobot();
     while(isInAnimation){
@@ -507,13 +526,13 @@ private void checkAnimations(){
     if(globalID == 78){
       robot.setRobotArm(150.0,110.0,216.0,1.0,180,90,200,true,255,127,127,127,2);
       waitForRobot();
-      println("In ID 78");
       robotText = ("You are a coward. You question at the wrong time. You have no patience. I wish you were not and this is in itself an accomplishment. Know that you create a feeling of regret in me");
       textToSpeech.sayNextSentence = true;
-      println("textToSpeech.sayNextSentence: "+textToSpeech.sayNextSentence);
-      println("set speech to true");
+      // println("textToSpeech.sayNextSentence: "+textToSpeech.sayNextSentence);
+      // println("set speech to true");
       robot.setRobotArm(-150.0,110.0,216.0,1.0,180,90,200,true,255,127,127,127,2);
       waitForRobot();
+      waitForSpeech();
     }else{ 
       robot.setRobotArm(150.0,110.0,216.0,1.0,180,90,200,true,255,0,255,0,2);
       waitForRobot();
@@ -537,19 +556,23 @@ private void checkAnimations(){
         waitForRobot();
       }
     }else{
-      println("In 20");
       robot.setRobotArm(-108.0,30.0,180.0,11.0,180,30,200,true,255,255,255,0,2);
       waitForRobot();
       robot.setRobotArm(-158.0,30.0,180.0,11.0,44,180,500,true,255,255,255,0,2);
       waitForRobot();
-      if(globalID == 51 && !textToSpeech.sayNextSentence){
+      if(globalID == 51){
         robotText = ("You are in complete lack of subtlety.");
         textToSpeech.sayNextSentence = true;
       }
-      while(isInAnimation){
+      if(globalID != 80){
+        while(isInAnimation){
+          robot.setRobotArm(-108.0,30.0,180.0,11.0,180,30,500,true,255,255,255,0,2);
+          waitForRobot();
+          robot.setRobotArm(-158.0,30.0,180.0,11.0,44,180,500,true,255,255,255,0,2);
+          waitForRobot();
+        }
+      }else{
         robot.setRobotArm(-108.0,30.0,180.0,11.0,180,30,500,true,255,255,255,0,2);
-        waitForRobot();
-        robot.setRobotArm(-158.0,30.0,180.0,11.0,44,180,500,true,255,255,255,0,2);
         waitForRobot();
       }
     }
@@ -610,7 +633,8 @@ private void checkAnimations(){
                   robotText = ("But wich one");
                   textToSpeech.sayNextSentence = true;
                 }
-               waitForRobot(); 
+               waitForRobot();
+               waitForSpeech();
                standAnimation(10,30, true,false,false,false,true,false,2000);
                // waitForTravers();
               }else if(meditation < 62 && attention < 62){
@@ -650,6 +674,8 @@ private void checkAnimations(){
                 if(counterMindWave >= 5){
                   counterMindWave = 6;
                 }
+
+                waitForSpeech();
                 standAnimation(10,30, true,false,false,false,true,false,5000);
                // waitForTravers();
               }else if(meditation < 62 && attention < 62){
@@ -667,7 +693,8 @@ private void checkAnimations(){
                   robotText = ("I am what you are but more since I elaborate upon you. I develop and recreate. Break down your patterns.");
                   textToSpeech.sayNextSentence = true;
                 }
-                standAnimation(10,30, true,false,false,false,true,false,2500);
+                waitForSpeech();
+                standAnimation(10,30, true,false,false,false,true,false,5000);
               }else if(meditation < 62 && attention > 62){
                 startPositionIsStored = false;
                 waitForRobot();
@@ -758,6 +785,7 @@ private void checkAnimations(){
             textToSpeech.sayNextSentence = true;
             counterHeartRate = 3;
             }
+            waitForSpeech();
           }
         }
         if(globalID == 52){
@@ -779,6 +807,7 @@ private void checkAnimations(){
             textToSpeech.sayNextSentence = true;
             counterHeartRate = 5;
             }
+            waitForSpeech();
           }
         }  
       }
@@ -832,13 +861,12 @@ private void checkAnimations(){
     for(int i = 0; i < 1; i++){
     robot.setRobotArm(32.0,348.0,110.0,25.0,20,62,100,true,255,255,0,0,2);
     waitForRobot();
-    standAnimation(2,10, true,true,true,false,true,false,5000);
+    standAnimation(2,10, true,true,true,false,true,false,2000);
     waitForTravers();
-    sleepTime(800);
     startPositionIsStored = false;
     robot.setRobotArm(-334.0,26.0,30.0,33.0,178,102,100,true,255,255,0,0,2);
     waitForRobot();
-    standAnimation(2,10, false,false,true,true,true,false,10000);
+    standAnimation(2,10, false,false,true,true,true,false,2000);
     waitForTravers();
     startPositionIsStored = false;
     }
@@ -933,7 +961,7 @@ private void checkAnimations(){
       //fadingSpeed only straight numbers
       colorFadeRunning = true;
       while(colorFadeRunning){
-      fadeColor(0,0,255,0,0,255,127,127,127,false,true,0,4,4,true,false);
+      fadeColor(0,0,255,0,0,255,127,127,127,false,true,0,3,4,true,false);
       }
       fadeInit = false;
     }else{
@@ -1255,5 +1283,6 @@ private void standAnimation(int runningDelay, float amp, boolean a, boolean b, b
         gStartValue = fadingRG;
         bStartValue = fadingRB;
       }
-    }   
+    }
+   
 }  

@@ -56,101 +56,101 @@ class Drawings  {
     //  .setSize(100,20)
     //  ;
   
-  controlP5.addButton("X+")
-    .setValue(0)
-    .setCaptionLabel("X+")
-    .setSize(round(30),round(30))
-    .setPosition(440,round(height * 0.55))
-    .setColorBackground(color(0, 200, 0))
-    ;
+  // controlP5.addButton("X+")
+  //   .setValue(0)
+  //   .setCaptionLabel("X+")
+  //   .setSize(round(30),round(30))
+  //   .setPosition(440,round(height * 0.55))
+  //   .setColorBackground(color(0, 200, 0))
+  //   ;
 
-  controlP5.addButton("X-")
-    .setValue(0)
-    .setCaptionLabel("X-")
-    .setSize(round(30),round(30))
-    .setPosition(440,round(height * 0.60))
-    .setColorBackground(color(0, 200, 0))
-    ;
+  // controlP5.addButton("X-")
+  //   .setValue(0)
+  //   .setCaptionLabel("X-")
+  //   .setSize(round(30),round(30))
+  //   .setPosition(440,round(height * 0.60))
+  //   .setColorBackground(color(0, 200, 0))
+  //   ;
   
-  controlP5.addButton("Y+")
-    .setValue(0)
-    .setCaptionLabel("Y+")
-    .setSize(round(30),round(30))
-    .setPosition(490,round(height * 0.55))
-    .setColorBackground(color(0, 200, 0))
-    ;
+  // controlP5.addButton("Y+")
+  //   .setValue(0)
+  //   .setCaptionLabel("Y+")
+  //   .setSize(round(30),round(30))
+  //   .setPosition(490,round(height * 0.55))
+  //   .setColorBackground(color(0, 200, 0))
+  //   ;
 
-  controlP5.addButton("Y-")
-    .setValue(0)
-    .setCaptionLabel("Y-")
-    .setSize(round(30),round(30))
-    .setPosition(490,round(height * 0.60))
-    .setColorBackground(color(0, 200, 0))
-    ;
+  // controlP5.addButton("Y-")
+  //   .setValue(0)
+  //   .setCaptionLabel("Y-")
+  //   .setSize(round(30),round(30))
+  //   .setPosition(490,round(height * 0.60))
+  //   .setColorBackground(color(0, 200, 0))
+  //   ;
 
-  controlP5.addButton("Z+")
-    .setValue(0)
-    .setCaptionLabel("Z+")
-    .setSize(round(30),round(30))
-    .setPosition(540,round(height * 0.55))
-    .setColorBackground(color(0, 200, 0))
-    ;
+  // controlP5.addButton("Z+")
+  //   .setValue(0)
+  //   .setCaptionLabel("Z+")
+  //   .setSize(round(30),round(30))
+  //   .setPosition(540,round(height * 0.55))
+  //   .setColorBackground(color(0, 200, 0))
+  //   ;
 
-  controlP5.addButton("Z-")
-    .setValue(0)
-    .setCaptionLabel("Z-")
-    .setSize(round(30),round(30))
-    .setPosition(540,round(height * 0.60))
-    .setColorBackground(color(0, 200, 0))
-    ;
+  // controlP5.addButton("Z-")
+  //   .setValue(0)
+  //   .setCaptionLabel("Z-")
+  //   .setSize(round(30),round(30))
+  //   .setPosition(540,round(height * 0.60))
+  //   .setColorBackground(color(0, 200, 0))
+  //   ;
   
-  controlP5.addButton("GA+")
-    .setValue(0)
-    .setCaptionLabel("GA+")
-    .setSize(round(30),round(30))
-    .setPosition(590,round(height * 0.55))
-    .setColorBackground(color(0, 200, 0))
-    ;
+  // controlP5.addButton("GA+")
+  //   .setValue(0)
+  //   .setCaptionLabel("GA+")
+  //   .setSize(round(30),round(30))
+  //   .setPosition(590,round(height * 0.55))
+  //   .setColorBackground(color(0, 200, 0))
+  //   ;
 
-  controlP5.addButton("GA-")
-    .setValue(0)
-    .setCaptionLabel("GA-")
-    .setSize(round(30),round(30))
-    .setPosition(590,round(height * 0.60))
-    .setColorBackground(color(0, 200, 0))
-    ;
+  // controlP5.addButton("GA-")
+  //   .setValue(0)
+  //   .setCaptionLabel("GA-")
+  //   .setSize(round(30),round(30))
+  //   .setPosition(590,round(height * 0.60))
+  //   .setColorBackground(color(0, 200, 0))
+  //   ;
 
-  controlP5.addButton("GC+")
-  .setValue(0)
-  .setCaptionLabel("GC+")
-  .setSize(round(30),round(30))
-  .setPosition(640,round(height * 0.55))
-  .setColorBackground(color(0, 200, 0))
-  ;
+  // controlP5.addButton("GC+")
+  // .setValue(0)
+  // .setCaptionLabel("GC+")
+  // .setSize(round(30),round(30))
+  // .setPosition(640,round(height * 0.55))
+  // .setColorBackground(color(0, 200, 0))
+  // ;
 
-  controlP5.addButton("GC-")
-    .setValue(0)
-    .setCaptionLabel("GC-")
-    .setSize(round(30),round(30))
-    .setPosition(640,round(height * 0.60))
-    .setColorBackground(color(0, 200, 0))
-    ;
+  // controlP5.addButton("GC-")
+  //   .setValue(0)
+  //   .setCaptionLabel("GC-")
+  //   .setSize(round(30),round(30))
+  //   .setPosition(640,round(height * 0.60))
+  //   .setColorBackground(color(0, 200, 0))
+  //   ;
 
-  controlP5.addButton("GR+")
-    .setValue(0)
-    .setCaptionLabel("GR+")
-    .setSize(round(30),round(30))
-    .setPosition(690,round(height * 0.55))
-    .setColorBackground(color(0, 200, 0))
-    ;
+  // controlP5.addButton("GR+")
+  //   .setValue(0)
+  //   .setCaptionLabel("GR+")
+  //   .setSize(round(30),round(30))
+  //   .setPosition(690,round(height * 0.55))
+  //   .setColorBackground(color(0, 200, 0))
+  //   ;
 
-  controlP5.addButton("GR-")
-    .setValue(0)
-    .setCaptionLabel("GR-")
-    .setSize(round(30),round(30))
-    .setPosition(690,round(height * 0.60))
-    .setColorBackground(color(0, 200, 0))
-    ;  
+  // controlP5.addButton("GR-")
+  //   .setValue(0)
+  //   .setCaptionLabel("GR-")
+  //   .setSize(round(30),round(30))
+  //   .setPosition(690,round(height * 0.60))
+  //   .setColorBackground(color(0, 200, 0))
+  //   ;  
   // controlP5.addButton("loadBtnDefault")
   //   .setValue(0)
   //   .setCaptionLabel("load Default")
@@ -187,15 +187,15 @@ class Drawings  {
   controlP5.addButton("Back")
    .setValue(0)
    .setCaptionLabel("Back")
-   .setPosition(round(width*0.09),round(height * 0.53))
-   .setSize(round(100*sF),round(20*sF))
+   .setPosition(round(width*0.1),round(height * 0.6))
+   .setSize(round(65*sF),round(20*sF))
    ;
 
    controlP5.addButton("Forward")
    .setValue(0)
    .setCaptionLabel("Forward")
-   .setPosition(round(width*0.15),round(height * 0.53))
-   .setSize(round(100*sF),round(20*sF))
+   .setPosition(round(width*0.145),round(height * 0.6))
+   .setSize(round(65*sF),round(20*sF))
    ;
 
   // toggleTestMode = controlP5.addRadioButton("testMode")
@@ -281,7 +281,7 @@ class Drawings  {
 
   headlineText_1 = controlP5.addTextlabel("label4")
                   .setText("ROBOT CONTROLS: ")
-                  .setPosition(round(width*0.01),round(height * 0.42))
+                  .setPosition(round(width*0.01),round(height * 0.51))
                   .setColorValue(255)
                   .setFont(fontHeadline)
                   ;
@@ -296,7 +296,7 @@ class Drawings  {
 
 
   controlP5.addTextfield("Set Global ID - [ ENTER ]")
-                .setPosition(round(width*0.09),round(height * 0.49))
+                .setPosition(round(width*0.1),round(height * 0.55))
                 .setSize(150,20)
                 .setFont(fontSmallBold)
                 .setFocus(true)
@@ -320,13 +320,13 @@ class Drawings  {
 
    lableID = controlP5.addTextlabel("lableID")
                 .setText("global ID")
-                .setPosition(round(width*0.01),round(height * 0.44))
+                .setPosition(round(width*0.01),round(height * 0.53))
                 .setColorValue(255)
                 .setFont(fontHeadLableBig)
                 ;
     textID = controlP5.addTextlabel("label7")
                 .setText("ID")
-                .setPosition(round(width*0.02),round(height*0.53))
+                .setPosition(round(width*0.015),round(height*0.61))
                 .setColorValue(255)
                 .setFont(fontHeadline)
                 ;                     

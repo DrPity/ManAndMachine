@@ -79,16 +79,18 @@ public int waitForSpeechReturn;
           println("globalID: "+globalID);
           speaking = true;
           waitForRobot();
-          waitForTravers();
+          if(globalID != 53){
+            waitForTravers();
+          }
           say(textString,voice);
           readText = false;
         // }
     	}
 
       if(sayNextSentence && !speaking){
-        println("In say sentence");
+        // println("In say sentence");
         String textString = robotAnimation.robotText;
-        println("textString: "+textString);
+        // println("textString: "+textString);
         int voice = robotAnimation.robotVoice;
         // waitForRobot();
         speaking = true;
@@ -106,7 +108,7 @@ public int waitForSpeechReturn;
 	void say(String s, int voice) {
 	  try {
       sleepTime(100);
-      println("In say");
+      // println("In say");
 	    Runtime rtime = Runtime.getRuntime();
 	    Process child = rtime.exec("/usr/bin/say -v " + (voices[voice]) + " " + s);
 	    waitForSpeechReturn = child.waitFor();

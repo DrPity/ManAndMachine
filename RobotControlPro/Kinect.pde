@@ -139,7 +139,7 @@ boolean xPositionUpdatedT = false;
 
   void onNewUser(SimpleOpenNI curContext,int userId)
   {
-    println("New User Detected - userId: " + userId);
+    // println("New User Detected - userId: " + userId);
    
    // start pose detection
     curContext.startTrackingSkeleton(userId);
@@ -150,7 +150,7 @@ boolean xPositionUpdatedT = false;
 
   void onLostUser(int userId)
   {
-    println("User Lost - userId: " + userId);
+    // println("User Lost - userId: " + userId);
   }
 
 // ------------------------------------------------------------------------------------

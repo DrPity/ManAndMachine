@@ -247,7 +247,7 @@ class Robot{
     if(wLA.deviceInstanciated || wLB.deviceInstanciated){
       port.write(String.format("Cc%d,%d,%d,%d\n",strip,r,g,b,0));
       // wA.port.write(10);
-      println(String.format("(Rr%d,%d,%d,%d)",strip, r, g,b));
+      // println(String.format("(Rr%d,%d,%d,%d)",strip, r, g,b));
       laLedIsready = false;
     }
 
