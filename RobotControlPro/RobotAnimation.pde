@@ -418,7 +418,7 @@ private void checkAnimations(){
       waitForRobot();
       sleepTime(1500);
       robot.setColor(wLA.port,0,0,0,0);
-      robot.setColor(wLB.port,0,0,0,0);
+      // robot.setColor(wLB.port,0,0,0,0);
 
     }else{
       robot.sendRobotData(1475, 1500, 2300, 800, 1500, 1500, 100, 0, 0, 255, 0, 2);
@@ -544,39 +544,47 @@ private void checkAnimations(){
   // --- Number 20 threatening---
   if(movementID == 20){
     if (globalID == 69){
-      waitForSpeech();
-      robot.setRobotArm(-108.0,30.0,180.0,11.0,180,30,200,true,255,lastR,lastG,lastB,2);
-      waitForRobot();
-      robot.setRobotArm(-158.0,30.0,180.0,11.0,44,180,500,true,255,lastR,lastG,lastB,2);
-      waitForRobot();
       while(isInAnimation){
         robot.setRobotArm(-108.0,30.0,180.0,11.0,180,30,500,true,255,lastR,lastG,lastB,2);
         waitForRobot();
+        if(!isAnimation)
+        break;
         robot.setRobotArm(-158.0,30.0,180.0,11.0,44,180,500,true,255,lastR,lastG,lastB,2);
         waitForRobot();
       }
-    }else{
+    }else if(globalID == 51){
+      robotText = ("You are in complete lack of subtlety.");
+      textToSpeech.sayNextSentence = true;
       robot.setRobotArm(-108.0,30.0,180.0,11.0,180,30,200,true,255,255,255,0,2);
       waitForRobot();
-      robot.setRobotArm(-158.0,30.0,180.0,11.0,44,180,500,true,255,255,255,0,2);
-      waitForRobot();
-      if(globalID == 51){
-        robotText = ("You are in complete lack of subtlety.");
-        textToSpeech.sayNextSentence = true;
-      }
-      if(globalID != 80){
-        while(isInAnimation){
-          robot.setRobotArm(-108.0,30.0,180.0,11.0,180,30,500,true,255,255,255,0,2);
-          waitForRobot();
-          robot.setRobotArm(-158.0,30.0,180.0,11.0,44,180,500,true,255,255,255,0,2);
-          waitForRobot();
-        }
-      }else{
+      while(isInAnimation){
         robot.setRobotArm(-108.0,30.0,180.0,11.0,180,30,500,true,255,255,255,0,2);
         waitForRobot();
-      }
+        if(!isAnimation)
+        break;
+        robot.setRobotArm(-158.0,30.0,180.0,11.0,44,180,500,true,255,255,255,0,2);
+        waitForRobot();
+      }  
+    }else if (globalID == 80){
+      while(isInAnimation){
+        robot.setRobotArm(-108.0,30.0,180.0,11.0,180,30,500,true,255,255,255,0,2);
+        waitForRobot();
+        if(!isAnimation)
+        break;
+        robot.setRobotArm(-158.0,30.0,180.0,11.0,44,180,500,true,255,255,255,0,2);
+        waitForRobot();
+      }  
+    }else{
+      while(isInAnimation){
+        robot.setRobotArm(-108.0,30.0,180.0,11.0,180,30,500,true,255,255,255,0,2);
+        waitForRobot();
+        if(!isAnimation)
+        break;
+        robot.setRobotArm(-158.0,30.0,180.0,11.0,44,180,500,true,255,255,255,0,2);
+        waitForRobot();
+      }  
     }
-  }
+    }
 
   // --- Number 21 kinect---
   if(movementID == 21){
@@ -609,7 +617,7 @@ private void checkAnimations(){
     counterMindWave = 0;
     while(isInAnimation){
       if(isMindWaveData){
-        if(channelsMindwave[1] != null && channelsMindwave[2] != null){
+        if(channelsMindwave[1] != null && channelsMindwave[2] != null && channelsMindwave[1].points.size() > 0 && channelsMindwave[2].points.size() > 0){
             int attention = channelsMindwave[1].getLatestPoint().value;
             int meditation = channelsMindwave[2].getLatestPoint().value;
             if(globalID == 58){
@@ -617,23 +625,25 @@ private void checkAnimations(){
               // standAnimation(10,20, true,false,false,false,true,false,0);
               if(meditation > 62 && attention < 62){
                 startPositionIsStored = false;
-                counterMindWave ++;
                 robot.setRobotArm(-198.0,18.0,262.0,25.0,132,82,200,true,255,255,255,255,2);
                 waitForRobot();
                 if(counterMindWave == 1 && !textToSpeech.sayNextSentence){
                   robotText = ("Suddently everything is a bit more random");
                   textToSpeech.sayNextSentence = true;
+                  counterMindWave ++;
                 }else if(counterMindWave == 2 && !textToSpeech.sayNextSentence){
                   robotText = ("Like anything can happen");
                   textToSpeech.sayNextSentence = true;
+                  counterMindWave ++;
                 }else if(counterMindWave == 3 && !textToSpeech.sayNextSentence){
                   robotText = ("Like we are two");
                   textToSpeech.sayNextSentence = true;
+                  counterMindWave ++;
                 }else if(counterMindWave == 4 && !textToSpeech.sayNextSentence){
                   robotText = ("But wich one");
                   textToSpeech.sayNextSentence = true;
+                  counterMindWave ++;
                 }
-               waitForRobot();
                waitForSpeech();
                standAnimation(10,30, true,false,false,false,true,false,2000);
                // waitForTravers();
@@ -710,7 +720,7 @@ private void checkAnimations(){
               }
             }
         }else{
-          println("No value from MindWave");
+          // println("No value from MindWave");
         }   
       }
     }
@@ -727,7 +737,7 @@ private void checkAnimations(){
     waitForRobot();
     while(isInAnimation){
       if(isMindWaveData){
-        if(channelsMindwave[1]!= null && channelsMindwave[2] != null){
+        if(channelsMindwave[1]!= null && channelsMindwave[2] != null && channelsMindwave[1].points.size() > 0 && channelsMindwave[2].points.size() > 0){
         int attention = channelsMindwave[1].getLatestPoint().value;
         int meditation = channelsMindwave[2].getLatestPoint().value;
           // robot.setRobotArm(-198.0,20.0,122.0,25.0,178,102,200,true,255,0,255,0,2);
@@ -854,10 +864,8 @@ private void checkAnimations(){
 
   //arousal back and forth
   if(movementID == 28){
-    robot.setColor(wLA.port,0,127,0,0);
-    robot.setTargetColor(wLA.port,0,127,127,127);
-    robot.setColor(wLB.port,0,127,0,0);
-    robot.setTargetColor(wLB.port,0,127,127,127);
+    robot.setColor(wLA.port,0,127,127,127);
+    robot.setColor(wLB.port,0,127,127,127);
     for(int i = 0; i < 1; i++){
     robot.setRobotArm(32.0,348.0,110.0,25.0,20,62,100,true,255,255,0,0,2);
     waitForRobot();
