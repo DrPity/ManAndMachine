@@ -151,7 +151,7 @@ class Robot{
 
       currentBase = (int) map(baseAngleD, 180, 0, BASE_MIN, BASE_MAX);
       currentShoulder = (int) map(shoulderAngleD, 0, 180, SHOULDER_MIN, SHOULDER_MAX);
-      currentElbow = (int) map(elbowAngleD, 180, 0, ELBOW_MIN, ELBOW_MAX);
+      currentElbow = (int) map(elbowAngleD, 0, 180, ELBOW_MIN, ELBOW_MAX);
       currentWrist = (int) map(wristAngleD, 0, 180, WRIST_MIN, WRIST_MAX);
       currentGripperRotation = (int) map(gripperRotation, 0, 180, GRIPPER_ROTATION_MIN, GRIPPER_ROTATION_MAX);
       currentGripperWidth = (int) map(gripperWidth, 0, 180, GRIPPER_MIN, GRIPPER_MAX);

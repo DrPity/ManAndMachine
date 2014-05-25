@@ -218,10 +218,15 @@ void draw() {
   background(180);
   pulseValue.setValue(heartRateString);
 
-  if(channelsMindwave[1]!= null && channelsMindwave[1].points.size() > 0)
-    attentionValue.setValue(String.valueOf(channelsMindwave[1].getLatestPoint().value));
-  if(channelsMindwave[2]!= null && channelsMindwave[1].points.size() > 0)
-    meditationValue.setValue(String.valueOf(channelsMindwave[2].getLatestPoint().value));
+  if(channelsMindwave[1]!= null){
+    if(channelsMindwave[1].points.size() > 0)
+      attentionValue.setValue(String.valueOf(channelsMindwave[1].getLatestPoint().value));
+  }
+  
+  if(channelsMindwave[2]!= null){
+    if(channelsMindwave[2].points.size() > 0)
+      meditationValue.setValue(String.valueOf(channelsMindwave[2].getLatestPoint().value));
+  }
 
   lableID.setValue(String.valueOf(globalID));
   drawings.drawRectangle(0,0,width,height,0,0,255,255,255,150);
@@ -243,8 +248,10 @@ void draw() {
   drawings.drawRectangle(0, 0, 88, 118, width - 98, 10, 255,255,255, 150);
   drawings.drawRectangle(round(width*0.13), round(height * 0.49),40,20, 85,65, 255-isReadyColor ,isReadyColor - 50,0, 220);
 	
-  if(channelsMindwave[0]!= null && channelsMindwave[0].points.size() > 0)
+  if(channelsMindwave[0]!= null){
+    if(channelsMindwave[0].points.size() > 0)
     connectionLight.update(channelsMindwave[0].getLatestPoint().value);
+  }
 	
   connectionLight.draw();
   connectionLight.mindWave.draw();

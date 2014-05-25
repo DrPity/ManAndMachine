@@ -310,7 +310,7 @@ private void checkAnimations(){
 
   // --- Number 22 MindWave ---
   if(movementIDt == 22){
-    if(channelsMindwave[1] != null && channelsMindwave[2] != null && channelsMindwave[1].points.size() > 0 && channelsMindwave[2].points.size() > 0){
+    if(channelsMindwave[1] != null && channelsMindwave[2] != null){
       while(isInAnimationT){
         int attention = channelsMindwave[1].getLatestPoint().value;
         int meditation = channelsMindwave[2].getLatestPoint().value;
@@ -391,7 +391,7 @@ private void checkAnimations(){
 
   // --- Number 22 MindWave ---
   if(movementIDt == 30){
-    if(channelsMindwave[1] != null && channelsMindwave[2] != null && channelsMindwave[1].points.size() > 0 && channelsMindwave[2].points.size() > 0){
+    if(channelsMindwave[1] != null && channelsMindwave[2] != null){
       while(isInAnimationT){
         int attention = channelsMindwave[1].getLatestPoint().value;
         int meditation = channelsMindwave[2].getLatestPoint().value;

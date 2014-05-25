@@ -78,9 +78,9 @@ public int waitForSpeechReturn;
           println("In speaking");
           println("globalID: "+globalID);
           speaking = true;
-          waitForRobot();
-          if(globalID != 53){
+          if(globalID != 53 || globalID != 69){
             waitForTravers();
+            waitForRobot();
           }
           say(textString,voice);
           readText = false;

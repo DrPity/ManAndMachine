@@ -87,13 +87,13 @@ private void checkAnimations(){
 
   // --- Number 1  WakeUP---
   if(movementID == 1){
-    robot.sendRobotData(1475, 1500, 2300, 800, 1500, 1500, 200, 0, 0, 255, 0, 2);
+    robot.sendRobotData(1475, 1500, 750, 800, 1500, 1500, 200, 0, 0, 255, 0, 2);
     waitForRobot();
     for(int i = 0; i <= 255 && isInAnimation; i++){
-      robot.sendRobotData(1475, 1500, 2300, 800, 1500, 1500, 1, i, 0, 255, 0, 2);
+      robot.sendRobotData(1475, 1500, 750, 800, 1500, 1500, 1, i, 0, 255, 0, 2);
       waitForRobot();
     }
-    robot.sendRobotData(1475, 1500, 2300, 1200, 1500, 1500, 200, 255, 0, 255, 0,2);
+    robot.sendRobotData(1475, 1500, 750, 1200, 1500, 1500, 200, 255, 0, 255, 0,2);
     waitForRobot();
   }
 
@@ -221,12 +221,12 @@ private void checkAnimations(){
   // --- Number 6 looking backwards---  
   if(movementID == 6){
     // println(" In animation Nr 6 ");
-    robot.sendRobotData(1475, 1500, 2300, 800, 1500, 1500, 200, 255, 0, 255, 0,2);
+    robot.sendRobotData(1475, 1500, 720, 800, 1500, 1500, 200, 255, 0, 255, 0,2);
     waitForRobot();
     robot.setRobotArm(-4,184,184,42,126,90,200,true,255,0,255,0,2);
     waitForRobot();
     standAnimation(15, 10, true,false,false,false,true,false, 1000);
-    robot.sendRobotData(1475, 1500, 2300, 800, 1500, 1500, 200, 255, 255, 0, 0,2);
+    robot.sendRobotData(1475, 1500, 720, 800, 1500, 1500, 200, 255, 255, 0, 0,2);
     waitForRobot();
   }
 
@@ -414,14 +414,14 @@ private void checkAnimations(){
       robot.setColor(wLB.port,2,0,0,0);
       robot.setColor(wLA.port,1,0,0,0);
       // robot.setColor(wLB.port,4,127,127,127);
-      robot.sendRobotData(1475, 1500, 2300, 800, 1500, 1500, 100, 0, 0, 255, 0, 2);
+      robot.sendRobotData(1475, 1500, 720, 800, 1500, 1500, 100, 0, 0, 255, 0, 2);
       waitForRobot();
       sleepTime(1500);
       robot.setColor(wLA.port,0,0,0,0);
       // robot.setColor(wLB.port,0,0,0,0);
 
     }else{
-      robot.sendRobotData(1475, 1500, 2300, 800, 1500, 1500, 100, 0, 0, 255, 0, 2);
+      robot.sendRobotData(1475, 1500, 720, 800, 1500, 1500, 100, 0, 0, 255, 0, 2);
       waitForRobot();
     }
   }
@@ -469,23 +469,23 @@ private void checkAnimations(){
       robot.setTargetColor(wLB.port,0,127,127,127);
       robot.setRobotArm(8.0,140.0,272.0,17.0,86,30,200,true,255,0,255,0,2);
       waitForRobot();
-      if(!isAnimation)
+      if(!isInAnimation)
         break;
       robot.setRobotArm(-152.0,140.0,244.0,17.0,134,30,200,true,255,0,255,0,2);
       waitForRobot();
-      if(!isAnimation)
+      if(!isInAnimation)
         break;
       robot.setRobotArm(152.0,140.0,244.0,17.0,50,30,300,true,255,0,255,0,2);
       waitForRobot();
-      if(!isAnimation)
+      if(!isInAnimation)
         break;
       robot.setRobotArm(-152.0,140.0,244.0,17.0,134,30,300,true,255,0,255,0,2);
       waitForRobot();
-      if(!isAnimation)
+      if(!isInAnimation)
         break;
       robot.setRobotArm(152.0,140.0,244.0,17.0,50,30,300,true,255,0,255,0,2);
       waitForRobot();
-      if(!isAnimation)
+      if(!isInAnimation)
         break;
     }
    }
@@ -547,7 +547,7 @@ private void checkAnimations(){
       while(isInAnimation){
         robot.setRobotArm(-108.0,30.0,180.0,11.0,180,30,500,true,255,lastR,lastG,lastB,2);
         waitForRobot();
-        if(!isAnimation)
+        if(!isInAnimation)
         break;
         robot.setRobotArm(-158.0,30.0,180.0,11.0,44,180,500,true,255,lastR,lastG,lastB,2);
         waitForRobot();
@@ -560,7 +560,7 @@ private void checkAnimations(){
       while(isInAnimation){
         robot.setRobotArm(-108.0,30.0,180.0,11.0,180,30,500,true,255,255,255,0,2);
         waitForRobot();
-        if(!isAnimation)
+        if(!isInAnimation)
         break;
         robot.setRobotArm(-158.0,30.0,180.0,11.0,44,180,500,true,255,255,255,0,2);
         waitForRobot();
@@ -569,7 +569,7 @@ private void checkAnimations(){
       while(isInAnimation){
         robot.setRobotArm(-108.0,30.0,180.0,11.0,180,30,500,true,255,255,255,0,2);
         waitForRobot();
-        if(!isAnimation)
+        if(!isInAnimation)
         break;
         robot.setRobotArm(-158.0,30.0,180.0,11.0,44,180,500,true,255,255,255,0,2);
         waitForRobot();
@@ -578,7 +578,7 @@ private void checkAnimations(){
       while(isInAnimation){
         robot.setRobotArm(-108.0,30.0,180.0,11.0,180,30,500,true,255,255,255,0,2);
         waitForRobot();
-        if(!isAnimation)
+        if(!isInAnimation)
         break;
         robot.setRobotArm(-158.0,30.0,180.0,11.0,44,180,500,true,255,255,255,0,2);
         waitForRobot();
@@ -594,6 +594,7 @@ private void checkAnimations(){
     }else{
       robot.setRobotArm(-236.0,-2.0,148.0,19.0,178,102,200,true,255,0,255,0,2);
       waitForRobot();
+
     }
     robot.setRobotArm(-236.0,-2.0,148.0,19.0,178,102,200,true,255,0,255,0,2);
     while(isInAnimation){
@@ -625,24 +626,24 @@ private void checkAnimations(){
               // standAnimation(10,20, true,false,false,false,true,false,0);
               if(meditation > 62 && attention < 62){
                 startPositionIsStored = false;
+
+                if(!textToSpeech.sayNextSentence)
+                  counterMindWave ++;
+
                 robot.setRobotArm(-198.0,18.0,262.0,25.0,132,82,200,true,255,255,255,255,2);
                 waitForRobot();
-                if(counterMindWave == 1 && !textToSpeech.sayNextSentence){
+                if(counterMindWave == 1){
                   robotText = ("Suddently everything is a bit more random");
                   textToSpeech.sayNextSentence = true;
-                  counterMindWave ++;
-                }else if(counterMindWave == 2 && !textToSpeech.sayNextSentence){
+                }else if(counterMindWave == 2){
                   robotText = ("Like anything can happen");
                   textToSpeech.sayNextSentence = true;
-                  counterMindWave ++;
-                }else if(counterMindWave == 3 && !textToSpeech.sayNextSentence){
+                }else if(counterMindWave == 3){
                   robotText = ("Like we are two");
                   textToSpeech.sayNextSentence = true;
-                  counterMindWave ++;
-                }else if(counterMindWave == 4 && !textToSpeech.sayNextSentence){
+                }else if(counterMindWave == 4){
                   robotText = ("But wich one");
                   textToSpeech.sayNextSentence = true;
-                  counterMindWave ++;
                 }
                waitForSpeech();
                standAnimation(10,30, true,false,false,false,true,false,2000);
@@ -671,13 +672,13 @@ private void checkAnimations(){
                 waitForRobot();
                 robot.setRobotArm(-198.0,18.0,262.0,25.0,132,82,200,true,255,255,255,255,2);
                 waitForRobot();
-                if(counterMindWave >= 3){
+                if(counterMindWave >= 3 && !textToSpeech.sayNextSentence){
                   counterMindWave ++;
                 }
-                if(counterMindWave == 4 && !textToSpeech.sayNextSentence){
+                if(counterMindWave == 4){
                   robotText = ("We are not two. We are one and one eternally. like a corridor of images shaped by mirrors reflecting each other");
                   textToSpeech.sayNextSentence = true;
-                }else if(counterMindWave == 5 && !textToSpeech.sayNextSentence){
+                }else if(counterMindWave == 5){
                   robotText = ("So you are unique when you are alone. But only then?");
                   textToSpeech.sayNextSentence = true;
                 }
@@ -690,16 +691,16 @@ private void checkAnimations(){
                // waitForTravers();
               }else if(meditation < 62 && attention < 62){
                 startPositionIsStored = false;
-                if(counterMindWave <= 2){
+                if(counterMindWave <= 2 && !textToSpeech.sayNextSentence){
                   counterMindWave ++;
                 }
                 waitForRobot();
                 robot.setRobotArm(-198.0,18.0,0.0,67.0,132,176,200,true,255,255,0,0,2);
                 waitForRobot();
-                if(counterMindWave == 1 && !textToSpeech.sayNextSentence){
+                if(counterMindWave == 1){
                   robotText = ("To a certain extent. You are as set in your ways as I am. Working through patterns. Predictable.");
                   textToSpeech.sayNextSentence = true;
-                }else if(counterMindWave == 2 && !textToSpeech.sayNextSentence){
+                }else if(counterMindWave == 2){
                   robotText = ("I am what you are but more since I elaborate upon you. I develop and recreate. Break down your patterns.");
                   textToSpeech.sayNextSentence = true;
                 }
@@ -874,7 +875,7 @@ private void checkAnimations(){
     startPositionIsStored = false;
     robot.setRobotArm(-334.0,26.0,30.0,33.0,178,102,100,true,255,255,0,0,2);
     waitForRobot();
-    standAnimation(2,10, false,false,true,true,true,false,2000);
+    standAnimation(2,10, false,false,true,true,true,false,8000);
     waitForTravers();
     startPositionIsStored = false;
     }
