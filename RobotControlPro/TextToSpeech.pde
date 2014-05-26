@@ -42,6 +42,7 @@ public boolean speaking;
 public boolean sayNextSentence;
 private int wait;
 public int waitForSpeechReturn;
+private int inTTSoldID;
 
 // ------------------------------------------------------------------------------------
 
@@ -58,6 +59,7 @@ public int waitForSpeechReturn;
     readText = false;
     sayNextSentence = false;
     waitForSpeechReturn = 0;
+    inTTSoldID = 0;
     println("Starting thread TextToSpeech (will execute every " + wait + " milliseconds.)");
     tableSpeech = loadTable("data/Strings.csv", "header");
     super.start();
@@ -75,16 +77,33 @@ public int waitForSpeechReturn;
     		String textString = tableSpeech.getString(globalID, "STRING");
         int voice = tableSpeech.getInt(globalID, "VOICE");
         // if (!textString.equals("-")){
-          println("In speaking");
-          println("globalID: "+globalID);
-          speaking = true;
-          if(globalID != 53 || globalID != 69){
-            waitForTravers();
-            waitForRobot();
-          }
-          say(textString,voice);
-          readText = false;
-        // }
+          
+          if(!textString.equals("-")){
+             speaking = true;
+             println("global ID: " + globalID);
+             println("In text to speech");
+            if(globalID != 53 && globalID != 69 && globalID != 51 && globalID != 78){
+              println("In waiting");
+              sleepTime(50);
+              waitForTravers();
+              waitForRobot();
+            }else{
+              sleepTime(50);
+              println("In else for robot in text");
+            }
+            say(textString,voice);
+            readText = false;
+            speaking = false;
+          }else if (inTTSoldID != globalID){
+            readText = false;
+            
+            if(!sayNextSentence)
+              speaking = false;
+            
+            inTTSoldID = globalID; 
+          }  
+
+
     	}
 
       if(sayNextSentence && !speaking){
@@ -113,6 +132,7 @@ public int waitForSpeechReturn;
 	    Process child = rtime.exec("/usr/bin/say -v " + (voices[voice]) + " " + s);
 	    waitForSpeechReturn = child.waitFor();
       waitUntilTextIsSpoken();
+
 	  }
 	  catch (Exception e) {
 	    e.printStackTrace();

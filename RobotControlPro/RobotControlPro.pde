@@ -174,12 +174,15 @@ println("before channel init");
 	channelsMindwave[1].maxValue = 100;
 	channelsMindwave[2].minValue = 0;
 	channelsMindwave[2].maxValue = 100;
+  channelsMindwave[0].addDataPoint(0);
+  channelsMindwave[1].addDataPoint(0);
+  channelsMindwave[2].addDataPoint(0);
 
   println("before pleth channel init");  
   channelPleth[0] = new Channel("Pleth", color(255, 127, 0), "???");
   channelPleth[0].minValue = 0;
   channelPleth[0].maxValue = 100;
-	
+	channelPleth[0].addDataPoint(0);
 // ----------------------------------------
   println("before graph init");  
 	// Set up the graph

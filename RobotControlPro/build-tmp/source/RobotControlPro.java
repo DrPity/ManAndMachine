@@ -198,12 +198,15 @@ println("before channel init");
 	channelsMindwave[1].maxValue = 100;
 	channelsMindwave[2].minValue = 0;
 	channelsMindwave[2].maxValue = 100;
+  channelsMindwave[0].addDataPoint(0);
+  channelsMindwave[1].addDataPoint(0);
+  channelsMindwave[2].addDataPoint(0);
 
   println("before pleth channel init");  
   channelPleth[0] = new Channel("Pleth", color(255, 127, 0), "???");
   channelPleth[0].minValue = 0;
   channelPleth[0].maxValue = 100;
-	
+	channelPleth[0].addDataPoint(0);
 // ----------------------------------------
   println("before graph init");  
 	// Set up the graph
@@ -661,9 +664,21 @@ class Channel {
 			return (Point)points.get(points.size() - 1);
 		}
 		else {
-			return new Point(0, 0);
+			return new Point(0,0);
 		}
 	}
+
+	public int getLatestPointValue(){
+		if(points.size() > 0) {
+			Point thisPoint = (Point)points.get(points.size() - 1);
+			int pointValue = thisPoint.value;
+			return pointValue;
+		}
+		else {
+			return 0;
+
+		}
+	}	
 
 
 }
@@ -2846,7 +2861,7 @@ private void checkAnimations(){
     robot.setColor(wLB.port,10,127,127,127);
     robot.setRobotArm(lastX,lastY,lastZ,lastGripperAngle,lastGripperRotation,lastGripperWidth,1,true,255,255,0,255,4);
     waitForRobot();
-    sleepTime(100);
+    sleepTime(300);
     // robot.setColor(wLA.port,0,127,127,127);
     // robot.setColor(wLB.port,0,127,127,127);
 
@@ -2860,6 +2875,8 @@ private void checkAnimations(){
   // --- Number 10 look and listen right---  
 
   if(movementID == 10){
+    robot.setColor(wLA.port,10,127,127,127);
+    robot.setColor(wLB.port,10,127,127,127);
 
     if ( globalID == 75 || globalID == 79){      
       robot.setRobotArm(-96,100,208,17,46,90,250,true,255,lastR,lastG,lastB,2);
@@ -2971,11 +2988,11 @@ private void checkAnimations(){
 
   // --- swaying --- 
   if(movementID == 16){
-    while(isInAnimation){
       robot.setColor(wLA.port,0,127,127,127);
       robot.setTargetColor(wLA.port,0,127,127,127);
       robot.setColor(wLB.port,0,127,127,127);
       robot.setTargetColor(wLB.port,0,127,127,127);
+    while(isInAnimation){
       robot.setRobotArm(8.0f,140.0f,272.0f,17.0f,86,30,200,true,255,0,255,0,2);
       waitForRobot();
       if(!isInAnimation)
@@ -3062,10 +3079,10 @@ private void checkAnimations(){
         waitForRobot();
       }
     }else if(globalID == 51){
+      robot.setRobotArm(-158.0f,30.0f,180.0f,11.0f,44,180,500,true,255,255,255,0,2);
+      waitForRobot();
       robotText = ("You are in complete lack of subtlety.");
       textToSpeech.sayNextSentence = true;
-      robot.setRobotArm(-108.0f,30.0f,180.0f,11.0f,180,30,200,true,255,255,255,0,2);
-      waitForRobot();
       while(isInAnimation){
         robot.setRobotArm(-108.0f,30.0f,180.0f,11.0f,180,30,500,true,255,255,255,0,2);
         waitForRobot();
@@ -3155,7 +3172,7 @@ private void checkAnimations(){
                   textToSpeech.sayNextSentence = true;
                 }
                waitForSpeech();
-               standAnimation(10,30, true,false,false,false,true,false,2000);
+               standAnimation(10,30, true,false,false,false,true,false,3000);
                // waitForTravers();
               }else if(meditation < 62 && attention < 62){
                 startPositionIsStored = false;
@@ -3322,7 +3339,7 @@ private void checkAnimations(){
             robotText = ("Sorry");
             textToSpeech.sayNextSentence = true;
             counterHeartRate = 4;
-            }else if (heartRateForCalculation <= 90 && counterHeartRate == 4 && !textToSpeech.sayNextSentence){
+            }else if (heartRateForCalculation <= 93 && counterHeartRate == 4 && !textToSpeech.sayNextSentence){
             robotText = ("Good. You are calming down. Let us behave in a civilized manner.");
             textToSpeech.sayNextSentence = true;
             counterHeartRate = 5;
@@ -3848,6 +3865,7 @@ public boolean speaking;
 public boolean sayNextSentence;
 private int wait;
 public int waitForSpeechReturn;
+private int inTTSoldID;
 
 // ------------------------------------------------------------------------------------
 
@@ -3864,6 +3882,7 @@ public int waitForSpeechReturn;
     readText = false;
     sayNextSentence = false;
     waitForSpeechReturn = 0;
+    inTTSoldID = 0;
     println("Starting thread TextToSpeech (will execute every " + wait + " milliseconds.)");
     tableSpeech = loadTable("data/Strings.csv", "header");
     super.start();
@@ -3881,16 +3900,33 @@ public int waitForSpeechReturn;
     		String textString = tableSpeech.getString(globalID, "STRING");
         int voice = tableSpeech.getInt(globalID, "VOICE");
         // if (!textString.equals("-")){
-          println("In speaking");
-          println("globalID: "+globalID);
-          speaking = true;
-          if(globalID != 53 || globalID != 69){
-            waitForTravers();
-            waitForRobot();
-          }
-          say(textString,voice);
-          readText = false;
-        // }
+          
+          if(!textString.equals("-")){
+             speaking = true;
+             println("global ID: " + globalID);
+             println("In text to speech");
+            if(globalID != 53 && globalID != 69 && globalID != 51 && globalID != 78){
+              println("In waiting");
+              sleepTime(50);
+              waitForTravers();
+              waitForRobot();
+            }else{
+              sleepTime(50);
+              println("In else for robot in text");
+            }
+            say(textString,voice);
+            readText = false;
+            speaking = false;
+          }else if (inTTSoldID != globalID){
+            readText = false;
+            
+            if(!sayNextSentence)
+              speaking = false;
+            
+            inTTSoldID = globalID; 
+          }  
+
+
     	}
 
       if(sayNextSentence && !speaking){
@@ -3919,6 +3955,7 @@ public int waitForSpeechReturn;
 	    Process child = rtime.exec("/usr/bin/say -v " + (voices[voice]) + " " + s);
 	    waitForSpeechReturn = child.waitFor();
       waitUntilTextIsSpoken();
+
 	  }
 	  catch (Exception e) {
 	    e.printStackTrace();
@@ -4302,16 +4339,19 @@ private void checkAnimations(){
 
   // --- Number 22 MindWave ---
   if(movementIDt == 22){
-    if(channelsMindwave[1] != null && channelsMindwave[2] != null){
-      while(isInAnimationT){
-        int attention = channelsMindwave[1].getLatestPoint().value;
-        int meditation = channelsMindwave[2].getLatestPoint().value;
-        if (meditation > 0){
-          robot.sendTraversData((int)map(meditation, 0, 100, 0, 2000),(int)map(meditation, 0, 100, 0, 2000),(int)map(meditation, 0, 100, 500, 1500), ((-100 + meditation)*30) + 6000);
-          waitForTravers();
-        }else{
-          robot.sendTraversData(0,0,0,8000);
+    while(isInAnimationT){
+      if(channelsMindwave[1] != null && channelsMindwave[2] != null){
+        if(channelsMindwave[1].points.size() > 0 && channelsMindwave[2].points.size() > 0){
+          int attention = (int)channelsMindwave[1].getLatestPointValue();
+          int meditation = (int)channelsMindwave[2].getLatestPointValue();
+          if (meditation > 0){
+            robot.sendTraversData((int)map(meditation, 0, 100, 0, 2000),(int)map(meditation, 0, 100, 0, 2000),(int)map(meditation, 0, 100, 500, 1500), ((-100 + meditation)*30) + 6000);
+            waitForTravers();
+          }  
         }
+        //else{
+        //   robot.sendTraversData(0,0,0,8000);
+        // }
       }
     }  
   }
@@ -4383,16 +4423,19 @@ private void checkAnimations(){
 
   // --- Number 22 MindWave ---
   if(movementIDt == 30){
-    if(channelsMindwave[1] != null && channelsMindwave[2] != null){
-      while(isInAnimationT){
-        int attention = channelsMindwave[1].getLatestPoint().value;
-        int meditation = channelsMindwave[2].getLatestPoint().value;
-        if (attention > 0){
-          robot.sendTraversData((int)map(attention, 0, 100, 2000, 100),(int)map(attention, 0, 100, 2000, 0),(int)map(attention, 0, 100, 500, 1500),((-100 + attention)*30) + 6000);
-          waitForTravers();
-        }else{
-          robot.sendTraversData(0,0,0,8000);
+    while(isInAnimationT){
+      if(channelsMindwave[1] != null && channelsMindwave[2] != null){
+        if(channelsMindwave[1].points.size() > 0 && channelsMindwave[2].points.size() > 0){
+          int attention = channelsMindwave[1].getLatestPointValue();
+          int meditation = channelsMindwave[2].getLatestPointValue();
+          if (attention > 0){
+            robot.sendTraversData((int)map(attention, 0, 100, 2000, 100),(int)map(attention, 0, 100, 2000, 0),(int)map(attention, 0, 100, 500, 1500),((-100 + attention)*30) + 6000);
+            waitForTravers();
+          }
         }
+        // else{
+          // robot.sendTraversData(0,0,0,8000);
+        // }
       }
     }  
   }

@@ -337,7 +337,7 @@ private void checkAnimations(){
     robot.setColor(wLB.port,10,127,127,127);
     robot.setRobotArm(lastX,lastY,lastZ,lastGripperAngle,lastGripperRotation,lastGripperWidth,1,true,255,255,0,255,4);
     waitForRobot();
-    sleepTime(100);
+    sleepTime(300);
     // robot.setColor(wLA.port,0,127,127,127);
     // robot.setColor(wLB.port,0,127,127,127);
 
@@ -351,6 +351,8 @@ private void checkAnimations(){
   // --- Number 10 look and listen right---  
 
   if(movementID == 10){
+    robot.setColor(wLA.port,10,127,127,127);
+    robot.setColor(wLB.port,10,127,127,127);
 
     if ( globalID == 75 || globalID == 79){      
       robot.setRobotArm(-96,100,208,17,46,90,250,true,255,lastR,lastG,lastB,2);
@@ -462,11 +464,11 @@ private void checkAnimations(){
 
   // --- swaying --- 
   if(movementID == 16){
-    while(isInAnimation){
       robot.setColor(wLA.port,0,127,127,127);
       robot.setTargetColor(wLA.port,0,127,127,127);
       robot.setColor(wLB.port,0,127,127,127);
       robot.setTargetColor(wLB.port,0,127,127,127);
+    while(isInAnimation){
       robot.setRobotArm(8.0,140.0,272.0,17.0,86,30,200,true,255,0,255,0,2);
       waitForRobot();
       if(!isInAnimation)
@@ -553,10 +555,10 @@ private void checkAnimations(){
         waitForRobot();
       }
     }else if(globalID == 51){
+      robot.setRobotArm(-158.0,30.0,180.0,11.0,44,180,500,true,255,255,255,0,2);
+      waitForRobot();
       robotText = ("You are in complete lack of subtlety.");
       textToSpeech.sayNextSentence = true;
-      robot.setRobotArm(-108.0,30.0,180.0,11.0,180,30,200,true,255,255,255,0,2);
-      waitForRobot();
       while(isInAnimation){
         robot.setRobotArm(-108.0,30.0,180.0,11.0,180,30,500,true,255,255,255,0,2);
         waitForRobot();
@@ -646,7 +648,7 @@ private void checkAnimations(){
                   textToSpeech.sayNextSentence = true;
                 }
                waitForSpeech();
-               standAnimation(10,30, true,false,false,false,true,false,2000);
+               standAnimation(10,30, true,false,false,false,true,false,3000);
                // waitForTravers();
               }else if(meditation < 62 && attention < 62){
                 startPositionIsStored = false;
@@ -813,7 +815,7 @@ private void checkAnimations(){
             robotText = ("Sorry");
             textToSpeech.sayNextSentence = true;
             counterHeartRate = 4;
-            }else if (heartRateForCalculation <= 90 && counterHeartRate == 4 && !textToSpeech.sayNextSentence){
+            }else if (heartRateForCalculation <= 93 && counterHeartRate == 4 && !textToSpeech.sayNextSentence){
             robotText = ("Good. You are calming down. Let us behave in a civilized manner.");
             textToSpeech.sayNextSentence = true;
             counterHeartRate = 5;

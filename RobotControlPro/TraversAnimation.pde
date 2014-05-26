@@ -310,16 +310,19 @@ private void checkAnimations(){
 
   // --- Number 22 MindWave ---
   if(movementIDt == 22){
-    if(channelsMindwave[1] != null && channelsMindwave[2] != null){
-      while(isInAnimationT){
-        int attention = channelsMindwave[1].getLatestPoint().value;
-        int meditation = channelsMindwave[2].getLatestPoint().value;
-        if (meditation > 0){
-          robot.sendTraversData((int)map(meditation, 0, 100, 0, 2000),(int)map(meditation, 0, 100, 0, 2000),(int)map(meditation, 0, 100, 500, 1500), ((-100 + meditation)*30) + 6000);
-          waitForTravers();
-        }else{
-          robot.sendTraversData(0,0,0,8000);
+    while(isInAnimationT){
+      if(channelsMindwave[1] != null && channelsMindwave[2] != null){
+        if(channelsMindwave[1].points.size() > 0 && channelsMindwave[2].points.size() > 0){
+          int attention = (int)channelsMindwave[1].getLatestPointValue();
+          int meditation = (int)channelsMindwave[2].getLatestPointValue();
+          if (meditation > 0){
+            robot.sendTraversData((int)map(meditation, 0, 100, 0, 2000),(int)map(meditation, 0, 100, 0, 2000),(int)map(meditation, 0, 100, 500, 1500), ((-100 + meditation)*30) + 6000);
+            waitForTravers();
+          }  
         }
+        //else{
+        //   robot.sendTraversData(0,0,0,8000);
+        // }
       }
     }  
   }
@@ -391,16 +394,19 @@ private void checkAnimations(){
 
   // --- Number 22 MindWave ---
   if(movementIDt == 30){
-    if(channelsMindwave[1] != null && channelsMindwave[2] != null){
-      while(isInAnimationT){
-        int attention = channelsMindwave[1].getLatestPoint().value;
-        int meditation = channelsMindwave[2].getLatestPoint().value;
-        if (attention > 0){
-          robot.sendTraversData((int)map(attention, 0, 100, 2000, 100),(int)map(attention, 0, 100, 2000, 0),(int)map(attention, 0, 100, 500, 1500),((-100 + attention)*30) + 6000);
-          waitForTravers();
-        }else{
-          robot.sendTraversData(0,0,0,8000);
+    while(isInAnimationT){
+      if(channelsMindwave[1] != null && channelsMindwave[2] != null){
+        if(channelsMindwave[1].points.size() > 0 && channelsMindwave[2].points.size() > 0){
+          int attention = channelsMindwave[1].getLatestPointValue();
+          int meditation = channelsMindwave[2].getLatestPointValue();
+          if (attention > 0){
+            robot.sendTraversData((int)map(attention, 0, 100, 2000, 100),(int)map(attention, 0, 100, 2000, 0),(int)map(attention, 0, 100, 500, 1500),((-100 + attention)*30) + 6000);
+            waitForTravers();
+          }
         }
+        // else{
+          // robot.sendTraversData(0,0,0,8000);
+        // }
       }
     }  
   }

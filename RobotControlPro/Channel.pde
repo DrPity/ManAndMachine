@@ -40,9 +40,21 @@ class Channel {
 			return (Point)points.get(points.size() - 1);
 		}
 		else {
-			return new Point(0, 0);
+			return new Point(0,0);
 		}
 	}
+
+	int getLatestPointValue(){
+		if(points.size() > 0) {
+			Point thisPoint = (Point)points.get(points.size() - 1);
+			int pointValue = thisPoint.value;
+			return pointValue;
+		}
+		else {
+			return 0;
+
+		}
+	}	
 
 
 }
