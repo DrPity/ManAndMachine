@@ -501,6 +501,27 @@ private void checkAnimations(){
     }
   }
 
+   if(movementIDt == 34){
+      robot.sendTraversData(1000,1000,1500,5000);
+      waitForTravers();
+      //fadingSpeed only straight numbers
+    }
+
+    if(movementIDt == 35){
+      robot.sendTraversData(1000,1000,300,5000);
+      waitForTravers();
+    }
+
+    if(movementIDt == 36){
+      robot.sendTraversData(1000,1000,250,5000);
+      waitForTravers();
+    }
+
+    if(movementIDt == 37){
+      robot.sendTraversData(1000,1000,1500,5000);
+      waitForTravers();
+    }
+
   isOutOfLoop = true;
   startPositionIsStoredT = false;
   isInAnimationT = false;

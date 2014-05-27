@@ -3637,6 +3637,32 @@ private void checkAnimations(){
     }
   }
 
+   if(movementID == 34){
+      robot.setColor(wLA.port,0,127,127,127);
+      robot.setColor(wLB.port,0,127,127,127);
+      robot.setRobotArm(-42.0f,316.0f,100.0f,33.0f,178,102,300,true,255,0,255,0,2);
+      waitForRobot();
+      //fadingSpeed only straight numbers
+    }
+
+    if(movementID == 35){
+      robot.setRobotArm(-34.0f,296.0f,138.0f,23.0f,176,0,200,true,255,0,255,0,2);
+      waitForRobot();
+    }
+
+    if(movementID == 36){
+      robot.setRobotArm(-34.0f,296.0f,138.0f,23.0f,176,0,200,true,255,0,255,0,2);
+      waitForRobot();
+    }
+
+    if(movementID == 37){
+      // robot.setColor(wLB.port,1,0,0,0);
+      // robot.setColor(wLB.port,2,0,0,0);
+      // robot.setColor(wLA.port,1,0,0,0);
+      robot.setRobotArm(-40.0f,296.0f,180.0f,31.0f,114,134,200,true,45,0,255,0,2);
+      waitForRobot();
+    }
+
   isInAnimation = false;
   isAnimation = false;
   isOutOfLoop = true;
@@ -4529,6 +4555,27 @@ private void checkAnimations(){
       }
     }
   }
+
+   if(movementIDt == 34){
+      robot.sendTraversData(1000,1000,1500,5000);
+      waitForTravers();
+      //fadingSpeed only straight numbers
+    }
+
+    if(movementIDt == 35){
+      robot.sendTraversData(1000,1000,300,5000);
+      waitForTravers();
+    }
+
+    if(movementIDt == 36){
+      robot.sendTraversData(1000,1000,250,5000);
+      waitForTravers();
+    }
+
+    if(movementIDt == 37){
+      robot.sendTraversData(1000,1000,1500,5000);
+      waitForTravers();
+    }
 
   isOutOfLoop = true;
   startPositionIsStoredT = false;

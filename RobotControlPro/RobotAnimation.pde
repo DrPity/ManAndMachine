@@ -333,8 +333,8 @@ private void checkAnimations(){
     while(isInAnimation){
       standAnimation(10,60, true,false,false,false,false,true,0);
     }
-    robot.setColor(wLA.port,10,127,127,127);
-    robot.setColor(wLB.port,10,127,127,127);
+    robot.setColor(wLA.port,10,0,0,0);
+    robot.setColor(wLB.port,10,0,0,0);
     robot.setRobotArm(lastX,lastY,lastZ,lastGripperAngle,lastGripperRotation,lastGripperWidth,1,true,255,255,0,255,4);
     waitForRobot();
     sleepTime(300);
@@ -343,9 +343,7 @@ private void checkAnimations(){
 
     // println("Animation 9 break");
     robot.setColor(wLA.port,0,127,127,127);
-    robot.setTargetColor(wLA.port,0,127,127,127);
     robot.setColor(wLB.port,0,127,127,127);
-    robot.setTargetColor(wLB.port,0,127,127,127);
   }  
 
   // --- Number 10 look and listen right---  
@@ -1112,6 +1110,32 @@ private void checkAnimations(){
 
     }
   }
+
+   if(movementID == 34){
+      robot.setColor(wLA.port,0,127,127,127);
+      robot.setColor(wLB.port,0,127,127,127);
+      robot.setRobotArm(-42.0,316.0,100.0,33.0,178,102,300,true,255,0,255,0,2);
+      waitForRobot();
+      //fadingSpeed only straight numbers
+    }
+
+    if(movementID == 35){
+      robot.setRobotArm(-34.0,296.0,138.0,23.0,176,0,200,true,255,0,255,0,2);
+      waitForRobot();
+    }
+
+    if(movementID == 36){
+      robot.setRobotArm(-34.0,296.0,138.0,23.0,176,0,200,true,255,0,255,0,2);
+      waitForRobot();
+    }
+
+    if(movementID == 37){
+      // robot.setColor(wLB.port,1,0,0,0);
+      // robot.setColor(wLB.port,2,0,0,0);
+      // robot.setColor(wLA.port,1,0,0,0);
+      robot.setRobotArm(-40.0,296.0,180.0,31.0,114,134,200,true,45,0,255,0,2);
+      waitForRobot();
+    }
 
   isInAnimation = false;
   isAnimation = false;

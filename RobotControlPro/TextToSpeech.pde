@@ -82,7 +82,7 @@ private int inTTSoldID;
              speaking = true;
              println("global ID: " + globalID);
              println("In text to speech");
-            if(globalID != 53 && globalID != 69 && globalID != 51 && globalID != 78){
+            if(globalID != 53 && globalID != 69 && globalID != 51 && globalID != 78 && globalID != 119){
               println("In waiting");
               sleepTime(50);
               waitForTravers();
