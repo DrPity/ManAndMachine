@@ -221,7 +221,7 @@ class Robot{
    void sendBeat(Serial port, int strip, int r, int g, int b){
     // println("laLedIsready: "+laLedIsready);
 
-    if(wLA.deviceInstanciated || wLB.deviceInstanciated){
+    if(wLA.deviceInstanciated && wLB.deviceInstanciated){
       // println("( In send beat )");
       port.write(String.format("Cc%d,%d,%d,%d,%d\n",strip,r,g,b,1));
       // println(String.format("(Rr%d,%d,%d,%d)",strip, r, g,b));
@@ -234,7 +234,7 @@ class Robot{
 
   void setTargetColor(Serial port, int strip, int r, int g, int b){
 
-    if(wLA.deviceInstanciated || wLB.deviceInstanciated){
+    if(wLA.deviceInstanciated && wLB.deviceInstanciated){
       port.write(String.format("Tt%d,%d,%d,%d\n",strip,r,g,b));
       // wA.port.write(10);
       laLedIsready = false;
@@ -244,7 +244,7 @@ class Robot{
 
    void setColor(Serial port, int strip, int r, int g, int b){
 
-    if(wLA.deviceInstanciated || wLB.deviceInstanciated){
+    if(wLA.deviceInstanciated && wLB.deviceInstanciated){
       port.write(String.format("Cc%d,%d,%d,%d\n",strip,r,g,b,0));
       // wA.port.write(10);
       // println(String.format("(Rr%d,%d,%d,%d)",strip, r, g,b));

@@ -682,6 +682,7 @@ private void checkAnimations(){
                   robotText = ("So you are unique when you are alone. But only then?");
                   textToSpeech.sayNextSentence = true;
                 }
+
                 if(counterMindWave >= 5){
                   counterMindWave = 6;
                 }
@@ -720,9 +721,7 @@ private void checkAnimations(){
                 standAnimation(10,30, true,false,false,false,true,false,1500);
               }
             }
-        }else{
-          // println("No value from MindWave");
-        }   
+        }  
       }
     }
   }
@@ -1135,6 +1134,88 @@ private void checkAnimations(){
       // robot.setColor(wLA.port,1,0,0,0);
       robot.setRobotArm(-40.0,296.0,180.0,31.0,114,134,200,true,45,0,255,0,2);
       waitForRobot();
+    }
+
+    if(movementID == 38){
+      robot.setColor(wLA.port,0,255,255,255);
+      robot.setColor(wLB.port,0,255,255,255);
+      // robot.setColor(wLB.port,1,0,0,0);
+      // robot.setColor(wLB.port,2,0,0,0);
+      // robot.setColor(wLA.port,1,0,0,0);
+      robot.setRobotArm(-26.0,178.0,328.0,1.0,0,0,200,true,255,0,255,0,2);
+      waitForRobot();
+    }
+
+    if(movementID == 39){
+      // robot.setColor(wLB.port,1,0,0,0);
+      // robot.setColor(wLB.port,2,0,0,0);
+      // robot.setColor(wLA.port,1,0,0,0);
+      sleepTime(6000);
+      robot.setRobotArm(-26.0,178.0,328.0,1.0,0,0,200,true,255,0,255,0,2);
+      waitForRobot();
+      robot.setRobotArm(-26.0,178.0,328.0,1.0,120,0,500,true,255,0,255,0,2);
+      waitForRobot();
+      robot.setRobotArm(-26.0,178.0,328.0,1.0,0,0,500,true,255,0,255,0,2);
+      waitForRobot();
+      robot.setRobotArm(-26.0,178.0,328.0,1.0,178,0,500,true,255,0,255,0,2);
+      waitForRobot();
+      sleepTime(5000);
+      robot.setRobotArm( -26.0,178.0,288.0,1.0,178,0,200,true,255,0,255,0,2);
+      waitForRobot();
+      sleepTime(250);
+      robot.sendTraversData(970,970,1450,900);
+      waitForTravers();
+      sleepTime(250);
+      robot.setRobotArm(-26.0,178.0,328.0,1.0,178,0,200,true,255,0,255,0,2);
+      waitForRobot();
+      sleepTime(250);
+      robot.sendTraversData(1000,1000,1450,900);
+      waitForTravers();
+      sleepTime(1000);
+      robot.sendTraversData(960,960,1450,900);
+      waitForTravers();
+      sleepTime(250);
+      robot.setRobotArm( -26.0,178.0,288.0,1.0,178,0,200,true,255,0,255,0,2);
+      waitForRobot();
+      sleepTime(250);
+      robot.sendTraversData(930,930,1450,900);
+      waitForTravers();
+      sleepTime(250);
+      robot.setRobotArm( -26.0,178.0,310.0,1.0,178,0,200,true,255,0,255,0,2);
+      waitForRobot();
+      sleepTime(250);
+      robot.sendTraversData(950,950,1450,900);
+      waitForTravers();
+      sleepTime(500);
+      robot.setRobotArm( -26.0,178.0,315.0,1.0,178,0,200,true,255,0,255,0,2);
+      waitForRobot();
+      sleepTime(250);
+      robot.sendTraversData(930,930,1450,900);
+      waitForTravers();
+      sleepTime(500);
+      robot.setRobotArm(-26.0,178.0,328.0,1.0,178,0,200,true,255,0,255,0,2);
+      waitForRobot();
+      sleepTime(250);
+      robot.sendTraversData(950,950,1450,900);
+      waitForTravers();
+      sleepTime(1000);
+      robot.sendTraversData(920,920,1450,900);
+      waitForTravers();
+      sleepTime(250);
+      robot.setRobotArm( -26.0,178.0,288.0,1.0,178,0,200,true,255,0,255,0,2);
+      waitForRobot();
+      sleepTime(250);
+      robot.sendTraversData(890,890,1450,900);
+      waitForTravers();
+      sleepTime(250);
+      robot.setRobotArm(-26.0,178.0,328.0,1.0,178,0,200,true,255,0,255,0,2);
+      waitForRobot();
+      sleepTime(250);
+      robot.sendTraversData(920,920,1450,900);
+      waitForTravers();
+      sleepTime(1000);
+      robot.sendTraversData(920,920,1800,8000);
+      waitForTravers();
     }
 
   isInAnimation = false;

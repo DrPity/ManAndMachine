@@ -80,10 +80,11 @@ private int inTTSoldID;
           
           if(!textString.equals("-")){
              speaking = true;
+             readText = false;
              println("global ID: " + globalID);
              println("In text to speech");
-            if(globalID != 53 && globalID != 69 && globalID != 51 && globalID != 78 && globalID != 119){
-              println("In waiting");
+            if( globalID != 53 && globalID != 69 && globalID != 51 && globalID != 78 && globalID != 119){
+              // println("In waiting");
               sleepTime(50);
               waitForTravers();
               waitForRobot();
@@ -92,7 +93,6 @@ private int inTTSoldID;
               println("In else for robot in text");
             }
             say(textString,voice);
-            readText = false;
             speaking = false;
           }else if (inTTSoldID != globalID){
             readText = false;

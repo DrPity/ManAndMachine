@@ -522,6 +522,15 @@ private void checkAnimations(){
       waitForTravers();
     }
 
+    if(movementIDt == 38){
+      robot.sendTraversData(1000,1000,1500,5000);
+      waitForTravers();
+    }
+
+    if(movementIDt == 39){
+      robot.sendTraversData(1000,1000,1450,5000);
+      waitForTravers();
+    }
   isOutOfLoop = true;
   startPositionIsStoredT = false;
   isInAnimationT = false;

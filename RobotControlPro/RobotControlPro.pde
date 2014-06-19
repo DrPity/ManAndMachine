@@ -33,7 +33,7 @@ private String  inCharM;
 private String  inCharLA;
 private String  inCharLB;
 private String  scaleMode;
-private String  arduinoPort               = "/dev/tty.usbmodem1d11341";
+private String  arduinoPort               = "/dev/tty.usbmodem1d11241";
 private String  melziPort                 = "/dev/tty.usbserial-AH01SIVE";
 private String  pulseMeterPort            = "/dev/tty.BerryMed-SerialPort";
 private String  ledPortA                  = "/dev/tty.usbmodem1d1111";
@@ -208,7 +208,7 @@ println("before channel init");
   inCharLB = null;
   isReadyForButtonCommands = true;
   println("Setup finished");  
-  kinect = addControlFrame("extra", 320,240);
+  // kinect = addControlFrame("extra", 320,240);
 
     
 }

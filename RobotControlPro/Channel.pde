@@ -47,8 +47,12 @@ class Channel {
 	int getLatestPointValue(){
 		if(points.size() > 0) {
 			Point thisPoint = (Point)points.get(points.size() - 1);
-			int pointValue = thisPoint.value;
-			return pointValue;
+			if(thisPoint != null){
+				int pointValue = thisPoint.value;
+				return pointValue;
+			}else{
+				return 0;
+			}
 		}
 		else {
 			return 0;

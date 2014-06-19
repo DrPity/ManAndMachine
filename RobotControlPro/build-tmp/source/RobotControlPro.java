@@ -57,7 +57,7 @@ private String  inCharM;
 private String  inCharLA;
 private String  inCharLB;
 private String  scaleMode;
-private String  arduinoPort               = "/dev/tty.usbmodem1d11341";
+private String  arduinoPort               = "/dev/tty.usbmodem1d11241";
 private String  melziPort                 = "/dev/tty.usbserial-AH01SIVE";
 private String  pulseMeterPort            = "/dev/tty.BerryMed-SerialPort";
 private String  ledPortA                  = "/dev/tty.usbmodem1d1111";
@@ -232,7 +232,7 @@ println("before channel init");
   inCharLB = null;
   isReadyForButtonCommands = true;
   println("Setup finished");  
-  kinect = addControlFrame("extra", 320,240);
+  // kinect = addControlFrame("extra", 320,240);
 
     
 }
@@ -671,8 +671,12 @@ class Channel {
 	public int getLatestPointValue(){
 		if(points.size() > 0) {
 			Point thisPoint = (Point)points.get(points.size() - 1);
-			int pointValue = thisPoint.value;
-			return pointValue;
+			if(thisPoint != null){
+				int pointValue = thisPoint.value;
+				return pointValue;
+			}else{
+				return 0;
+			}
 		}
 		else {
 			return 0;
@@ -2384,7 +2388,7 @@ class Robot{
    public void sendBeat(Serial port, int strip, int r, int g, int b){
     // println("laLedIsready: "+laLedIsready);
 
-    if(wLA.deviceInstanciated || wLB.deviceInstanciated){
+    if(wLA.deviceInstanciated && wLB.deviceInstanciated){
       // println("( In send beat )");
       port.write(String.format("Cc%d,%d,%d,%d,%d\n",strip,r,g,b,1));
       // println(String.format("(Rr%d,%d,%d,%d)",strip, r, g,b));
@@ -2397,7 +2401,7 @@ class Robot{
 
   public void setTargetColor(Serial port, int strip, int r, int g, int b){
 
-    if(wLA.deviceInstanciated || wLB.deviceInstanciated){
+    if(wLA.deviceInstanciated && wLB.deviceInstanciated){
       port.write(String.format("Tt%d,%d,%d,%d\n",strip,r,g,b));
       // wA.port.write(10);
       laLedIsready = false;
@@ -2407,7 +2411,7 @@ class Robot{
 
    public void setColor(Serial port, int strip, int r, int g, int b){
 
-    if(wLA.deviceInstanciated || wLB.deviceInstanciated){
+    if(wLA.deviceInstanciated && wLB.deviceInstanciated){
       port.write(String.format("Cc%d,%d,%d,%d\n",strip,r,g,b,0));
       // wA.port.write(10);
       // println(String.format("(Rr%d,%d,%d,%d)",strip, r, g,b));
@@ -2857,8 +2861,8 @@ private void checkAnimations(){
     while(isInAnimation){
       standAnimation(10,60, true,false,false,false,false,true,0);
     }
-    robot.setColor(wLA.port,10,127,127,127);
-    robot.setColor(wLB.port,10,127,127,127);
+    robot.setColor(wLA.port,10,0,0,0);
+    robot.setColor(wLB.port,10,0,0,0);
     robot.setRobotArm(lastX,lastY,lastZ,lastGripperAngle,lastGripperRotation,lastGripperWidth,1,true,255,255,0,255,4);
     waitForRobot();
     sleepTime(300);
@@ -2867,9 +2871,7 @@ private void checkAnimations(){
 
     // println("Animation 9 break");
     robot.setColor(wLA.port,0,127,127,127);
-    robot.setTargetColor(wLA.port,0,127,127,127);
     robot.setColor(wLB.port,0,127,127,127);
-    robot.setTargetColor(wLB.port,0,127,127,127);
   }  
 
   // --- Number 10 look and listen right---  
@@ -3208,6 +3210,7 @@ private void checkAnimations(){
                   robotText = ("So you are unique when you are alone. But only then?");
                   textToSpeech.sayNextSentence = true;
                 }
+
                 if(counterMindWave >= 5){
                   counterMindWave = 6;
                 }
@@ -3246,9 +3249,7 @@ private void checkAnimations(){
                 standAnimation(10,30, true,false,false,false,true,false,1500);
               }
             }
-        }else{
-          // println("No value from MindWave");
-        }   
+        }  
       }
     }
   }
@@ -3663,6 +3664,88 @@ private void checkAnimations(){
       waitForRobot();
     }
 
+    if(movementID == 38){
+      robot.setColor(wLA.port,0,255,255,255);
+      robot.setColor(wLB.port,0,255,255,255);
+      // robot.setColor(wLB.port,1,0,0,0);
+      // robot.setColor(wLB.port,2,0,0,0);
+      // robot.setColor(wLA.port,1,0,0,0);
+      robot.setRobotArm(-26.0f,178.0f,328.0f,1.0f,0,0,200,true,255,0,255,0,2);
+      waitForRobot();
+    }
+
+    if(movementID == 39){
+      // robot.setColor(wLB.port,1,0,0,0);
+      // robot.setColor(wLB.port,2,0,0,0);
+      // robot.setColor(wLA.port,1,0,0,0);
+      sleepTime(6000);
+      robot.setRobotArm(-26.0f,178.0f,328.0f,1.0f,0,0,200,true,255,0,255,0,2);
+      waitForRobot();
+      robot.setRobotArm(-26.0f,178.0f,328.0f,1.0f,120,0,500,true,255,0,255,0,2);
+      waitForRobot();
+      robot.setRobotArm(-26.0f,178.0f,328.0f,1.0f,0,0,500,true,255,0,255,0,2);
+      waitForRobot();
+      robot.setRobotArm(-26.0f,178.0f,328.0f,1.0f,178,0,500,true,255,0,255,0,2);
+      waitForRobot();
+      sleepTime(5000);
+      robot.setRobotArm( -26.0f,178.0f,288.0f,1.0f,178,0,200,true,255,0,255,0,2);
+      waitForRobot();
+      sleepTime(250);
+      robot.sendTraversData(970,970,1450,900);
+      waitForTravers();
+      sleepTime(250);
+      robot.setRobotArm(-26.0f,178.0f,328.0f,1.0f,178,0,200,true,255,0,255,0,2);
+      waitForRobot();
+      sleepTime(250);
+      robot.sendTraversData(1000,1000,1450,900);
+      waitForTravers();
+      sleepTime(1000);
+      robot.sendTraversData(960,960,1450,900);
+      waitForTravers();
+      sleepTime(250);
+      robot.setRobotArm( -26.0f,178.0f,288.0f,1.0f,178,0,200,true,255,0,255,0,2);
+      waitForRobot();
+      sleepTime(250);
+      robot.sendTraversData(930,930,1450,900);
+      waitForTravers();
+      sleepTime(250);
+      robot.setRobotArm( -26.0f,178.0f,310.0f,1.0f,178,0,200,true,255,0,255,0,2);
+      waitForRobot();
+      sleepTime(250);
+      robot.sendTraversData(950,950,1450,900);
+      waitForTravers();
+      sleepTime(500);
+      robot.setRobotArm( -26.0f,178.0f,315.0f,1.0f,178,0,200,true,255,0,255,0,2);
+      waitForRobot();
+      sleepTime(250);
+      robot.sendTraversData(930,930,1450,900);
+      waitForTravers();
+      sleepTime(500);
+      robot.setRobotArm(-26.0f,178.0f,328.0f,1.0f,178,0,200,true,255,0,255,0,2);
+      waitForRobot();
+      sleepTime(250);
+      robot.sendTraversData(950,950,1450,900);
+      waitForTravers();
+      sleepTime(1000);
+      robot.sendTraversData(920,920,1450,900);
+      waitForTravers();
+      sleepTime(250);
+      robot.setRobotArm( -26.0f,178.0f,288.0f,1.0f,178,0,200,true,255,0,255,0,2);
+      waitForRobot();
+      sleepTime(250);
+      robot.sendTraversData(890,890,1450,900);
+      waitForTravers();
+      sleepTime(250);
+      robot.setRobotArm(-26.0f,178.0f,328.0f,1.0f,178,0,200,true,255,0,255,0,2);
+      waitForRobot();
+      sleepTime(250);
+      robot.sendTraversData(920,920,1450,900);
+      waitForTravers();
+      sleepTime(1000);
+      robot.sendTraversData(920,920,1800,8000);
+      waitForTravers();
+    }
+
   isInAnimation = false;
   isAnimation = false;
   isOutOfLoop = true;
@@ -3929,10 +4012,11 @@ private int inTTSoldID;
           
           if(!textString.equals("-")){
              speaking = true;
+             readText = false;
              println("global ID: " + globalID);
              println("In text to speech");
-            if(globalID != 53 && globalID != 69 && globalID != 51 && globalID != 78){
-              println("In waiting");
+            if( globalID != 53 && globalID != 69 && globalID != 51 && globalID != 78 && globalID != 119){
+              // println("In waiting");
               sleepTime(50);
               waitForTravers();
               waitForRobot();
@@ -3941,7 +4025,6 @@ private int inTTSoldID;
               println("In else for robot in text");
             }
             say(textString,voice);
-            readText = false;
             speaking = false;
           }else if (inTTSoldID != globalID){
             readText = false;
@@ -4577,6 +4660,15 @@ private void checkAnimations(){
       waitForTravers();
     }
 
+    if(movementIDt == 38){
+      robot.sendTraversData(1000,1000,1500,5000);
+      waitForTravers();
+    }
+
+    if(movementIDt == 39){
+      robot.sendTraversData(1000,1000,1450,5000);
+      waitForTravers();
+    }
   isOutOfLoop = true;
   startPositionIsStoredT = false;
   isInAnimationT = false;
